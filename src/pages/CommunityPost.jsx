@@ -1,7 +1,8 @@
 import { Link, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import ReactMarkdown from "react-markdown";
 import "./Community.css";
+
+const API_URL = "https://backpacker-gateways-2.onrender.com";
 
 export default function CommunityPost() {
   const { id } = useParams();
@@ -17,7 +18,7 @@ export default function CommunityPost() {
         setError("");
 
         const response = await fetch(
-          `https://backpacker-gateways-2.onrender.com/api/community/${id}`
+          `${API_URL}/api/community/${id}`
         );
 
         if (!response.ok) {
@@ -25,11 +26,18 @@ export default function CommunityPost() {
         }
 
         const data = await response.json();
+
+        if (data.status && data.status !== "approved") {
+          throw new Error("This post is not available.");
+        }
+
         setPost(data);
       } catch (err) {
         console.error("Community post error:", err);
+
         setError(
-          "Sorry, the community post you are looking for does not exist."
+          err.message ||
+            "Sorry, the community post you are looking for does not exist."
         );
       } finally {
         setLoading(false);
@@ -55,8 +63,10 @@ export default function CommunityPost() {
     return (
       <main className="community-page">
         <section className="community-post-not-found">
-          <h1>Loading Post...</h1>
-          <p>Please wait while we load the community post.</p>
+          <div className="community-container">
+            <h1>Loading Post...</h1>
+            <p>Please wait while we load the community post.</p>
+          </div>
         </section>
       </main>
     );
@@ -66,16 +76,21 @@ export default function CommunityPost() {
     return (
       <main className="community-page">
         <section className="community-post-not-found">
-          <h1>Post Not Found</h1>
+          <div className="community-container">
+            <h1>Post Not Found</h1>
 
-          <p>
-            {error ||
-              "Sorry, the community post you are looking for does not exist."}
-          </p>
+            <p>
+              {error ||
+                "Sorry, the community post you are looking for does not exist."}
+            </p>
 
-          <Link to="/community" className="community-primary-btn">
-            Back to Community
-          </Link>
+            <Link
+              to="/community"
+              className="community-primary-btn"
+            >
+              Back to Community
+            </Link>
+          </div>
         </section>
       </main>
     );
@@ -86,6 +101,7 @@ export default function CommunityPost() {
       <section className="community-post-detail">
         <div className="community-container">
 
+          {/* BACK BUTTON */}
           <Link
             to="/community"
             className="back-community-link"
@@ -93,8 +109,8 @@ export default function CommunityPost() {
             ← Back to Community
           </Link>
 
+          {/* POST HEADER */}
           <div className="community-post-detail-header">
-
             <span className="post-category">
               {post.category?.toUpperCase() || "TRAVEL"}
             </span>
@@ -114,9 +130,9 @@ export default function CommunityPost() {
                 {formatPostDate(post.createdAt)}
               </span>
             </div>
-
           </div>
 
+          {/* FEATURED IMAGE */}
           {post.image ? (
             <img
               src={post.image}
@@ -124,39 +140,39 @@ export default function CommunityPost() {
               className="community-post-detail-image"
             />
           ) : (
-            <div
-              className="community-post-detail-image"
-              style={{
-                minHeight: "420px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                background:
-                  "linear-gradient(135deg, #1b4332, #2d6a4f)",
-                color: "#ffffff",
-                fontSize: "28px",
-                fontWeight: "600",
-              }}
-            >
-              {post.location || "Nepal"}
+            <div className="community-post-detail-image community-post-image-placeholder">
+              <span>
+                {post.location || "Nepal"}
+              </span>
             </div>
           )}
 
-          <article className="community-post-article">
-            <ReactMarkdown>
-              {post.content}
-            </ReactMarkdown>
-          </article>
+          {/* POST CONTENT */}
+          <article
+            className="community-post-article"
+            dangerouslySetInnerHTML={{
+              __html: post.content || "",
+            }}
+          />
 
+          {/* BOTTOM CTA */}
           <div className="community-post-bottom">
+            <div className="community-post-bottom-content">
+              <span className="community-post-bottom-label">
+                BACKPACKER GATEWAYS COMMUNITY
+              </span>
+
+              <h3>
+                Discover more stories from travellers around the world.
+              </h3>
+            </div>
 
             <Link
-              to="/community"
+              to="/community/posts"
               className="community-primary-btn"
             >
-              Explore More Posts
+              Explore More Posts →
             </Link>
-
           </div>
 
         </div>
@@ -164,4 +180,3 @@ export default function CommunityPost() {
     </main>
   );
 }
-
