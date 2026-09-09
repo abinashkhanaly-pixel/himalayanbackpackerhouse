@@ -7,6 +7,7 @@ import Booking from "./pages/Booking";
 import Gear from "./pages/Gear";
 import VehicleRental from "./pages/VehicleRental";
 import About from "./pages/About";
+import Contact from "./pages/Contact";
 
 import Community from "./pages/Community";
 import CommunityPost from "./pages/CommunityPost";
@@ -15,7 +16,7 @@ import AdminLogin from "./pages/AdminLogin";
 import AdminRooms from "./pages/AdminRooms";
 import ProtectedRoute from "./components/ProtectedRoute";
 
-export default function App() {
+function App() {
   return (
     <BrowserRouter>
       <Routes>
@@ -38,6 +39,9 @@ export default function App() {
 
         {/* ABOUT US */}
         <Route path="/about" element={<About />} />
+
+        {/* CONTACT US */}
+        <Route path="/contact" element={<Contact />} />
 
         {/* BACKPACKER COMMUNITY */}
         <Route path="/community" element={<Community />} />
@@ -66,3 +70,5 @@ export default function App() {
     </BrowserRouter>
   );
 }
+
+export default App;
