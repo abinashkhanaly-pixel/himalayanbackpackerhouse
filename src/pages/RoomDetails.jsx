@@ -1,18 +1,22 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { getRoom } from "../services/roomApi";
+import { getRoomBySlug } from "../services/roomApi";
 
 const RoomDetails = () => {
-  const { id } = useParams();
+  const { slug } = useParams();
   const navigate = useNavigate();
 
   const [room, setRoom] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // =========================================================
+  // LOAD ROOM BY SEO SLUG
+  // =========================================================
+
   useEffect(() => {
     const loadRoom = async () => {
-      if (!id) {
+      if (!slug) {
         setError("No room selected.");
         setLoading(false);
         return;
@@ -22,7 +26,7 @@ const RoomDetails = () => {
         setLoading(true);
         setError("");
 
-        const result = await getRoom(id);
+        const result = await getRoomBySlug(slug);
 
         if (result?.success === false || !result?.data) {
           throw new Error("Room not found");
@@ -38,13 +42,353 @@ const RoomDetails = () => {
     };
 
     loadRoom();
-  }, [id]);
+  }, [slug]);
+
+  // =========================================================
+  // SEO
+  // =========================================================
+
+  useEffect(() => {
+    if (!room) return;
+
+    const destination = room.destination || "Kathmandu";
+    const roomName = room.name || "Himalayan Room";
+
+    const fallbackTitle =
+      `${roomName} in ${destination} | Backpacker Gateways`;
+
+    const fallbackDescription =
+      `Book the ${roomName} in ${destination}, Nepal with Backpacker Gateways. Enjoy comfortable accommodation, Himalayan hospitality and convenient access to local attractions and trekking routes.`;
+
+    const title =
+      room.seoTitle?.trim() || fallbackTitle;
+
+    const description =
+      room.seoDescription?.trim() || fallbackDescription;
+
+    const cleanSlug =
+      room.seoSlug?.trim() || slug;
+
+    const canonicalUrl =
+      `${window.location.origin}/rooms/${cleanSlug}`;
+
+    // =======================================================
+    // PAGE TITLE
+    // =======================================================
+
+    document.title = title;
+
+    // =======================================================
+    // META DESCRIPTION
+    // =======================================================
+
+    let metaDescription =
+      document.querySelector('meta[name="description"]');
+
+    if (!metaDescription) {
+      metaDescription =
+        document.createElement("meta");
+
+      metaDescription.setAttribute(
+        "name",
+        "description"
+      );
+
+      document.head.appendChild(metaDescription);
+    }
+
+    metaDescription.setAttribute(
+      "content",
+      description
+    );
+
+    // =======================================================
+    // CANONICAL
+    // =======================================================
+
+    let canonical =
+      document.querySelector('link[rel="canonical"]');
+
+    if (!canonical) {
+      canonical =
+        document.createElement("link");
+
+      canonical.setAttribute(
+        "rel",
+        "canonical"
+      );
+
+      document.head.appendChild(canonical);
+    }
+
+    canonical.setAttribute(
+      "href",
+      canonicalUrl
+    );
+
+    // =======================================================
+    // OPEN GRAPH
+    // =======================================================
+
+    const setMetaProperty = (
+      property,
+      content
+    ) => {
+      let tag =
+        document.querySelector(
+          `meta[property="${property}"]`
+        );
+
+      if (!tag) {
+        tag =
+          document.createElement("meta");
+
+        tag.setAttribute(
+          "property",
+          property
+        );
+
+        document.head.appendChild(tag);
+      }
+
+      tag.setAttribute(
+        "content",
+        content
+      );
+    };
+
+    setMetaProperty(
+      "og:title",
+      title
+    );
+
+    setMetaProperty(
+      "og:description",
+      description
+    );
+
+    setMetaProperty(
+      "og:url",
+      canonicalUrl
+    );
+
+    setMetaProperty(
+      "og:type",
+      "website"
+    );
+
+    if (room.images?.length > 0) {
+      setMetaProperty(
+        "og:image",
+        room.images[0]
+      );
+    }
+
+    // =======================================================
+    // TWITTER CARD
+    // =======================================================
+
+    const setMetaName = (
+      name,
+      content
+    ) => {
+      let tag =
+        document.querySelector(
+          `meta[name="${name}"]`
+        );
+
+      if (!tag) {
+        tag =
+          document.createElement("meta");
+
+        tag.setAttribute(
+          "name",
+          name
+        );
+
+        document.head.appendChild(tag);
+      }
+
+      tag.setAttribute(
+        "content",
+        content
+      );
+    };
+
+    setMetaName(
+      "twitter:card",
+      "summary_large_image"
+    );
+
+    setMetaName(
+      "twitter:title",
+      title
+    );
+
+    setMetaName(
+      "twitter:description",
+      description
+    );
+
+    if (room.images?.length > 0) {
+      setMetaName(
+        "twitter:image",
+        room.images[0]
+      );
+    }
+
+    // =======================================================
+    // JSON-LD STRUCTURED DATA
+    // =======================================================
+
+    const existingSchema =
+      document.getElementById(
+        "room-jsonld"
+      );
+
+    if (existingSchema) {
+      existingSchema.remove();
+    }
+
+    const schema = {
+      "@context":
+        "https://schema.org",
+
+      "@type":
+        "HotelRoom",
+
+      name:
+        roomName,
+
+      description:
+        room.description ||
+        description,
+
+      url:
+        canonicalUrl,
+
+      image:
+        room.images || [],
+
+      occupancy: {
+        "@type":
+          "QuantitativeValue",
+
+        maxValue:
+          Number(room.capacity || 1)
+      },
+
+      bed: room.beds
+        ? {
+            "@type":
+              "BedDetails",
+
+            typeOfBed:
+              room.beds
+          }
+        : undefined,
+
+      amenityFeature:
+        Array.isArray(room.amenities)
+          ? room.amenities.map(
+              (amenity) => ({
+                "@type":
+                  "LocationFeatureSpecification",
+
+                name:
+                  amenity,
+
+                value:
+                  true
+              })
+            )
+          : [],
+
+      address: {
+        "@type":
+          "PostalAddress",
+
+        addressLocality:
+          destination,
+
+        addressCountry:
+          "NP"
+      },
+
+      offers: {
+        "@type":
+          "Offer",
+
+        price:
+          Number(room.price || 0),
+
+        priceCurrency:
+          "NPR",
+
+        availability:
+          room.available
+            ? "https://schema.org/InStock"
+            : "https://schema.org/OutOfStock",
+
+        url:
+          canonicalUrl
+      }
+    };
+
+    // Remove undefined properties
+    const cleanSchema =
+      JSON.parse(
+        JSON.stringify(schema)
+      );
+
+    const script =
+      document.createElement("script");
+
+    script.id =
+      "room-jsonld";
+
+    script.type =
+      "application/ld+json";
+
+    script.textContent =
+      JSON.stringify(
+        cleanSchema
+      );
+
+    document.head.appendChild(
+      script
+    );
+
+    // Cleanup
+    return () => {
+      const schemaElement =
+        document.getElementById(
+          "room-jsonld"
+        );
+
+      if (schemaElement) {
+        schemaElement.remove();
+      }
+    };
+  }, [room, slug]);
+
+  // =========================================================
+  // BOOKING
+  // =========================================================
 
   const handleBooking = () => {
-    if (!room?._id || !room?.available) return;
+    if (!room?._id || !room?.available) {
+      return;
+    }
 
-    navigate(`/booking?room=${room._id}`);
+    navigate(
+      `/booking?room=${room._id}`
+    );
   };
+
+  // =========================================================
+  // LOADING
+  // =========================================================
 
   if (loading) {
     return (
@@ -80,11 +424,18 @@ const RoomDetails = () => {
 
         <div className="details-loading">
           <div className="spinner"></div>
-          <p>Preparing your Himalayan stay...</p>
+
+          <p>
+            Preparing your Himalayan stay...
+          </p>
         </div>
       </>
     );
   }
+
+  // =========================================================
+  // ERROR
+  // =========================================================
 
   if (error || !room) {
     return (
@@ -131,16 +482,37 @@ const RoomDetails = () => {
         `}</style>
 
         <div className="details-error">
-          <h2>No room selected</h2>
-          <p>{error || "The requested room could not be found."}</p>
+          <h2>
+            No room selected
+          </h2>
 
-          <Link to="/rooms" className="back-button">
+          <p>
+            {error ||
+              "The requested room could not be found."}
+          </p>
+
+          <Link
+            to="/rooms"
+            className="back-button"
+          >
             ← Back to Rooms
           </Link>
         </div>
       </>
     );
   }
+
+  const destination =
+    room.destination ||
+    "Kathmandu";
+
+  const roomName =
+    room.name ||
+    "Himalayan Room";
+
+  // =========================================================
+  // PAGE
+  // =========================================================
 
   return (
     <>
@@ -232,6 +604,13 @@ const RoomDetails = () => {
           color: rgba(255, 255, 255, 0.9);
           font-size: 17px;
           line-height: 1.7;
+        }
+
+        .details-location {
+          margin-top: 15px;
+          color: rgba(255,255,255,0.9);
+          font-size: 14px;
+          font-weight: 600;
         }
 
         .details-container {
@@ -481,14 +860,17 @@ const RoomDetails = () => {
 
       <div className="details-page">
 
-        {/* HERO */}
+        {/* ===================================================
+            HERO
+        =================================================== */}
+
         <section className="details-hero">
 
           {room.images?.length > 0 && (
             <img
               className="details-hero-image"
               src={room.images[0]}
-              alt={room.name}
+              alt={`${roomName} in ${destination}, Nepal`}
             />
           )}
 
@@ -496,13 +878,18 @@ const RoomDetails = () => {
 
           <div className="details-hero-content">
 
-            <Link to="/rooms" className="details-back">
+            <Link
+              to="/rooms"
+              className="details-back"
+            >
               ← Back to Rooms
             </Link>
 
             <div
               className={`details-availability ${
-                !room.available ? "unavailable" : ""
+                !room.available
+                  ? "unavailable"
+                  : ""
               }`}
             >
               {room.available
@@ -510,17 +897,28 @@ const RoomDetails = () => {
                 : "Currently Unavailable"}
             </div>
 
-            <h1>{room.name}</h1>
+            {/* SEO H1 */}
+
+            <h1>
+              {roomName} in {destination}
+            </h1>
 
             <p className="details-hero-description">
               {room.description}
             </p>
 
+            <div className="details-location">
+              📍 {destination}, Nepal
+            </div>
+
           </div>
 
         </section>
 
-        {/* CONTENT */}
+        {/* ===================================================
+            CONTENT
+        =================================================== */}
+
         <main className="details-container">
 
           <div className="details-grid">
@@ -532,59 +930,75 @@ const RoomDetails = () => {
               </span>
 
               <h2>
-                Comfort surrounded by the mountains.
+                Comfortable accommodation in {destination}.
               </h2>
 
               <p>
-                Wake up to peaceful surroundings, warm
-                hospitality and the beauty of the Himalayas.
-                Our rooms are thoughtfully designed for
-                travellers who want comfort, convenience
-                and an authentic mountain experience.
+                Stay in the {roomName} in {destination},
+                Nepal and enjoy peaceful surroundings,
+                warm hospitality and convenient access
+                to Himalayan adventures. Our accommodation
+                is designed for travellers looking for
+                comfort, convenience and an authentic
+                Nepal travel experience.
               </p>
 
               {/* HIGHLIGHTS */}
+
               <div className="room-highlights">
 
                 <div className="highlight">
+
                   <div className="highlight-icon">
                     👥
                   </div>
 
-                  <strong>Guests</strong>
+                  <strong>
+                    Guests
+                  </strong>
 
                   <span>
                     Up to {room.capacity} guests
                   </span>
+
                 </div>
 
                 <div className="highlight">
+
                   <div className="highlight-icon">
                     🛏️
                   </div>
 
-                  <strong>Sleeping</strong>
+                  <strong>
+                    Sleeping
+                  </strong>
 
                   <span>
                     {room.beds}
                   </span>
+
                 </div>
 
                 <div className="highlight">
+
                   <div className="highlight-icon">
                     🏔️
                   </div>
 
-                  <strong>Experience</strong>
+                  <strong>
+                    Experience
+                  </strong>
 
                   <span>
-                    Himalayan stay
+                    Himalayan stay in {destination}
                   </span>
+
                 </div>
 
               </div>
 
               {/* AMENITIES */}
+
               <span className="section-label">
                 Room Amenities
               </span>
@@ -596,31 +1010,45 @@ const RoomDetails = () => {
               <div className="amenities-grid">
 
                 {room.amenities?.length > 0 ? (
-                  room.amenities.map((amenity, index) => (
-                    <div
-                      className="amenity-card"
-                      key={`${room._id}-${index}`}
-                    >
-                      <span className="amenity-icon">
-                        ✓
-                      </span>
 
-                      <span>
-                        {amenity}
-                      </span>
-                    </div>
-                  ))
+                  room.amenities.map(
+                    (amenity, index) => (
+
+                      <div
+                        className="amenity-card"
+                        key={`${room._id}-${index}`}
+                      >
+
+                        <span className="amenity-icon">
+                          ✓
+                        </span>
+
+                        <span>
+                          {amenity}
+                        </span>
+
+                      </div>
+
+                    )
+                  )
+
                 ) : (
+
                   <p>
-                    Standard room amenities are available.
+                    Standard room amenities
+                    are available.
                   </p>
+
                 )}
 
               </div>
 
             </div>
 
-            {/* BOOKING CARD */}
+            {/* =================================================
+                BOOKING CARD
+            ================================================= */}
+
             <aside className="booking-card">
 
               <h3>
@@ -628,14 +1056,17 @@ const RoomDetails = () => {
               </h3>
 
               <p className="booking-subtitle">
-                Plan your Himalayan escape with us.
+                Plan your Himalayan escape
+                with us.
               </p>
 
               <div className="price-box">
 
                 <span className="price">
                   NPR{" "}
-                  {Number(room.price || 0).toLocaleString(
+                  {Number(
+                    room.price || 0
+                  ).toLocaleString(
                     "en-NP"
                   )}
                 </span>
@@ -674,8 +1105,9 @@ const RoomDetails = () => {
               </button>
 
               <p className="booking-note">
-                Best rates available when booking
-                directly with Himalayan Backpacker House.
+                Best rates available when
+                booking directly with
+                Backpacker Gateways.
               </p>
 
               <Link

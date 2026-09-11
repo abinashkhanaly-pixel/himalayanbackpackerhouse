@@ -3,6 +3,7 @@ const express = require("express");
 const {
   getRooms,
   getRoom,
+  getRoomBySlug,
   createRoom,
   updateRoom,
   deleteRoom,
@@ -14,15 +15,6 @@ const router = express.Router();
 // GET /api/rooms/search
 // SEARCH ROOMS
 // =====================================================
-// Query parameters:
-// ?destination=Kathmandu
-// ?guests=2
-// ?checkIn=2026-09-01
-// ?checkOut=2026-09-05
-//
-// Example:
-// GET http://localhost:5000/api/rooms/search?destination=Kathmandu&guests=2
-// =====================================================
 
 router.get("/search", getRooms);
 
@@ -32,7 +24,7 @@ router.get("/search", getRooms);
 // =====================================================
 //
 // Example:
-// GET http://localhost:5000/api/rooms
+// GET /api/rooms
 //
 // With filters:
 // GET /api/rooms?destination=Kathmandu&guests=2
@@ -41,8 +33,22 @@ router.get("/search", getRooms);
 router.get("/", getRooms);
 
 // =====================================================
+// GET /api/rooms/slug/:slug
+// GET SINGLE ROOM BY SEO SLUG
+// =====================================================
+//
+// Example:
+// GET /api/rooms/slug/deluxe-mountain-view-room-kathmandu
+//
+// IMPORTANT:
+// This route must come BEFORE /:id
+// =====================================================
+
+router.get("/slug/:slug", getRoomBySlug);
+
+// =====================================================
 // GET /api/rooms/:id
-// GET SINGLE ROOM
+// GET SINGLE ROOM BY MONGODB ID
 // =====================================================
 
 router.get("/:id", getRoom);
@@ -69,3 +75,4 @@ router.put("/:id", updateRoom);
 router.delete("/:id", deleteRoom);
 
 module.exports = router;
+

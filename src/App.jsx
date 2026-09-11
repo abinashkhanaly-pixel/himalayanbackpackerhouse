@@ -26,7 +26,12 @@ function App() {
 
         {/* ROOMS */}
         <Route path="/rooms" element={<Rooms />} />
-        <Route path="/rooms/:id" element={<RoomDetails />} />
+
+        {/* SEO-FRIENDLY ROOM URL */}
+        {/* Example:
+            /rooms/deluxe-mountain-view-room-kathmandu
+        */}
+        <Route path="/rooms/:slug" element={<RoomDetails />} />
 
         {/* BOOKING */}
         <Route path="/booking" element={<Booking />} />
@@ -72,3 +77,4 @@ function App() {
 }
 
 export default App;
+

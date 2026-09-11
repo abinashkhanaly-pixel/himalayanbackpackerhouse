@@ -35,6 +35,9 @@ const getRooms = async (req, res) => {
         { description: searchRegex },
         { amenities: searchRegex },
         { beds: searchRegex },
+        { seoTitle: searchRegex },
+        { seoDescription: searchRegex },
+        { seoSlug: searchRegex },
       ];
     }
 
@@ -104,8 +107,6 @@ const getRooms = async (req, res) => {
           );
         }
       } catch (bookingError) {
-        // Booking model may not exist yet.
-        // Room search will still work.
         console.warn(
           "Booking availability check skipped:",
           bookingError.message
@@ -150,7 +151,7 @@ const searchRooms = async (req, res) => {
 };
 
 // =====================================================
-// GET SINGLE ROOM
+// GET SINGLE ROOM BY MONGODB ID
 // GET /api/rooms/:id
 // =====================================================
 
@@ -180,13 +181,86 @@ const getRoom = async (req, res) => {
 };
 
 // =====================================================
+// GET SINGLE ROOM BY SEO SLUG
+// GET /api/rooms/slug/:slug
+//
+// Example:
+// /api/rooms/slug/deluxe-mountain-view-room-kathmandu
+// =====================================================
+
+const getRoomBySlug = async (req, res) => {
+  try {
+    const slug = req.params.slug
+      ? req.params.slug.trim().toLowerCase()
+      : "";
+
+    if (!slug) {
+      return res.status(400).json({
+        success: false,
+        message: "Room SEO slug is required",
+      });
+    }
+
+    const room = await Room.findOne({
+      seoSlug: slug,
+    });
+
+    if (!room) {
+      return res.status(404).json({
+        success: false,
+        message: "Room not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      data: room,
+    });
+  } catch (error) {
+    console.error("Get Room By Slug Error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// =====================================================
 // CREATE ROOM
 // POST /api/rooms
 // =====================================================
 
 const createRoom = async (req, res) => {
   try {
-    const room = await Room.create(req.body);
+    // ---------------------------------------------
+    // CLEAN SEO DATA
+    // ---------------------------------------------
+
+    const roomData = {
+      ...req.body,
+
+      seoSlug: req.body.seoSlug
+        ? req.body.seoSlug
+            .trim()
+            .toLowerCase()
+            .replace(/\s+/g, "-")
+        : "",
+
+      seoTitle: req.body.seoTitle
+        ? req.body.seoTitle.trim()
+        : "",
+
+      seoDescription: req.body.seoDescription
+        ? req.body.seoDescription.trim()
+        : "",
+    };
+
+    // ---------------------------------------------
+    // CREATE ROOM
+    // ---------------------------------------------
+
+    const room = await Room.create(roomData);
 
     res.status(201).json({
       success: true,
@@ -210,9 +284,42 @@ const createRoom = async (req, res) => {
 
 const updateRoom = async (req, res) => {
   try {
+    // ---------------------------------------------
+    // CLEAN SEO DATA
+    // ---------------------------------------------
+
+    const roomData = {
+      ...req.body,
+
+      ...(req.body.seoSlug !== undefined && {
+        seoSlug: req.body.seoSlug
+          ? req.body.seoSlug
+              .trim()
+              .toLowerCase()
+              .replace(/\s+/g, "-")
+          : "",
+      }),
+
+      ...(req.body.seoTitle !== undefined && {
+        seoTitle: req.body.seoTitle
+          ? req.body.seoTitle.trim()
+          : "",
+      }),
+
+      ...(req.body.seoDescription !== undefined && {
+        seoDescription: req.body.seoDescription
+          ? req.body.seoDescription.trim()
+          : "",
+      }),
+    };
+
+    // ---------------------------------------------
+    // UPDATE ROOM
+    // ---------------------------------------------
+
     const room = await Room.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      roomData,
       {
         new: true,
         runValidators: true,
@@ -279,7 +386,9 @@ module.exports = {
   getRooms,
   searchRooms,
   getRoom,
+  getRoomBySlug,
   createRoom,
   updateRoom,
   deleteRoom,
 };
+

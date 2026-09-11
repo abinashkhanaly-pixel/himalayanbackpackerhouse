@@ -27,6 +27,37 @@ const roomSchema = new mongoose.Schema(
     },
 
     // ==========================================
+    // SEO FIELDS
+    // ==========================================
+
+    // SEO URL / Slug
+    // Example:
+    // deluxe-mountain-view-room-kathmandu
+    seoSlug: {
+      type: String,
+      trim: true,
+      lowercase: true,
+      maxlength: [150, "SEO slug cannot exceed 150 characters"],
+      index: true,
+    },
+
+    // SEO Page Title
+    // Example:
+    // Deluxe Mountain View Room in Kathmandu | Backpacker Gateways
+    seoTitle: {
+      type: String,
+      trim: true,
+      maxlength: [160, "SEO title cannot exceed 160 characters"],
+    },
+
+    // SEO Meta Description
+    seoDescription: {
+      type: String,
+      trim: true,
+      maxlength: [320, "SEO description cannot exceed 320 characters"],
+    },
+
+    // ==========================================
     // ROOM DESCRIPTION
     // ==========================================
     description: {
@@ -131,3 +162,4 @@ roomSchema.set("toJSON", {
 });
 
 module.exports = mongoose.model("Room", roomSchema);
+

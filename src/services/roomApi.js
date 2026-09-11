@@ -1,6 +1,8 @@
 const API_URL = "https://backpacker-gateways-2.onrender.com/api/rooms";
 
-
+// ==========================================
+// GET ALL ROOMS
+// ==========================================
 export const getRooms = async ({
   destination = "",
   checkIn = "",
@@ -27,9 +29,7 @@ export const getRooms = async ({
 
   const query = params.toString();
 
-  const url = query
-    ? `${API_URL}?${query}`
-    : API_URL;
+  const url = query ? `${API_URL}?${query}` : API_URL;
 
   const response = await fetch(url);
 
@@ -40,6 +40,9 @@ export const getRooms = async ({
   return await response.json();
 };
 
+// ==========================================
+// GET ROOM BY MONGODB ID
+// ==========================================
 export const getRoom = async (id) => {
   if (!id) {
     throw new Error("Room ID is required");
@@ -54,6 +57,32 @@ export const getRoom = async (id) => {
   return await response.json();
 };
 
+// ==========================================
+// GET ROOM BY SEO SLUG
+// Example:
+// /rooms/deluxe-mountain-view-room-kathmandu
+// ==========================================
+export const getRoomBySlug = async (slug) => {
+  if (!slug) {
+    throw new Error("Room SEO slug is required");
+  }
+
+  const cleanSlug = slug.trim().toLowerCase();
+
+  const response = await fetch(
+    `${API_URL}/slug/${encodeURIComponent(cleanSlug)}`
+  );
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch room by slug (${response.status})`);
+  }
+
+  return await response.json();
+};
+
+// ==========================================
+// CREATE ROOM
+// ==========================================
 export const createRoom = async (roomData) => {
   const response = await fetch(API_URL, {
     method: "POST",
@@ -74,6 +103,9 @@ export const createRoom = async (roomData) => {
   return result;
 };
 
+// ==========================================
+// UPDATE ROOM
+// ==========================================
 export const updateRoom = async (id, roomData) => {
   if (!id) {
     throw new Error("Room ID is required");
@@ -98,6 +130,9 @@ export const updateRoom = async (id, roomData) => {
   return result;
 };
 
+// ==========================================
+// DELETE ROOM
+// ==========================================
 export const deleteRoom = async (id) => {
   if (!id) {
     throw new Error("Room ID is required");
@@ -117,3 +152,4 @@ export const deleteRoom = async (id) => {
 
   return result;
 };
+

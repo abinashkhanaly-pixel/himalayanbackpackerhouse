@@ -19,9 +19,19 @@ export default function AdminRooms() {
   const [postsLoading, setPostsLoading] = useState(true);
   const [creatingPost, setCreatingPost] = useState(false);
 
+  // =========================
+  // ROOM FORM
+  // =========================
+
   const [form, setForm] = useState({
     name: "",
     destination: "",
+
+    // SEO
+    seoSlug: "",
+    seoTitle: "",
+    seoDescription: "",
+
     description: "",
     price: "",
     capacity: "",
@@ -30,6 +40,10 @@ export default function AdminRooms() {
     images: "",
     available: true,
   });
+
+  // =========================
+  // COMMUNITY FORM
+  // =========================
 
   const [communityForm, setCommunityForm] = useState({
     title: "",
@@ -123,6 +137,12 @@ export default function AdminRooms() {
     setForm({
       name: "",
       destination: "",
+
+      // SEO
+      seoSlug: "",
+      seoTitle: "",
+      seoDescription: "",
+
       description: "",
       price: "",
       capacity: "",
@@ -142,6 +162,24 @@ export default function AdminRooms() {
       const roomData = {
         name: form.name,
         destination: form.destination,
+
+        // =========================
+        // SEO DATA
+        // =========================
+
+        seoSlug: form.seoSlug
+          .trim()
+          .toLowerCase()
+          .replace(/\s+/g, "-"),
+
+        seoTitle: form.seoTitle.trim(),
+
+        seoDescription: form.seoDescription.trim(),
+
+        // =========================
+        // ROOM DATA
+        // =========================
+
         description: form.description,
         price: Number(form.price),
         capacity: Number(form.capacity),
@@ -162,16 +200,19 @@ export default function AdminRooms() {
 
       if (editingId) {
         await updateRoom(editingId, roomData);
+
         alert("Room updated successfully");
       } else {
         await createRoom(roomData);
+
         alert("Room added successfully");
       }
 
       resetForm();
+
       await loadRooms();
     } catch (error) {
-      console.error(error);
+      console.error("ROOM SAVE ERROR:", error);
       alert(error.message);
     }
   };
@@ -182,6 +223,12 @@ export default function AdminRooms() {
     setForm({
       name: room.name || "",
       destination: room.destination || "",
+
+      // SEO
+      seoSlug: room.seoSlug || "",
+      seoTitle: room.seoTitle || "",
+      seoDescription: room.seoDescription || "",
+
       description: room.description || "",
       price: room.price || "",
       capacity: room.capacity || "",
@@ -425,7 +472,6 @@ export default function AdminRooms() {
         {/* ================= HEADER ================= */}
 
         <div className="admin-header">
-
           <div>
             <span>BACKPACKER GATEWAYS</span>
 
@@ -445,7 +491,6 @@ export default function AdminRooms() {
           >
             Refresh Dashboard
           </button>
-
         </div>
 
         {/* ================= ROOM MANAGEMENT ================= */}
@@ -464,6 +509,8 @@ export default function AdminRooms() {
 
             <div className="form-grid">
 
+              {/* ROOM NAME */}
+
               <div className="field">
 
                 <label>Room / Hotel Name</label>
@@ -472,11 +519,13 @@ export default function AdminRooms() {
                   name="name"
                   value={form.name}
                   onChange={handleChange}
-                  placeholder="Everest View Mountain Lodge"
+                  placeholder="Deluxe Mountain View Room"
                   required
                 />
 
               </div>
+
+              {/* DESTINATION */}
 
               <div className="field">
 
@@ -486,11 +535,85 @@ export default function AdminRooms() {
                   name="destination"
                   value={form.destination}
                   onChange={handleChange}
-                  placeholder="Khumjung, Everest Region"
+                  placeholder="Kathmandu, Nepal"
                   required
                 />
 
               </div>
+
+              {/* =========================
+                  SEO SETTINGS
+              ========================= */}
+
+              <div className="field full seo-heading">
+
+                <strong>SEO SETTINGS</strong>
+
+                <small>
+                  These fields help Google understand and display this room page.
+                </small>
+
+              </div>
+
+              {/* SEO SLUG */}
+
+              <div className="field">
+
+                <label>SEO URL / Slug</label>
+
+                <input
+                  name="seoSlug"
+                  value={form.seoSlug}
+                  onChange={handleChange}
+                  placeholder="deluxe-mountain-view-room-kathmandu"
+                />
+
+                <small>
+                  Lowercase words separated by hyphens. Do not include https://
+                </small>
+
+              </div>
+
+              {/* SEO TITLE */}
+
+              <div className="field">
+
+                <label>SEO Title</label>
+
+                <input
+                  name="seoTitle"
+                  value={form.seoTitle}
+                  onChange={handleChange}
+                  placeholder="Deluxe Mountain View Room in Kathmandu | Backpacker Gateways"
+                />
+
+                <small>
+                  Keep the title clear and preferably around 50–60 characters.
+                </small>
+
+              </div>
+
+              {/* SEO DESCRIPTION */}
+
+              <div className="field full">
+
+                <label>SEO Description</label>
+
+                <textarea
+                  name="seoDescription"
+                  value={form.seoDescription}
+                  onChange={handleChange}
+                  placeholder="Book a Deluxe Mountain View Room in Kathmandu with Backpacker Gateways. Comfortable accommodation near Thamel with modern amenities."
+                  rows="4"
+                />
+
+                <small>
+                  Write a unique, natural description. Around 150–160 characters is a good target.
+                </small>
+
+              </div>
+
+              {/* PRICE */}
 
               <div className="field">
 
@@ -502,10 +625,13 @@ export default function AdminRooms() {
                   value={form.price}
                   onChange={handleChange}
                   placeholder="3200"
+                  min="0"
                   required
                 />
 
               </div>
+
+              {/* CAPACITY */}
 
               <div className="field">
 
@@ -517,10 +643,13 @@ export default function AdminRooms() {
                   value={form.capacity}
                   onChange={handleChange}
                   placeholder="2"
+                  min="1"
                   required
                 />
 
               </div>
+
+              {/* BEDS */}
 
               <div className="field">
 
@@ -535,6 +664,8 @@ export default function AdminRooms() {
 
               </div>
 
+              {/* IMAGE */}
+
               <div className="field">
 
                 <label>Image URL</label>
@@ -546,7 +677,13 @@ export default function AdminRooms() {
                   placeholder="https://..."
                 />
 
+                <small>
+                  Add one or more image URLs separated by commas.
+                </small>
+
               </div>
+
+              {/* DESCRIPTION */}
 
               <div className="field full">
 
@@ -562,6 +699,8 @@ export default function AdminRooms() {
                 />
 
               </div>
+
+              {/* AMENITIES */}
 
               <div className="field full">
 
@@ -579,6 +718,8 @@ export default function AdminRooms() {
                 </small>
 
               </div>
+
+              {/* AVAILABLE */}
 
               <div className="available-field">
 
@@ -611,7 +752,6 @@ export default function AdminRooms() {
               </button>
 
               {editingId && (
-
                 <button
                   type="button"
                   className="cancel-btn"
@@ -619,7 +759,6 @@ export default function AdminRooms() {
                 >
                   Cancel Edit
                 </button>
-
               )}
 
             </div>
@@ -680,6 +819,12 @@ export default function AdminRooms() {
                     <p className="destination">
                       {room.destination}
                     </p>
+
+                    {room.seoSlug && (
+                      <p className="seo-url-display">
+                        /rooms/{room.seoSlug}
+                      </p>
+                    )}
 
                     <p>
                       {room.description}
@@ -775,7 +920,9 @@ export default function AdminRooms() {
                   ADMIN POST
                 </span>
 
-                <h3>Create New Community Post</h3>
+                <h3>
+                  Create New Community Post
+                </h3>
 
                 <p>
                   Publish a new story, travel update,
@@ -1020,22 +1167,18 @@ export default function AdminRooms() {
                       </h3>
 
                       {post.author && (
-
                         <p className="post-author">
                           By {post.author}
                         </p>
-
                       )}
 
                       {post.category && (
-
                         <p className="post-category">
                           {post.category}
                           {post.location
                             ? ` • ${post.location}`
                             : ""}
                         </p>
-
                       )}
 
                       <div
@@ -1217,6 +1360,34 @@ export default function AdminRooms() {
 
         .field small {
           color: #777;
+          line-height: 1.5;
+        }
+
+        /* ================= SEO ================= */
+
+        .seo-heading {
+          margin-top: 5px;
+          padding: 15px 18px;
+          background: #f7f9f7;
+          border: 1px solid #e1e6e1;
+          border-radius: 10px;
+        }
+
+        .seo-heading strong {
+          font-size: 13px;
+          letter-spacing: 1.5px;
+          color: #8b6b3f;
+        }
+
+        .seo-heading small {
+          margin-top: 2px;
+        }
+
+        .seo-url-display {
+          color: #8b6b3f !important;
+          font-size: 12px !important;
+          font-weight: 700;
+          word-break: break-all;
         }
 
         .available-field,
