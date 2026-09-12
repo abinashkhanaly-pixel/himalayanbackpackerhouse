@@ -9,28 +9,46 @@ const bookingRoutes = require("./routes/bookingRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const gearRoutes = require("./routes/gearRoutes");
 const communityRoutes = require("./routes/communityRoutes");
+const inquiryRoutes = require("./routes/inquiryRoutes");
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-// Room API
+// ==========================================
+// ROOM API
+// ==========================================
 app.use("/api/rooms", roomRoutes);
 
-// Booking API
+// ==========================================
+// BOOKING API
+// ==========================================
 app.use("/api/bookings", bookingRoutes);
 
-// Admin API
+// ==========================================
+// ADMIN API
+// ==========================================
 app.use("/api/admin", adminRoutes);
 
-// Gear API
+// ==========================================
+// GEAR API
+// ==========================================
 app.use("/api/gears", gearRoutes);
 
-// Community API
+// ==========================================
+// COMMUNITY API
+// ==========================================
 app.use("/api/community", communityRoutes);
 
-// Home route
+// ==========================================
+// INQUIRY API
+// ==========================================
+app.use("/api/inquiries", inquiryRoutes);
+
+// ==========================================
+// HOME ROUTE
+// ==========================================
 app.get("/", (req, res) => {
   res.json({
     success: true,
@@ -38,6 +56,9 @@ app.get("/", (req, res) => {
   });
 });
 
+// ==========================================
+// SERVER
+// ==========================================
 const PORT = process.env.PORT || 5000;
 
 connectDB()
