@@ -1,4 +1,7 @@
-const API_URL = "https://backpacker-gateways-2.onrender.com/api/rooms";
+const API_URL =
+  window.location.hostname === "localhost"
+    ? "http://localhost:5000/api/rooms"
+    : "https://backpacker-gateways-2.onrender.com/api/rooms";
 
 // ==========================================
 // GET ALL ROOMS

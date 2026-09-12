@@ -1,95 +1,15 @@
 const Room = require("../models/Room");
 
 // =====================================================
-// SEO SLUG HELPER
-// =====================================================
-
-const makeSlug = (text = "") => {
-  return text
-    .toString()
-    .trim()
-    .toLowerCase()
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
-};
-
-// =====================================================
-// CREATE UNIQUE SEO SLUG
-// =====================================================
-
-const getUniqueSlug = async (baseSlug, excludeId = null) => {
-  let slug = baseSlug || "room";
-  let counter = 2;
-
-  while (true) {
-    const query = {
-      seoSlug: slug,
-    };
-
-    if (excludeId) {
-      query._id = { $ne: excludeId };
-    }
-
-    const existingRoom = await Room.findOne(query);
-
-    if (!existingRoom) {
-      return slug;
-    }
-
-    slug = `${baseSlug}-${counter}`;
-    counter++;
-  }
-};
-
-// =====================================================
-// SEO TITLE
-// =====================================================
-
-const generateSeoTitle = (roomData) => {
-  if (roomData.seoTitle && roomData.seoTitle.trim()) {
-    return roomData.seoTitle.trim();
-  }
-
-  const name = roomData.name?.trim() || "Room";
-  const destination = roomData.destination?.trim();
-
-  if (destination) {
-    return `${name} in ${destination} | Backpacker Gateways`;
-  }
-
-  return `${name} | Backpacker Gateways`;
-};
-
-// =====================================================
-// SEO DESCRIPTION
-// =====================================================
-
-const generateSeoDescription = (roomData) => {
-  if (
-    roomData.seoDescription &&
-    roomData.seoDescription.trim()
-  ) {
-    return roomData.seoDescription.trim();
-  }
-
-  const name = roomData.name?.trim() || "comfortable room";
-  const destination = roomData.destination?.trim();
-
-  if (destination) {
-    return `Book ${name} in ${destination}. Check room details, amenities, availability and pricing with Backpacker Gateways.`;
-  }
-
-  return `Book ${name} with Backpacker Gateways. Check room details, amenities, availability and pricing.`;
-};
-
-// =====================================================
 // GET ALL / SEARCH ROOMS
 // GET /api/rooms
 // GET /api/rooms/search
+//
+// Query:
+// ?destination=Mountain
+// ?guests=2
+// ?checkIn=2026-09-01
+// ?checkOut=2026-09-05
 // =====================================================
 
 const getRooms = async (req, res) => {
@@ -108,14 +28,10 @@ const getRooms = async (req, res) => {
     // ---------------------------------------------
 
     if (destination.trim()) {
-      const searchRegex = new RegExp(
-        destination.trim(),
-        "i"
-      );
+      const searchRegex = new RegExp(destination.trim(), "i");
 
       roomFilter.$or = [
         { name: searchRegex },
-        { destination: searchRegex },
         { description: searchRegex },
         { amenities: searchRegex },
         { beds: searchRegex },
@@ -132,17 +48,14 @@ const getRooms = async (req, res) => {
     if (guests) {
       const guestNumber = Number(guests);
 
-      if (
-        !Number.isNaN(guestNumber) &&
-        guestNumber > 0
-      ) {
+      if (!Number.isNaN(guestNumber) && guestNumber > 0) {
         roomFilter.capacity = {
           $gte: guestNumber,
         };
       }
     }
 
-    // Only available rooms
+    // Only show available rooms
     roomFilter.available = true;
 
     // ---------------------------------------------
@@ -186,16 +99,11 @@ const getRooms = async (req, res) => {
           const bookedRoomIds = new Set(
             bookings
               .filter((booking) => booking.room)
-              .map((booking) =>
-                booking.room.toString()
-              )
+              .map((booking) => booking.room.toString())
           );
 
           rooms = rooms.filter(
-            (room) =>
-              !bookedRoomIds.has(
-                room._id.toString()
-              )
+            (room) => !bookedRoomIds.has(room._id.toString())
           );
         }
       } catch (bookingError) {
@@ -235,6 +143,7 @@ const getRooms = async (req, res) => {
 
 // =====================================================
 // SEARCH ROOMS
+// GET /api/rooms/search
 // =====================================================
 
 const searchRooms = async (req, res) => {
@@ -274,6 +183,9 @@ const getRoom = async (req, res) => {
 // =====================================================
 // GET SINGLE ROOM BY SEO SLUG
 // GET /api/rooms/slug/:slug
+//
+// Example:
+// /api/rooms/slug/deluxe-mountain-view-room-kathmandu
 // =====================================================
 
 const getRoomBySlug = async (req, res) => {
@@ -305,10 +217,7 @@ const getRoomBySlug = async (req, res) => {
       data: room,
     });
   } catch (error) {
-    console.error(
-      "Get Room By Slug Error:",
-      error
-    );
+    console.error("Get Room By Slug Error:", error);
 
     res.status(500).json({
       success: false,
@@ -324,56 +233,31 @@ const getRoomBySlug = async (req, res) => {
 
 const createRoom = async (req, res) => {
   try {
+    // ---------------------------------------------
+    // CLEAN SEO DATA
+    // ---------------------------------------------
+
     const roomData = {
       ...req.body,
+
+      seoSlug: req.body.seoSlug
+        ? req.body.seoSlug
+            .trim()
+            .toLowerCase()
+            .replace(/\s+/g, "-")
+        : "",
+
+      seoTitle: req.body.seoTitle
+        ? req.body.seoTitle.trim()
+        : "",
+
+      seoDescription: req.body.seoDescription
+        ? req.body.seoDescription.trim()
+        : "",
     };
 
     // ---------------------------------------------
-    // SEO SLUG
-    // ---------------------------------------------
-
-    let baseSlug = roomData.seoSlug
-      ? makeSlug(roomData.seoSlug)
-      : "";
-
-    // If SEO slug is empty,
-    // generate automatically from name + destination
-
-    if (!baseSlug) {
-      const nameSlug = makeSlug(roomData.name);
-      const destinationSlug = makeSlug(
-        roomData.destination
-      );
-
-      baseSlug = [nameSlug, destinationSlug]
-        .filter(Boolean)
-        .join("-");
-    }
-
-    if (!baseSlug) {
-      baseSlug = "room";
-    }
-
-    roomData.seoSlug = await getUniqueSlug(
-      baseSlug
-    );
-
-    // ---------------------------------------------
-    // SEO TITLE
-    // ---------------------------------------------
-
-    roomData.seoTitle =
-      generateSeoTitle(roomData);
-
-    // ---------------------------------------------
-    // SEO DESCRIPTION
-    // ---------------------------------------------
-
-    roomData.seoDescription =
-      generateSeoDescription(roomData);
-
-    // ---------------------------------------------
-    // CREATE
+    // CREATE ROOM
     // ---------------------------------------------
 
     const room = await Room.create(roomData);
@@ -384,10 +268,7 @@ const createRoom = async (req, res) => {
       data: room,
     });
   } catch (error) {
-    console.error(
-      "Create Room Error:",
-      error
-    );
+    console.error("Create Room Error:", error);
 
     res.status(400).json({
       success: false,
@@ -404,82 +285,36 @@ const createRoom = async (req, res) => {
 const updateRoom = async (req, res) => {
   try {
     // ---------------------------------------------
-    // GET EXISTING ROOM
+    // CLEAN SEO DATA
     // ---------------------------------------------
-
-    const existingRoom = await Room.findById(
-      req.params.id
-    );
-
-    if (!existingRoom) {
-      return res.status(404).json({
-        success: false,
-        message: "Room not found",
-      });
-    }
 
     const roomData = {
       ...req.body,
+
+      ...(req.body.seoSlug !== undefined && {
+        seoSlug: req.body.seoSlug
+          ? req.body.seoSlug
+              .trim()
+              .toLowerCase()
+              .replace(/\s+/g, "-")
+          : "",
+      }),
+
+      ...(req.body.seoTitle !== undefined && {
+        seoTitle: req.body.seoTitle
+          ? req.body.seoTitle.trim()
+          : "",
+      }),
+
+      ...(req.body.seoDescription !== undefined && {
+        seoDescription: req.body.seoDescription
+          ? req.body.seoDescription.trim()
+          : "",
+      }),
     };
 
     // ---------------------------------------------
-    // SEO SLUG
-    // ---------------------------------------------
-
-    let baseSlug = roomData.seoSlug
-      ? makeSlug(roomData.seoSlug)
-      : makeSlug(existingRoom.seoSlug);
-
-    // If slug is empty,
-    // generate from room name + destination
-
-    if (!baseSlug) {
-      const nameSlug = makeSlug(
-        roomData.name || existingRoom.name
-      );
-
-      const destinationSlug = makeSlug(
-        roomData.destination ||
-          existingRoom.destination
-      );
-
-      baseSlug = [nameSlug, destinationSlug]
-        .filter(Boolean)
-        .join("-");
-    }
-
-    if (!baseSlug) {
-      baseSlug = `room-${existingRoom._id}`;
-    }
-
-    roomData.seoSlug = await getUniqueSlug(
-      baseSlug,
-      existingRoom._id
-    );
-
-    // ---------------------------------------------
-    // SEO TITLE
-    // ---------------------------------------------
-
-    const mergedRoomData = {
-      ...existingRoom.toObject(),
-      ...roomData,
-    };
-
-    roomData.seoTitle =
-      generateSeoTitle(mergedRoomData);
-
-    // ---------------------------------------------
-    // SEO DESCRIPTION
-    // ---------------------------------------------
-
-    roomData.seoDescription =
-      generateSeoDescription(
-        mergedRoomData
-      );
-
-    // ---------------------------------------------
-    // UPDATE
+    // UPDATE ROOM
     // ---------------------------------------------
 
     const room = await Room.findByIdAndUpdate(
@@ -491,16 +326,20 @@ const updateRoom = async (req, res) => {
       }
     );
 
+    if (!room) {
+      return res.status(404).json({
+        success: false,
+        message: "Room not found",
+      });
+    }
+
     res.json({
       success: true,
       message: "Room updated successfully",
       data: room,
     });
   } catch (error) {
-    console.error(
-      "Update Room Error:",
-      error
-    );
+    console.error("Update Room Error:", error);
 
     res.status(400).json({
       success: false,
@@ -516,8 +355,7 @@ const updateRoom = async (req, res) => {
 
 const deleteRoom = async (req, res) => {
   try {
-    const room =
-      await Room.findByIdAndDelete(req.params.id);
+    const room = await Room.findByIdAndDelete(req.params.id);
 
     if (!room) {
       return res.status(404).json({
@@ -531,10 +369,7 @@ const deleteRoom = async (req, res) => {
       message: "Room deleted successfully",
     });
   } catch (error) {
-    console.error(
-      "Delete Room Error:",
-      error
-    );
+    console.error("Delete Room Error:", error);
 
     res.status(500).json({
       success: false,
@@ -556,3 +391,4 @@ module.exports = {
   updateRoom,
   deleteRoom,
 };
+
