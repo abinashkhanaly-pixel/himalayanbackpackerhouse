@@ -12,6 +12,8 @@ import Contact from "./pages/Contact";
 import Community from "./pages/Community";
 import CommunityPost from "./pages/CommunityPost";
 
+import VisaChecker from "./pages/visa-checker/VisaChecker";
+
 import AdminLogin from "./pages/AdminLogin";
 import AdminRooms from "./pages/AdminRooms";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -26,42 +28,50 @@ function App() {
 
         {/* ROOMS */}
         <Route path="/rooms" element={<Rooms />} />
-
-        {/* SEO-FRIENDLY ROOM URL */}
-        {/* Example:
-            /rooms/deluxe-mountain-view-room-kathmandu
-        */}
         <Route path="/rooms/:slug" element={<RoomDetails />} />
 
         {/* BOOKING */}
         <Route path="/booking" element={<Booking />} />
 
-        {/* GEAR RENTAL */}
+        {/* GEAR */}
         <Route path="/gear" element={<Gear />} />
 
-        {/* TOURIST VEHICLE RENTAL */}
+        {/* VEHICLES */}
         <Route path="/vehicles" element={<VehicleRental />} />
 
-        {/* ABOUT US */}
+        {/* ABOUT */}
         <Route path="/about" element={<About />} />
 
-        {/* CONTACT US */}
+        {/* CONTACT */}
         <Route path="/contact" element={<Contact />} />
 
-        {/* BACKPACKER COMMUNITY */}
+        {/* COMMUNITY */}
         <Route path="/community" element={<Community />} />
 
-        {/* COMMUNITY INDIVIDUAL POSTS */}
+        {/* COMMUNITY POST */}
         <Route
           path="/community/post/:id"
           element={<CommunityPost />}
         />
 
-        {/* ADMIN LOGIN */}
-        <Route path="/admin" element={<AdminLogin />} />
-        <Route path="/admin/login" element={<AdminLogin />} />
+        {/* NEPAL VISA CHECKER */}
+        <Route
+          path="/visa-checker"
+          element={<VisaChecker />}
+        />
 
-        {/* ADMIN DASHBOARD */}
+        {/* ADMIN */}
+        <Route
+          path="/admin"
+          element={<AdminLogin />}
+        />
+
+        <Route
+          path="/admin/login"
+          element={<AdminLogin />}
+        />
+
+        {/* ADMIN ROOMS */}
         <Route
           path="/admin/rooms"
           element={
@@ -71,10 +81,15 @@ function App() {
           }
         />
 
+        {/* FALLBACK */}
+        <Route
+          path="*"
+          element={<Home />}
+        />
+
       </Routes>
     </BrowserRouter>
   );
 }
 
 export default App;
-

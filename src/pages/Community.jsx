@@ -8,8 +8,8 @@ const practicalActions = [
     label: "BEFORE ARRIVAL",
     title: "Check Your Visa",
     text: "Check Nepal visa requirements, Visa on Arrival information and entry requirements before you fly.",
-    type: "external",
-    href: "https://www.immigration.gov.np/",
+    type: "link",
+    href: "/visa-checker",
     action: "CHECK VISA",
   },
   {
