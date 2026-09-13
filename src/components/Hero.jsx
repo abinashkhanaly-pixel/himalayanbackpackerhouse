@@ -1,12 +1,11 @@
-
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "./Hero.css";
 
 const heroImages = [
-  "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=2200&q=90",
-  "https://images.unsplash.com/photo-1528360983277-13d401cdc186?auto=format&fit=crop&w=2200&q=90",
-  "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?auto=format&fit=crop&w=2200&q=90",
+  "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=1600&q=70",
+  "https://images.unsplash.com/photo-1528360983277-13d401cdc186?auto=format&fit=crop&w=1600&q=70",
+  "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?auto=format&fit=crop&w=1600&q=70",
 ];
 
 const destinations = [
@@ -344,9 +343,13 @@ export default function Hero() {
               className={`hero-background ${
                 currentImage === index ? "active" : ""
               }`}
-              style={{
-                backgroundImage: `url("${image}")`,
-              }}
+              style={
+                currentImage === index
+                  ? {
+                      backgroundImage: `url("${image}")`,
+                    }
+                  : undefined
+              }
             />
           ))}
         </div>
@@ -971,7 +974,7 @@ export default function Hero() {
         <div className="community-grid">
           {communityPosts.map((post) => (
             <Link
-              to="/community" 
+              to="/blog"
               className="community-card"
               key={post.title}
             >
