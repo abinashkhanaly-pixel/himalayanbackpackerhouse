@@ -1,11 +1,12 @@
+
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "./Hero.css";
 
 const heroImages = [
-  "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=1600&q=70",
-  "https://images.unsplash.com/photo-1528360983277-13d401cdc186?auto=format&fit=crop&w=1600&q=70",
-  "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?auto=format&fit=crop&w=1600&q=70",
+  "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=2200&q=90",
+  "https://images.unsplash.com/photo-1528360983277-13d401cdc186?auto=format&fit=crop&w=2200&q=90",
+  "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?auto=format&fit=crop&w=2200&q=90",
 ];
 
 const destinations = [
@@ -343,13 +344,9 @@ export default function Hero() {
               className={`hero-background ${
                 currentImage === index ? "active" : ""
               }`}
-              style={
-                currentImage === index
-                  ? {
-                      backgroundImage: `url("${image}")`,
-                    }
-                  : undefined
-              }
+              style={{
+                backgroundImage: `url("${image}")`,
+              }}
             />
           ))}
         </div>
@@ -946,46 +943,52 @@ export default function Hero() {
         </div>
       </section>
 
-     
-{/* COMMUNITY */}
-<section className="content-section community-section">
-  <div className="section-top">
-    <div>
-      <span className="section-label">TRAVEL TOGETHER</span>
+      {/* COMMUNITY */}
+      <section className="content-section community-section">
+        <div className="section-top">
+          <div>
+            <span className="section-label">TRAVEL TOGETHER</span>
 
-      <h2>Backpacker Community</h2>
+            <h2>Backpacker Community</h2>
 
-      <p className="section-subtitle">
-        Share · Plan · Travel Together
-      </p>
-    </div>
+            <p className="section-subtitle">
+              Share · Plan · Travel Together
+            </p>
+          </div>
 
-    <div className="community-members">
-      <div className="avatar-stack">
-        <span>U</span>
-        <span>A</span>
-        <span>M</span>
-        <span>R</span>
-      </div>
+          <div className="community-members">
+            <div className="avatar-stack">
+              <span>U</span>
+              <span>A</span>
+              <span>M</span>
+              <span>R</span>
+            </div>
 
-      <small>2.5K Travelers</small>
-    </div>
-  </div>
+            <small>2.5K Travelers</small>
+          </div>
+        </div>
 
-  <div className="community-intro">
-    <p>
-      Connect with fellow travellers, discover trusted travel information,
-      share experiences and plan your next Himalayan adventure together.
-    </p>
+        <div className="community-grid">
+          {communityPosts.map((post) => (
+            <Link
+              to="/community" 
+              className="community-card"
+              key={post.title}
+            >
+              <img src={post.image} alt={post.title} loading="lazy" />
 
-    <Link to="/community" className="community-explore-button">
-      Explore Community →
-    </Link>
-  </div>
-</section>
+              <div className="community-card-body">
+                <h3>{post.title}</h3>
 
+                <p>{post.text}</p>
 
-                     
+                <span>Read More →</span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="cta-section">
         <div className="cta-background" />
