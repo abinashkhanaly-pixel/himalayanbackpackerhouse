@@ -91,7 +91,7 @@ const Booking = () => {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/api/bookings",
+        "https://backpacker-gateways-2.onrender.com/api/bookings",
         {
           method: "POST",
           headers: {

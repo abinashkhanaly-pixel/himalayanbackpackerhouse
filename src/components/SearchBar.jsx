@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./SearchBar.css";
 
-const API_URL = "http://localhost:5000/api/rooms";
+const API_URL = "https://backpacker-gateways-2.onrender.com/api/rooms";
 
 const destinations = [
   {

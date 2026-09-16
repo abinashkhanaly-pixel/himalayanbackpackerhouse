@@ -6,7 +6,7 @@ import "./AddTrek.css";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ||
-  "http://localhost:5000/api";
+  "https://backpacker-gateways-2.onrender.com/api";
 
 const emptyItinerary = {
   day: 1,
@@ -775,7 +775,7 @@ function AddTrek() {
         "TypeError"
       ) {
         setError(
-          "Cannot connect to the backend server. Make sure the backend is running on http://localhost:5000."
+          "Cannot connect to the backend server. Please try again."
         );
       } else {
         setError(
@@ -2302,4 +2302,6 @@ function AddTrek() {
 }
 
 export default AddTrek;
+
+
 

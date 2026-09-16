@@ -1,6 +1,6 @@
 const API_URL =
   window.location.hostname === "localhost"
-    ? "http://localhost:5000/api/rooms"
+    ? "https://backpacker-gateways-2.onrender.com/api/rooms"
     : "https://backpacker-gateways-2.onrender.com/api/rooms";
 
 // ==========================================
@@ -155,4 +155,5 @@ export const deleteRoom = async (id) => {
 
   return result;
 };
+
 

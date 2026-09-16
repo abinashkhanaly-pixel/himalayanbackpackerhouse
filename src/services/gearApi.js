@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:5000/api/gears";
+const API_URL = "https://backpacker-gateways-2.onrender.com/api/gears";
 
 // GET ALL GEARS
 export const getGears = async (params = {}) => {
