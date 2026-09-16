@@ -1,5 +1,5 @@
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { jsPDF } from "jspdf";
 import "./VisaChecker.css";
 import visaRules from "./visaRules";
@@ -73,6 +73,184 @@ const passportTypes = [
 ];
 
 export default function VisaChecker() {
+  /*
+   * ---------------------------------------------------------
+   * SEO + META TAGS + STRUCTURED DATA
+   * ---------------------------------------------------------
+   */
+  useEffect(() => {
+    const pageTitle =
+      "Nepal Visa Requirements & Entry Guide | Backpacker Gateways";
+
+    const pageDescription =
+      "Check general Nepal visa and entry information based on nationality, travel purpose, planned stay and passport type.";
+
+    const pageUrl =
+      "https://www.backpackergateways.com/visa-checker";
+
+    document.title = pageTitle;
+
+    const setMeta = (attribute, value, content) => {
+      if (!content) return;
+
+      let element = document.head.querySelector(
+        `meta[${attribute}="${value}"]`
+      );
+
+      if (!element) {
+        element = document.createElement("meta");
+        element.setAttribute(attribute, value);
+        document.head.appendChild(element);
+      }
+
+      element.setAttribute("content", content);
+    };
+
+    const setLink = (rel, href) => {
+      let element = document.head.querySelector(
+        `link[rel="${rel}"]`
+      );
+
+      if (!element) {
+        element = document.createElement("link");
+        element.setAttribute("rel", rel);
+        document.head.appendChild(element);
+      }
+
+      element.setAttribute("href", href);
+    };
+
+    // Basic SEO
+    setMeta(
+      "name",
+      "description",
+      pageDescription
+    );
+
+    setMeta(
+      "name",
+      "keywords",
+      "Nepal visa, Nepal visa requirements, Nepal visa checker, Nepal entry requirements, Nepal travel visa, Nepal immigration"
+    );
+
+    setMeta(
+      "name",
+      "author",
+      "Backpacker Gateways"
+    );
+
+    setMeta(
+      "name",
+      "robots",
+      "index, follow"
+    );
+
+    // Canonical
+    setLink(
+      "canonical",
+      pageUrl
+    );
+
+    // Open Graph
+    setMeta(
+      "property",
+      "og:title",
+      pageTitle
+    );
+
+    setMeta(
+      "property",
+      "og:description",
+      pageDescription
+    );
+
+    setMeta(
+      "property",
+      "og:type",
+      "website"
+    );
+
+    setMeta(
+      "property",
+      "og:url",
+      pageUrl
+    );
+
+    setMeta(
+      "property",
+      "og:site_name",
+      "Backpacker Gateways"
+    );
+
+    // Twitter / X
+    setMeta(
+      "name",
+      "twitter:card",
+      "summary_large_image"
+    );
+
+    setMeta(
+      "name",
+      "twitter:title",
+      pageTitle
+    );
+
+    setMeta(
+      "name",
+      "twitter:description",
+      pageDescription
+    );
+
+    // JSON-LD Structured Data
+    const structuredData = {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "Nepal Visa Requirements & Entry Guide",
+      "description": pageDescription,
+      "url": pageUrl,
+      "inLanguage": "en",
+      "isPartOf": {
+        "@type": "WebSite",
+        "name": "Backpacker Gateways",
+        "url": "https://www.backpackergateways.com/"
+      },
+      "about": {
+        "@type": "Thing",
+        "name": "Nepal Visa Requirements"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Backpacker Gateways",
+        "url": "https://www.backpackergateways.com/"
+      }
+    };
+
+    let script = document.getElementById(
+      "visa-checker-jsonld"
+    );
+
+    if (!script) {
+      script = document.createElement("script");
+      script.type = "application/ld+json";
+      script.id = "visa-checker-jsonld";
+      document.head.appendChild(script);
+    }
+
+    script.textContent =
+      JSON.stringify(structuredData);
+
+    return () => {
+      const existingScript =
+        document.getElementById(
+          "visa-checker-jsonld"
+        );
+
+      if (existingScript) {
+        existingScript.remove();
+      }
+    };
+  }, []);
+
   const [country, setCountry] = useState("");
   const [search, setSearch] = useState("");
   const [purpose, setPurpose] = useState("Tourism");
@@ -286,7 +464,9 @@ export default function VisaChecker() {
         contentWidth
       );
 
-      addPageIfNeeded(lines.length * 4.8 + 7);
+      addPageIfNeeded(
+        lines.length * 4.8 + 7
+      );
 
       doc.setFont("helvetica", "normal");
       doc.setFontSize(9.5);
@@ -297,13 +477,18 @@ export default function VisaChecker() {
       y += lines.length * 4.8 + 6;
     };
 
-    const addBullet = (text, color = colors.green) => {
+    const addBullet = (
+      text,
+      color = colors.green
+    ) => {
       const lines = doc.splitTextToSize(
         text,
         contentWidth - 8
       );
 
-      addPageIfNeeded(lines.length * 4.8 + 5);
+      addPageIfNeeded(
+        lines.length * 4.8 + 5
+      );
 
       doc.setFillColor(...color);
 
@@ -339,9 +524,14 @@ export default function VisaChecker() {
       );
 
       const boxHeight =
-        Math.max(17, valueLines.length * 4.5 + 11);
+        Math.max(
+          17,
+          valueLines.length * 4.5 + 11
+        );
 
-      addPageIfNeeded(boxHeight + 4);
+      addPageIfNeeded(
+        boxHeight + 4
+      );
 
       doc.setFillColor(...background);
 
@@ -398,7 +588,13 @@ export default function VisaChecker() {
     y = 25;
 
     doc.setFillColor(...colors.red);
-    doc.rect(0, 11, pageWidth, 3, "F");
+    doc.rect(
+      0,
+      11,
+      pageWidth,
+      3,
+      "F"
+    );
 
     doc.setFillColor(...colors.green);
     doc.roundedRect(
@@ -625,15 +821,21 @@ export default function VisaChecker() {
       addParagraph(
         "For trekking and adventure travel, visa requirements are only one part of preparation. Check route-specific permits, conservation or national-park requirements, insurance coverage, weather and emergency arrangements."
       );
-    } else if (result.purpose === "Business") {
+    } else if (
+      result.purpose === "Business"
+    ) {
       addParagraph(
         "Business travel may require additional documentation depending on the activity and applicable visa category. Confirm the appropriate visa type and supporting documents with the relevant official authority."
       );
-    } else if (result.purpose === "Study") {
+    } else if (
+      result.purpose === "Study"
+    ) {
       addParagraph(
         "Study-related travel may require additional documentation such as institutional or admission documents. Confirm the appropriate visa category and current process before travelling."
       );
-    } else if (result.purpose === "Transit") {
+    } else if (
+      result.purpose === "Transit"
+    ) {
       addParagraph(
         "Transit requirements depend on your itinerary, nationality and transit circumstances. Confirm whether a Nepal entry visa or transit permission is applicable to your journey."
       );
@@ -656,7 +858,9 @@ export default function VisaChecker() {
 
     const officialBoxHeight = 45;
 
-    addPageIfNeeded(officialBoxHeight + 5);
+    addPageIfNeeded(
+      officialBoxHeight + 5
+    );
 
     doc.roundedRect(
       margin,
@@ -701,10 +905,11 @@ export default function VisaChecker() {
     doc.setFontSize(8.5);
     doc.setTextColor(...colors.dark);
 
-    const officialLines = doc.splitTextToSize(
-      "Use the official Nepal government immigration information to verify the latest visa, entry, fee and documentation requirements before travelling.",
-      contentWidth - 32
-    );
+    const officialLines =
+      doc.splitTextToSize(
+        "Use the official Nepal government immigration information to verify the latest visa, entry, fee and documentation requirements before travelling.",
+        contentWidth - 32
+      );
 
     doc.text(
       officialLines,
@@ -738,15 +943,18 @@ export default function VisaChecker() {
     const disclaimer =
       "This document is a general travel-information guide prepared by Backpacker Gateways. It is not an official government document, visa approval, immigration decision, visa application or legal advice. Visa rules, fees, eligibility, procedures and entry requirements may change.";
 
-    const disclaimerLines = doc.splitTextToSize(
-      disclaimer,
-      contentWidth - 16
-    );
+    const disclaimerLines =
+      doc.splitTextToSize(
+        disclaimer,
+        contentWidth - 16
+      );
 
     const disclaimerHeight =
       disclaimerLines.length * 4.8 + 15;
 
-    addPageIfNeeded(disclaimerHeight);
+    addPageIfNeeded(
+      disclaimerHeight
+    );
 
     doc.roundedRect(
       margin,
@@ -837,7 +1045,6 @@ export default function VisaChecker() {
         </div>
       </section>
 
-
       {/* CHECKER */}
       <section className="visa-checker-section">
 
@@ -863,7 +1070,6 @@ export default function VisaChecker() {
 
             </div>
 
-
             <div className="country-search">
 
               <input
@@ -876,7 +1082,6 @@ export default function VisaChecker() {
               />
 
             </div>
-
 
             <div className="country-grid">
 
@@ -910,7 +1115,6 @@ export default function VisaChecker() {
 
             </div>
 
-
             {selectedCountry && (
 
               <div className="selected-country">
@@ -934,7 +1138,6 @@ export default function VisaChecker() {
 
             )}
 
-
             {/* PURPOSE */}
             <div className="visa-form-block">
 
@@ -953,7 +1156,6 @@ export default function VisaChecker() {
                 </div>
 
               </div>
-
 
               <div className="choice-grid">
 
@@ -980,7 +1182,6 @@ export default function VisaChecker() {
 
             </div>
 
-
             {/* STAY */}
             <div className="visa-form-block">
 
@@ -997,7 +1198,6 @@ export default function VisaChecker() {
                 </div>
 
               </div>
-
 
               <div className="choice-grid">
 
@@ -1024,7 +1224,6 @@ export default function VisaChecker() {
 
             </div>
 
-
             {/* PASSPORT TYPE */}
             <div className="visa-form-block">
 
@@ -1043,7 +1242,6 @@ export default function VisaChecker() {
                 </div>
 
               </div>
-
 
               <div className="choice-grid">
 
@@ -1070,7 +1268,6 @@ export default function VisaChecker() {
 
             </div>
 
-
             <button
               type="submit"
               className="check-visa-button"
@@ -1080,7 +1277,6 @@ export default function VisaChecker() {
             </button>
 
           </form>
-
 
           {/* RESULT */}
           {result && (
@@ -1106,7 +1302,6 @@ export default function VisaChecker() {
 
               </div>
 
-
               {/* COUNTRY */}
               <div className="result-country">
 
@@ -1127,7 +1322,6 @@ export default function VisaChecker() {
                 </div>
 
               </div>
-
 
               {/* ENTRY GUIDANCE */}
               <div className="guide-section">
@@ -1154,7 +1348,6 @@ export default function VisaChecker() {
                 </div>
 
               </div>
-
 
               {/* TRIP PROFILE */}
               <div className="guide-section">
@@ -1222,7 +1415,6 @@ export default function VisaChecker() {
 
               </div>
 
-
               {/* VISA */}
               <div className="guide-section">
 
@@ -1283,7 +1475,6 @@ export default function VisaChecker() {
 
               </div>
 
-
               {/* DOCUMENTS */}
               <div className="guide-section">
 
@@ -1332,7 +1523,6 @@ export default function VisaChecker() {
                 </div>
 
               </div>
-
 
               {/* BEFORE TRAVEL */}
               <div className="guide-section">
@@ -1387,7 +1577,6 @@ export default function VisaChecker() {
 
               </div>
 
-
               {/* OFFICIAL */}
               <div className="guide-official">
 
@@ -1416,7 +1605,6 @@ export default function VisaChecker() {
 
               </div>
 
-
               {/* DISCLAIMER */}
               <div className="result-warning">
 
@@ -1435,7 +1623,6 @@ export default function VisaChecker() {
 
               </div>
 
-
               {/* ACTIONS */}
               <div className="guide-actions">
 
@@ -1448,7 +1635,6 @@ export default function VisaChecker() {
                   <span>↓</span>
                 </button>
 
-
                 <a
                   className="official-button"
                   href="https://www.immigration.gov.np/"
@@ -1460,7 +1646,6 @@ export default function VisaChecker() {
                 </a>
 
               </div>
-
 
               <p className="verified-text">
                 General information only. Always verify
@@ -1479,4 +1664,6 @@ export default function VisaChecker() {
     </main>
   );
 }
+
+
 

@@ -1,0 +1,642 @@
+.trek-details-page {
+  background: #ffffff;
+  color: #1f2937;
+  min-height: 100vh;
+}
+
+.trek-details-container {
+  width: min(1180px, 92%);
+  margin: 0 auto;
+}
+
+/* HERO */
+
+.trek-details-hero {
+  position: relative;
+  height: 520px;
+  overflow: hidden;
+}
+
+.trek-details-hero > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.trek-details-hero-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  padding: 70px 0;
+  background:
+    linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.8),
+      rgba(0, 0, 0, 0.05)
+    );
+}
+
+.trek-back-link {
+  color: #ffffff;
+  text-decoration: none;
+  display: inline-block;
+  margin-bottom: 22px;
+  font-size: 14px;
+}
+
+.trek-details-eyebrow,
+.section-label {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: #d97706;
+  margin: 0 0 10px;
+}
+
+.trek-details-hero h1 {
+  color: #ffffff;
+  font-size: clamp(36px, 5vw, 64px);
+  line-height: 1.05;
+  max-width: 850px;
+  margin: 0 0 18px;
+}
+
+.trek-details-hero-description {
+  color: #ffffff;
+  max-width: 760px;
+  font-size: 18px;
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* GALLERY */
+
+.trek-gallery-section {
+  background: #f7f7f7;
+  padding: 18px 0;
+}
+
+.trek-gallery {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+}
+
+.trek-gallery-thumb {
+  border: 2px solid transparent;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+  flex: 0 0 100px;
+  height: 72px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.trek-gallery-thumb.active {
+  border-color: #d97706;
+}
+
+.trek-gallery-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* MAIN LAYOUT */
+
+.trek-details-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 330px;
+  gap: 55px;
+  padding: 60px 0 100px;
+}
+
+.trek-details-content {
+  min-width: 0;
+}
+
+/* INFO */
+
+.trek-info-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 65px;
+}
+
+.trek-info-box {
+  padding: 20px;
+  border-right: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.trek-info-box:nth-child(4n) {
+  border-right: none;
+}
+
+.trek-info-box span {
+  display: block;
+  color: #6b7280;
+  font-size: 12px;
+  margin-bottom: 7px;
+}
+
+.trek-info-box strong {
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+/* SECTIONS */
+
+.trek-section-block {
+  margin-bottom: 65px;
+}
+
+.trek-section-block h2 {
+  font-size: 32px;
+  margin: 0 0 24px;
+  color: #111827;
+}
+
+.trek-section-block h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.trek-long-text {
+  font-size: 16px;
+  line-height: 1.85;
+  color: #4b5563;
+}
+
+/* HIGHLIGHTS */
+
+.highlight-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.highlight-item {
+  display: flex;
+  gap: 12px;
+  padding: 17px;
+  background: #f8fafc;
+  border-radius: 10px;
+}
+
+.highlight-item span {
+  color: #16a34a;
+  font-weight: 800;
+}
+
+.highlight-item p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* TWO COLUMN */
+
+.trek-two-column {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  padding: 28px;
+  background: #f8fafc;
+  border-radius: 14px;
+}
+
+/* ITINERARY */
+
+.itinerary-list {
+  border-top: 1px solid #e5e7eb;
+}
+
+.itinerary-item {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.itinerary-header {
+  width: 100%;
+  border: none;
+  background: #ffffff;
+  padding: 22px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-align: left;
+  cursor: pointer;
+}
+
+.itinerary-header div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.itinerary-header span:first-child {
+  color: #d97706;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.itinerary-header strong {
+  font-size: 17px;
+  color: #111827;
+}
+
+.itinerary-arrow {
+  font-size: 25px;
+  color: #6b7280;
+}
+
+.itinerary-description {
+  padding: 0 45px 25px 0;
+}
+
+.itinerary-description p {
+  color: #4b5563;
+  line-height: 1.8;
+  margin: 0;
+}
+
+/* INCLUDED / EXCLUDED */
+
+.included-list,
+.excluded-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.included-list li,
+.excluded-list li {
+  display: flex;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+  line-height: 1.6;
+}
+
+.included-list span {
+  color: #16a34a;
+  font-weight: 800;
+}
+
+.excluded-list span {
+  color: #dc2626;
+  font-weight: 800;
+}
+
+/* FAQ */
+
+.faq-list {
+  border-top: 1px solid #e5e7eb;
+}
+
+.faq-item {
+  border-bottom: 1px solid #e5e7eb;
+  padding: 20px 0;
+}
+
+.faq-item summary {
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.faq-item p {
+  color: #4b5563;
+  line-height: 1.7;
+  margin: 15px 0 0;
+}
+
+/* BOOKING SIDEBAR */
+
+.trek-booking-sidebar {
+  position: relative;
+}
+
+.trek-booking-card {
+  position: sticky;
+  top: 25px;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+}
+
+.booking-label {
+  color: #6b7280;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  font-weight: 800;
+  margin: 0 0 5px;
+}
+
+.trek-price {
+  font-size: 42px;
+  font-weight: 800;
+  color: #111827;
+}
+
+.price-note {
+  color: #6b7280;
+  margin: 3px 0;
+}
+
+.booking-divider {
+  height: 1px;
+  background: #e5e7eb;
+  margin: 22px 0;
+}
+
+.booking-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 25px;
+}
+
+.booking-summary div {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.booking-summary span {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.booking-summary strong {
+  font-size: 13px;
+  text-align: right;
+}
+
+.book-trek-main-btn,
+.whatsapp-direct-btn {
+  width: 100%;
+  min-height: 50px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.book-trek-main-btn {
+  border: none;
+  background: #111827;
+  color: white;
+  margin-bottom: 10px;
+}
+
+.whatsapp-direct-btn {
+  border: 1px solid #16a34a;
+  color: #15803d;
+  background: white;
+}
+
+.booking-small-note {
+  color: #6b7280;
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+  margin: 15px 0 0;
+}
+
+/* MOBILE BOOKING */
+
+.mobile-booking-bar {
+  display: none;
+}
+
+/* MODAL */
+
+.booking-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.booking-modal {
+  position: relative;
+  background: #ffffff;
+  width: min(500px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 16px;
+  padding: 35px;
+  box-sizing: border-box;
+}
+
+.modal-close {
+  position: absolute;
+  top: 15px;
+  right: 18px;
+  border: none;
+  background: none;
+  font-size: 30px;
+  cursor: pointer;
+  color: #6b7280;
+}
+
+.booking-modal h2 {
+  font-size: 30px;
+  margin: 0 0 8px;
+}
+
+.selected-trek {
+  color: #d97706;
+  font-weight: 700;
+  margin-bottom: 25px;
+}
+
+.booking-modal form {
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+}
+
+.booking-modal label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.booking-modal input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 13px;
+  border: 1px solid #d1d5db;
+  border-radius: 7px;
+  font-size: 15px;
+}
+
+.modal-whatsapp-btn {
+  border: none;
+  background: #16a34a;
+  color: white;
+  padding: 15px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* NOT FOUND */
+
+.trek-not-found {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 40px;
+}
+
+.trek-not-found a {
+  color: #d97706;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+/* TABLET */
+
+@media (max-width: 1000px) {
+  .trek-details-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .trek-booking-sidebar {
+    order: -1;
+  }
+
+  .trek-booking-card {
+    position: static;
+  }
+
+  .trek-info-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .trek-info-box:nth-child(4n) {
+    border-right: 1px solid #e5e7eb;
+  }
+
+  .trek-info-box:nth-child(2n) {
+    border-right: none;
+  }
+}
+
+/* MOBILE */
+
+@media (max-width: 650px) {
+  .trek-details-hero {
+    height: 470px;
+  }
+
+  .trek-details-hero-overlay {
+    padding: 45px 0;
+  }
+
+  .trek-details-hero h1 {
+    font-size: 38px;
+  }
+
+  .trek-details-hero-description {
+    font-size: 15px;
+  }
+
+  .trek-info-grid {
+    grid-template-columns: 1fr 1fr;
+    margin-bottom: 45px;
+  }
+
+  .trek-info-box {
+    padding: 15px;
+  }
+
+  .trek-section-block {
+    margin-bottom: 45px;
+  }
+
+  .trek-section-block h2 {
+    font-size: 26px;
+  }
+
+  .highlight-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .trek-two-column {
+    grid-template-columns: 1fr;
+  }
+
+  .trek-details-layout {
+    padding-bottom: 90px;
+  }
+
+  .trek-booking-sidebar {
+    display: none;
+  }
+
+  .mobile-booking-bar {
+    position: fixed;
+    display: flex;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 500;
+    background: #ffffff;
+    border-top: 1px solid #e5e7eb;
+    padding: 12px 15px;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.08);
+  }
+
+  .mobile-booking-bar div {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .mobile-booking-bar span {
+    font-size: 11px;
+    color: #6b7280;
+  }
+
+  .mobile-booking-bar strong {
+    font-size: 21px;
+  }
+
+  .mobile-booking-bar button {
+    border: none;
+    background: #111827;
+    color: white;
+    padding: 13px 20px;
+    border-radius: 7px;
+    font-weight: 700;
+  }
+
+  .booking-modal {
+    padding: 28px 20px;
+  }
+}

@@ -1,3 +1,4 @@
+
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Home from "./pages/Home";
@@ -17,6 +18,15 @@ import VisaChecker from "./pages/visa-checker/VisaChecker";
 import AdminLogin from "./pages/AdminLogin";
 import AdminRooms from "./pages/AdminRooms";
 import ProtectedRoute from "./components/ProtectedRoute";
+
+// TREKKING
+import Trekking from "./pages/Trekking";
+import TrekkingDetails from "./pages/TrekkingDetails";
+
+// ADMIN TREKKING
+import AdminTrekking from "./pages/AdminTrekking";
+import AddTrek from "./pages/AddTrek";
+import EditTrek from "./pages/EditTrek";
 
 function App() {
   return (
@@ -39,14 +49,35 @@ function App() {
         {/* VEHICLES */}
         <Route path="/vehicles" element={<VehicleRental />} />
 
+        {/* TREKKING */}
+        <Route
+          path="/trekking"
+          element={<Trekking />}
+        />
+
+        {/* TREKKING DETAILS */}
+        <Route
+          path="/trekking/:slug"
+          element={<TrekkingDetails />}
+        />
+
         {/* ABOUT */}
-        <Route path="/about" element={<About />} />
+        <Route
+          path="/about"
+          element={<About />}
+        />
 
         {/* CONTACT */}
-        <Route path="/contact" element={<Contact />} />
+        <Route
+          path="/contact"
+          element={<Contact />}
+        />
 
         {/* COMMUNITY */}
-        <Route path="/community" element={<Community />} />
+        <Route
+          path="/community"
+          element={<Community />}
+        />
 
         {/* COMMUNITY POST */}
         <Route
@@ -60,7 +91,7 @@ function App() {
           element={<VisaChecker />}
         />
 
-        {/* ADMIN */}
+        {/* ADMIN LOGIN */}
         <Route
           path="/admin"
           element={<AdminLogin />}
@@ -81,6 +112,36 @@ function App() {
           }
         />
 
+        {/* ADMIN TREKKING */}
+        <Route
+          path="/admin/trekking"
+          element={
+            <ProtectedRoute>
+              <AdminTrekking />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ADD NEW TREK */}
+        <Route
+          path="/admin/trekking/add"
+          element={
+            <ProtectedRoute>
+              <AddTrek />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* EDIT TREK */}
+        <Route
+          path="/admin/trekking/edit/:id"
+          element={
+            <ProtectedRoute>
+              <EditTrek />
+            </ProtectedRoute>
+          }
+        />
+
         {/* FALLBACK */}
         <Route
           path="*"
@@ -93,3 +154,4 @@ function App() {
 }
 
 export default App;
+
