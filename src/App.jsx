@@ -1,4 +1,3 @@
-
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Home from "./pages/Home";
@@ -16,6 +15,7 @@ import CommunityPost from "./pages/CommunityPost";
 import VisaChecker from "./pages/visa-checker/VisaChecker";
 
 import AdminLogin from "./pages/AdminLogin";
+import Admin from "./pages/Admin";
 import AdminRooms from "./pages/AdminRooms";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -91,7 +91,10 @@ function App() {
           element={<VisaChecker />}
         />
 
+        {/* ========================= */}
         {/* ADMIN LOGIN */}
+        {/* ========================= */}
+
         <Route
           path="/admin"
           element={<AdminLogin />}
@@ -102,7 +105,23 @@ function App() {
           element={<AdminLogin />}
         />
 
+        {/* ========================= */}
+        {/* ADMIN DASHBOARD */}
+        {/* ========================= */}
+
+        <Route
+          path="/admin/dashboard"
+          element={
+            <ProtectedRoute>
+              <Admin />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ========================= */}
         {/* ADMIN ROOMS */}
+        {/* ========================= */}
+
         <Route
           path="/admin/rooms"
           element={
@@ -112,7 +131,10 @@ function App() {
           }
         />
 
+        {/* ========================= */}
         {/* ADMIN TREKKING */}
+        {/* ========================= */}
+
         <Route
           path="/admin/trekking"
           element={
@@ -154,4 +176,3 @@ function App() {
 }
 
 export default App;
-

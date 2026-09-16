@@ -40,7 +40,8 @@ export default function AdminLogin() {
 
       localStorage.setItem("adminToken", data.token);
 
-      navigate("/admin/rooms");
+      // Go to the main Admin Dashboard
+      navigate("/admin/dashboard");
     } catch (error) {
       console.error("Login error:", error);
       setError("Unable to connect to server");
@@ -64,8 +65,8 @@ export default function AdminLogin() {
         <h1>Welcome back</h1>
 
         <p>
-          Sign in to manage your hotels,
-          rooms and mountain lodges.
+          Sign in to manage your hotels, rooms,
+          trekking packages and mountain experiences.
         </p>
 
         {error && (
@@ -97,9 +98,7 @@ export default function AdminLogin() {
           />
 
           <button type="submit" disabled={loading}>
-            {loading
-              ? "Signing in..."
-              : "Login to Dashboard"}
+            {loading ? "Signing in..." : "Login to Dashboard"}
           </button>
 
         </form>
