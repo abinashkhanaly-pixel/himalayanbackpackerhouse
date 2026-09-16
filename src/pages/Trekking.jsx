@@ -5,7 +5,7 @@ import "./Trekking.css";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ||
-  "http://localhost:5000/api";
+  "https://backpacker-gateways-2.onrender.com/api";
 
 function Trekking() {
   const [showBooking, setShowBooking] = useState(false);
