@@ -1,176 +1,197 @@
+import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import Home from "./pages/Home";
-import Rooms from "./pages/Rooms";
-import RoomDetails from "./pages/RoomDetails";
-import Booking from "./pages/Booking";
-import Gear from "./pages/Gear";
-import VehicleRental from "./pages/VehicleRental";
-import About from "./pages/About";
-import Contact from "./pages/Contact";
-
-import Community from "./pages/Community";
-import CommunityPost from "./pages/CommunityPost";
-
-import VisaChecker from "./pages/visa-checker/VisaChecker";
-
-import AdminLogin from "./pages/AdminLogin";
-import Admin from "./pages/Admin";
-import AdminRooms from "./pages/AdminRooms";
 import ProtectedRoute from "./components/ProtectedRoute";
 
-// TREKKING
-import Trekking from "./pages/Trekking";
-import TrekkingDetails from "./pages/TrekkingDetails";
+// Public pages
+const Home = lazy(() => import("./pages/Home"));
+const Rooms = lazy(() => import("./pages/Rooms"));
+const RoomDetails = lazy(() => import("./pages/RoomDetails"));
+const Booking = lazy(() => import("./pages/Booking"));
+const Gear = lazy(() => import("./pages/Gear"));
+const VehicleRental = lazy(() => import("./pages/VehicleRental"));
+const About = lazy(() => import("./pages/About"));
+const Contact = lazy(() => import("./pages/Contact"));
 
-// ADMIN TREKKING
-import AdminTrekking from "./pages/AdminTrekking";
-import AddTrek from "./pages/AddTrek";
-import EditTrek from "./pages/EditTrek";
+const Community = lazy(() => import("./pages/Community"));
+const CommunityPost = lazy(() => import("./pages/CommunityPost"));
+
+const VisaChecker = lazy(() =>
+  import("./pages/visa-checker/VisaChecker")
+);
+
+// Admin pages
+const AdminLogin = lazy(() => import("./pages/AdminLogin"));
+const Admin = lazy(() => import("./pages/Admin"));
+const AdminRooms = lazy(() => import("./pages/AdminRooms"));
+
+const AdminTrekking = lazy(() =>
+  import("./pages/AdminTrekking")
+);
+
+const AddTrek = lazy(() =>
+  import("./pages/AddTrek")
+);
+
+const EditTrek = lazy(() =>
+  import("./pages/EditTrek")
+);
+
+// Trekking
+const Trekking = lazy(() =>
+  import("./pages/Trekking")
+);
+
+const TrekkingDetails = lazy(() =>
+  import("./pages/TrekkingDetails")
+);
+
+function PageLoader() {
+  return (
+    <div
+      style={{
+        minHeight: "60vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      Loading...
+    </div>
+  );
+}
 
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
 
-        {/* HOME */}
-        <Route path="/" element={<Home />} />
+          {/* HOME */}
+          <Route path="/" element={<Home />} />
 
-        {/* ROOMS */}
-        <Route path="/rooms" element={<Rooms />} />
-        <Route path="/rooms/:slug" element={<RoomDetails />} />
+          {/* ROOMS */}
+          <Route path="/rooms" element={<Rooms />} />
+          <Route
+            path="/rooms/:slug"
+            element={<RoomDetails />}
+          />
 
-        {/* BOOKING */}
-        <Route path="/booking" element={<Booking />} />
+          {/* BOOKING */}
+          <Route path="/booking" element={<Booking />} />
 
-        {/* GEAR */}
-        <Route path="/gear" element={<Gear />} />
+          {/* GEAR */}
+          <Route path="/gear" element={<Gear />} />
 
-        {/* VEHICLES */}
-        <Route path="/vehicles" element={<VehicleRental />} />
+          {/* VEHICLES */}
+          <Route
+            path="/vehicles"
+            element={<VehicleRental />}
+          />
 
-        {/* TREKKING */}
-        <Route
-          path="/trekking"
-          element={<Trekking />}
-        />
+          {/* TREKKING */}
+          <Route
+            path="/trekking"
+            element={<Trekking />}
+          />
 
-        {/* TREKKING DETAILS */}
-        <Route
-          path="/trekking/:slug"
-          element={<TrekkingDetails />}
-        />
+          <Route
+            path="/trekking/:slug"
+            element={<TrekkingDetails />}
+          />
 
-        {/* ABOUT */}
-        <Route
-          path="/about"
-          element={<About />}
-        />
+          {/* ABOUT */}
+          <Route path="/about" element={<About />} />
 
-        {/* CONTACT */}
-        <Route
-          path="/contact"
-          element={<Contact />}
-        />
+          {/* CONTACT */}
+          <Route path="/contact" element={<Contact />} />
 
-        {/* COMMUNITY */}
-        <Route
-          path="/community"
-          element={<Community />}
-        />
+          {/* COMMUNITY */}
+          <Route
+            path="/community"
+            element={<Community />}
+          />
 
-        {/* COMMUNITY POST */}
-        <Route
-          path="/community/post/:id"
-          element={<CommunityPost />}
-        />
+          <Route
+            path="/community/post/:id"
+            element={<CommunityPost />}
+          />
 
-        {/* NEPAL VISA CHECKER */}
-        <Route
-          path="/visa-checker"
-          element={<VisaChecker />}
-        />
+          {/* VISA */}
+          <Route
+            path="/visa-checker"
+            element={<VisaChecker />}
+          />
 
-        {/* ========================= */}
-        {/* ADMIN LOGIN */}
-        {/* ========================= */}
+          {/* ADMIN LOGIN */}
+          <Route
+            path="/admin"
+            element={<AdminLogin />}
+          />
 
-        <Route
-          path="/admin"
-          element={<AdminLogin />}
-        />
+          <Route
+            path="/admin/login"
+            element={<AdminLogin />}
+          />
 
-        <Route
-          path="/admin/login"
-          element={<AdminLogin />}
-        />
+          {/* ADMIN DASHBOARD */}
+          <Route
+            path="/admin/dashboard"
+            element={
+              <ProtectedRoute>
+                <Admin />
+              </ProtectedRoute>
+            }
+          />
 
-        {/* ========================= */}
-        {/* ADMIN DASHBOARD */}
-        {/* ========================= */}
+          {/* ADMIN ROOMS */}
+          <Route
+            path="/admin/rooms"
+            element={
+              <ProtectedRoute>
+                <AdminRooms />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route
-          path="/admin/dashboard"
-          element={
-            <ProtectedRoute>
-              <Admin />
-            </ProtectedRoute>
-          }
-        />
+          {/* ADMIN TREKKING */}
+          <Route
+            path="/admin/trekking"
+            element={
+              <ProtectedRoute>
+                <AdminTrekking />
+              </ProtectedRoute>
+            }
+          />
 
-        {/* ========================= */}
-        {/* ADMIN ROOMS */}
-        {/* ========================= */}
+          {/* ADD TREK */}
+          <Route
+            path="/admin/trekking/add"
+            element={
+              <ProtectedRoute>
+                <AddTrek />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route
-          path="/admin/rooms"
-          element={
-            <ProtectedRoute>
-              <AdminRooms />
-            </ProtectedRoute>
-          }
-        />
+          {/* EDIT TREK */}
+          <Route
+            path="/admin/trekking/edit/:id"
+            element={
+              <ProtectedRoute>
+                <EditTrek />
+              </ProtectedRoute>
+            }
+          />
 
-        {/* ========================= */}
-        {/* ADMIN TREKKING */}
-        {/* ========================= */}
+          {/* FALLBACK */}
+          <Route
+            path="*"
+            element={<Home />}
+          />
 
-        <Route
-          path="/admin/trekking"
-          element={
-            <ProtectedRoute>
-              <AdminTrekking />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* ADD NEW TREK */}
-        <Route
-          path="/admin/trekking/add"
-          element={
-            <ProtectedRoute>
-              <AddTrek />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* EDIT TREK */}
-        <Route
-          path="/admin/trekking/edit/:id"
-          element={
-            <ProtectedRoute>
-              <EditTrek />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* FALLBACK */}
-        <Route
-          path="*"
-          element={<Home />}
-        />
-
-      </Routes>
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }

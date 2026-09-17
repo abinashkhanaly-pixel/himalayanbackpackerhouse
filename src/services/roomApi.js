@@ -1,7 +1,5 @@
 const API_URL =
-  window.location.hostname === "localhost"
-    ? "https://backpacker-gateways-2.onrender.com/api/rooms"
-    : "https://backpacker-gateways-2.onrender.com/api/rooms";
+  "https://backpacker-gateways-2.onrender.com/api/rooms";
 
 // ==========================================
 // GET ALL ROOMS
@@ -34,13 +32,27 @@ export const getRooms = async ({
 
   const url = query ? `${API_URL}?${query}` : API_URL;
 
+  // API timing
+  const start = performance.now();
+
+  console.log("ROOM API REQUEST:", url);
+
   const response = await fetch(url);
+
+  const apiTime = Math.round(performance.now() - start);
+
+  console.log("ROOM API TIME:", apiTime, "ms");
+  console.log("ROOM API STATUS:", response.status);
 
   if (!response.ok) {
     throw new Error(`Failed to fetch rooms (${response.status})`);
   }
 
-  return await response.json();
+  const data = await response.json();
+
+  console.log("ROOM API DATA:", data);
+
+  return data;
 };
 
 // ==========================================
@@ -62,8 +74,6 @@ export const getRoom = async (id) => {
 
 // ==========================================
 // GET ROOM BY SEO SLUG
-// Example:
-// /rooms/deluxe-mountain-view-room-kathmandu
 // ==========================================
 export const getRoomBySlug = async (slug) => {
   if (!slug) {
@@ -77,7 +87,9 @@ export const getRoomBySlug = async (slug) => {
   );
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch room by slug (${response.status})`);
+    throw new Error(
+      `Failed to fetch room by slug (${response.status})`
+    );
   }
 
   return await response.json();
@@ -99,7 +111,8 @@ export const createRoom = async (roomData) => {
 
   if (!response.ok) {
     throw new Error(
-      result?.message || `Failed to create room (${response.status})`
+      result?.message ||
+        `Failed to create room (${response.status})`
     );
   }
 
@@ -126,7 +139,8 @@ export const updateRoom = async (id, roomData) => {
 
   if (!response.ok) {
     throw new Error(
-      result?.message || `Failed to update room (${response.status})`
+      result?.message ||
+        `Failed to update room (${response.status})`
     );
   }
 
@@ -149,11 +163,10 @@ export const deleteRoom = async (id) => {
 
   if (!response.ok) {
     throw new Error(
-      result?.message || `Failed to delete room (${response.status})`
+      result?.message ||
+        `Failed to delete room (${response.status})`
     );
   }
 
   return result;
 };
-
-

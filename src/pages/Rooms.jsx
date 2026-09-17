@@ -117,6 +117,8 @@ export default function Rooms() {
                           "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=1200&q=80"
                         }
                         alt={`${room.name} in ${room.destination || "Nepal"}`}
+                        loading="lazy"
+                        decoding="async"
                         onError={(e) => {
                           e.currentTarget.src =
                             "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=1200&q=80";
@@ -205,8 +207,6 @@ export default function Rooms() {
                       <div className="buttons">
 
                         {/* SEO-FRIENDLY ROOM URL */}
-                        {/* Uses seoSlug when available.
-                            Falls back to MongoDB ID for older rooms. */}
 
                         <Link
                           to={`/rooms/${
@@ -218,6 +218,7 @@ export default function Rooms() {
                         </Link>
 
                         {/* BOOKING STILL USES ROOM ID */}
+
                         <Link
                           to={`/booking?room=${room._id}`}
                           className="book"
@@ -760,4 +761,3 @@ export default function Rooms() {
     </div>
   );
 }
-
