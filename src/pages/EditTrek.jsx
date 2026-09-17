@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import RichTextEditor from "../components/RichTextEditor";
@@ -24,10 +23,23 @@ const emptyDeparture = {
   available: true,
 };
 
-const emptyGearSection = {
-  title: "General",
-  items: [""],
-};
+/* --------------------------------------------------
+   FIXED EQUIPMENT CATEGORIES
+-------------------------------------------------- */
+
+const EQUIPMENT_CATEGORIES = [
+  "General",
+  "Upper Body",
+  "Lower Body",
+  "Footwear",
+  "First Aid & Essential Kit",
+  "Personal & Electronics",
+  "Documents & Travel Essentials",
+];
+
+/* --------------------------------------------------
+   EMPTY FORM
+-------------------------------------------------- */
 
 const createEmptyForm = () => ({
   name: "",
@@ -57,45 +69,41 @@ const createEmptyForm = () => ({
   elevationImage: "",
   videos: [],
 
+  /* RICH TEXT CONTENT */
+
   description: "",
-  highlights: [""],
+  highlights: "",
   overview: "",
-  shortItinerary: [""],
-  importantInformation: [],
+  shortItinerary: "",
+  importantInformation: "",
+
+  /* DETAILED ITINERARY */
 
   itinerary: [{ ...emptyItinerary }],
 
-  included: [""],
-  excluded: [""],
+  /* PRICING CONTENT */
+
+  included: "",
+  excluded: "",
+
+  /* DEPARTURES */
 
   departures: [{ ...emptyDeparture }],
 
-  gearSections: [
-    {
-      title: "General",
-      items: [""],
-    },
-    {
-      title: "Upper Body",
-      items: [""],
-    },
-    {
-      title: "Lower Body",
-      items: [""],
-    },
-    {
-      title: "Footwear",
-      items: [""],
-    },
-    {
-      title: "First Aid & Essentials",
-      items: [""],
-    },
-  ],
+  /* EQUIPMENT */
+
+  gearSections: EQUIPMENT_CATEGORIES.map((category) => ({
+    title: category,
+    items: [""],
+  })),
+
+  /* FAQ */
 
   faqs: [{ ...emptyFaq }],
 
   reviews: [],
+
+  /* SEO */
 
   seo: {
     primaryKeyword: "",
@@ -122,15 +130,68 @@ function EditTrek() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  /* ---------------- NORMALIZE API DATA ---------------- */
+  /* ==================================================
+     NORMALIZE API DATA
+  ================================================== */
 
   const normalizeTrek = (trek) => {
     const base = createEmptyForm();
+
+    /* ----------------------------------------------
+       NORMALIZE EQUIPMENT
+    ---------------------------------------------- */
+
+    const normalizedGearSections =
+      EQUIPMENT_CATEGORIES.map((category) => {
+        const existing =
+          Array.isArray(trek.gearSections)
+            ? trek.gearSections.find((section) => {
+                const title =
+                  section?.title?.toLowerCase().trim();
+
+                const categoryName =
+                  category.toLowerCase().trim();
+
+                /* Handle old category name */
+                if (
+                  categoryName ===
+                  "first aid & essential kit"
+                ) {
+                  return (
+                    title ===
+                      "first aid & essential kit" ||
+                    title === "first aid & essentials"
+                  );
+                }
+
+                return title === categoryName;
+              })
+            : null;
+
+        let content = "";
+
+        if (Array.isArray(existing?.items)) {
+          content = existing.items.join("<br>");
+        } else if (existing?.items) {
+          content = existing.items;
+        }
+
+        return {
+          title: category,
+          items: [content],
+        };
+      });
+
+    /* ----------------------------------------------
+       RETURN NORMALIZED FORM
+    ---------------------------------------------- */
 
     return {
       ...base,
 
       ...trek,
+
+      /* BASIC */
 
       name: trek.name || "",
       shortName: trek.shortName || "",
@@ -154,35 +215,50 @@ function EditTrek() {
       accommodation: trek.accommodation || "",
       meals: trek.meals || "",
 
+      /* MEDIA */
+
       mainImage: trek.mainImage || "",
+
       gallery: Array.isArray(trek.gallery)
         ? trek.gallery
         : [],
+
       mapImage: trek.mapImage || "",
-      elevationImage: trek.elevationImage || "",
+
+      elevationImage:
+        trek.elevationImage || "",
+
       videos: Array.isArray(trek.videos)
         ? trek.videos
         : [],
 
+      /* ----------------------------------------------
+         RICH TEXT CONTENT
+      ---------------------------------------------- */
+
       description: trek.description || "",
-      highlights:
-        Array.isArray(trek.highlights) &&
-        trek.highlights.length
-          ? trek.highlights
-          : [""],
+
+      highlights: Array.isArray(trek.highlights)
+        ? trek.highlights.join("<br>")
+        : trek.highlights || "",
 
       overview: trek.overview || "",
 
-      shortItinerary:
-        Array.isArray(trek.shortItinerary) &&
-        trek.shortItinerary.length
-          ? trek.shortItinerary
-          : [""],
+      shortItinerary: Array.isArray(
+        trek.shortItinerary
+      )
+        ? trek.shortItinerary.join("<br>")
+        : trek.shortItinerary || "",
 
-      importantInformation:
-        Array.isArray(trek.importantInformation)
-          ? trek.importantInformation
-          : [],
+      importantInformation: Array.isArray(
+        trek.importantInformation
+      )
+        ? trek.importantInformation.join("<br>")
+        : trek.importantInformation || "",
+
+      /* ----------------------------------------------
+         DETAILED ITINERARY
+      ---------------------------------------------- */
 
       itinerary:
         Array.isArray(trek.itinerary) &&
@@ -195,17 +271,21 @@ function EditTrek() {
             }))
           : [{ ...emptyItinerary }],
 
-      included:
-        Array.isArray(trek.included) &&
-        trek.included.length
-          ? trek.included
-          : [""],
+      /* ----------------------------------------------
+         PRICING RICH TEXT
+      ---------------------------------------------- */
 
-      excluded:
-        Array.isArray(trek.excluded) &&
-        trek.excluded.length
-          ? trek.excluded
-          : [""],
+      included: Array.isArray(trek.included)
+        ? trek.included.join("<br>")
+        : trek.included || "",
+
+      excluded: Array.isArray(trek.excluded)
+        ? trek.excluded.join("<br>")
+        : trek.excluded || "",
+
+      /* ----------------------------------------------
+         DEPARTURES
+      ---------------------------------------------- */
 
       departures:
         Array.isArray(trek.departures) &&
@@ -217,31 +297,39 @@ function EditTrek() {
             }))
           : [{ ...emptyDeparture }],
 
+      /* ----------------------------------------------
+         EQUIPMENT
+      ---------------------------------------------- */
+
       gearSections:
-        Array.isArray(trek.gearSections) &&
-        trek.gearSections.length
-          ? trek.gearSections.map((section) => ({
-              title: section?.title || "",
-              items:
-                Array.isArray(section?.items) &&
-                section.items.length
-                  ? section.items
-                  : [""],
-            }))
-          : base.gearSections,
+        normalizedGearSections,
+
+      /* ----------------------------------------------
+         FAQ
+      ---------------------------------------------- */
 
       faqs:
         Array.isArray(trek.faqs) &&
         trek.faqs.length
           ? trek.faqs.map((faq) => ({
-              question: faq?.question || "",
-              answer: faq?.answer || "",
+              question:
+                faq?.question || "",
+              answer:
+                faq?.answer || "",
             }))
           : [{ ...emptyFaq }],
+
+      /* ----------------------------------------------
+         REVIEWS
+      ---------------------------------------------- */
 
       reviews: Array.isArray(trek.reviews)
         ? trek.reviews
         : [],
+
+      /* ----------------------------------------------
+         SEO
+      ---------------------------------------------- */
 
       seo: {
         ...base.seo,
@@ -285,7 +373,9 @@ function EditTrek() {
     };
   };
 
-  /* ---------------- LOAD TREK ---------------- */
+  /* ==================================================
+     LOAD TREK
+  ================================================== */
 
   useEffect(() => {
     let cancelled = false;
@@ -335,7 +425,10 @@ function EditTrek() {
         }
 
         if (!cancelled) {
-          setForm(normalizeTrek(trek));
+          setForm(
+            normalizeTrek(trek)
+          );
+
           setLoading(false);
         }
       } catch (error) {
@@ -375,7 +468,9 @@ function EditTrek() {
     };
   }, [id]);
 
-  /* ---------------- BASIC HANDLERS ---------------- */
+  /* ==================================================
+     BASIC HANDLERS
+  ================================================== */
 
   const handleChange = (e) => {
     const {
@@ -387,6 +482,7 @@ function EditTrek() {
 
     setForm((current) => ({
       ...current,
+
       [name]:
         type === "checkbox"
           ? checked
@@ -398,11 +494,16 @@ function EditTrek() {
     }
   };
 
+  /* ==================================================
+     SEO HANDLER
+  ================================================== */
+
   const handleSeoChange = (e) => {
     const { name, value } = e.target;
 
     setForm((current) => ({
       ...current,
+
       seo: {
         ...current.seo,
         [name]: value,
@@ -414,7 +515,9 @@ function EditTrek() {
     }
   };
 
-  /* ---------------- RICH TEXT CONTENT ---------------- */
+  /* ==================================================
+     RICH TEXT HANDLER
+  ================================================== */
 
   const updateRichText = (
     field,
@@ -430,15 +533,26 @@ function EditTrek() {
     }
   };
 
-  /* ---------------- SLUG ---------------- */
+  /* ==================================================
+     SLUG
+  ================================================== */
 
   const generateSlug = (value) => {
     return value
       .toLowerCase()
       .trim()
-      .replace(/[^a-z0-9\s-]/g, "")
-      .replace(/\s+/g, "-")
-      .replace(/-+/g, "-");
+      .replace(
+        /[^a-z0-9\s-]/g,
+        ""
+      )
+      .replace(
+        /\s+/g,
+        "-"
+      )
+      .replace(
+        /-+/g,
+        "-"
+      );
   };
 
   const handleNameChange = (e) => {
@@ -446,7 +560,9 @@ function EditTrek() {
 
     setForm((current) => ({
       ...current,
+
       name: value,
+
       slug: generateSlug(value),
     }));
 
@@ -455,45 +571,9 @@ function EditTrek() {
     }
   };
 
-  /* ---------------- ARRAY HELPERS ---------------- */
-
-  const updateArrayItem = (
-    field,
-    index,
-    value
-  ) => {
-    setForm((current) => ({
-      ...current,
-      [field]: current[field].map(
-        (item, i) =>
-          i === index ? value : item
-      ),
-    }));
-  };
-
-  const addArrayItem = (field) => {
-    setForm((current) => ({
-      ...current,
-      [field]: [
-        ...current[field],
-        "",
-      ],
-    }));
-  };
-
-  const removeArrayItem = (
-    field,
-    index
-  ) => {
-    setForm((current) => ({
-      ...current,
-      [field]: current[field].filter(
-        (_, i) => i !== index
-      ),
-    }));
-  };
-
-  /* ---------------- ITINERARY ---------------- */
+  /* ==================================================
+     ITINERARY
+  ================================================== */
 
   const updateItinerary = (
     index,
@@ -502,6 +582,7 @@ function EditTrek() {
   ) => {
     setForm((current) => ({
       ...current,
+
       itinerary:
         current.itinerary.map(
           (item, i) =>
@@ -518,13 +599,17 @@ function EditTrek() {
   const addItineraryDay = () => {
     setForm((current) => ({
       ...current,
+
       itinerary: [
         ...current.itinerary,
+
         {
           day:
             current.itinerary.length +
             1,
+
           title: "",
+
           description: "",
         },
       ],
@@ -536,6 +621,7 @@ function EditTrek() {
   ) => {
     setForm((current) => ({
       ...current,
+
       itinerary:
         current.itinerary
           .filter(
@@ -548,7 +634,9 @@ function EditTrek() {
     }));
   };
 
-  /* ---------------- FAQ ---------------- */
+  /* ==================================================
+     FAQ
+  ================================================== */
 
   const updateFaq = (
     index,
@@ -557,21 +645,24 @@ function EditTrek() {
   ) => {
     setForm((current) => ({
       ...current,
-      faqs: current.faqs.map(
-        (faq, i) =>
-          i === index
-            ? {
-                ...faq,
-                [field]: value,
-              }
-            : faq
-      ),
+
+      faqs:
+        current.faqs.map(
+          (faq, i) =>
+            i === index
+              ? {
+                  ...faq,
+                  [field]: value,
+                }
+              : faq
+        ),
     }));
   };
 
   const addFaq = () => {
     setForm((current) => ({
       ...current,
+
       faqs: [
         ...current.faqs,
         { ...emptyFaq },
@@ -582,13 +673,17 @@ function EditTrek() {
   const removeFaq = (index) => {
     setForm((current) => ({
       ...current,
-      faqs: current.faqs.filter(
-        (_, i) => i !== index
-      ),
+
+      faqs:
+        current.faqs.filter(
+          (_, i) => i !== index
+        ),
     }));
   };
 
-  /* ---------------- DEPARTURES ---------------- */
+  /* ==================================================
+     DEPARTURES
+  ================================================== */
 
   const updateDeparture = (
     index,
@@ -597,6 +692,7 @@ function EditTrek() {
   ) => {
     setForm((current) => ({
       ...current,
+
       departures:
         current.departures.map(
           (item, i) =>
@@ -613,6 +709,7 @@ function EditTrek() {
   const addDeparture = () => {
     setForm((current) => ({
       ...current,
+
       departures: [
         ...current.departures,
         { ...emptyDeparture },
@@ -625,6 +722,7 @@ function EditTrek() {
   ) => {
     setForm((current) => ({
       ...current,
+
       departures:
         current.departures.filter(
           (_, i) => i !== index
@@ -632,127 +730,42 @@ function EditTrek() {
     }));
   };
 
-  /* ---------------- GEAR ---------------- */
+  /* ==================================================
+     EQUIPMENT
+  ================================================== */
 
-  const updateGearTitle = (
+  const updateGearContent = (
     sectionIndex,
     value
   ) => {
     setForm((current) => ({
       ...current,
+
       gearSections:
         current.gearSections.map(
-          (section, i) =>
-            i === sectionIndex
+          (section, index) =>
+            index === sectionIndex
               ? {
                   ...section,
-                  title: value,
+                  items: [value],
                 }
               : section
         ),
     }));
+
+    if (error) {
+      setError("");
+    }
   };
 
-  const updateGearItem = (
-    sectionIndex,
-    itemIndex,
-    value
-  ) => {
-    setForm((current) => ({
-      ...current,
-      gearSections:
-        current.gearSections.map(
-          (section, i) =>
-            i === sectionIndex
-              ? {
-                  ...section,
-                  items:
-                    section.items.map(
-                      (item, itemI) =>
-                        itemI === itemIndex
-                          ? value
-                          : item
-                    ),
-                }
-              : section
-        ),
-    }));
-  };
-
-  const addGearItem = (
-    sectionIndex
-  ) => {
-    setForm((current) => ({
-      ...current,
-      gearSections:
-        current.gearSections.map(
-          (section, i) =>
-            i === sectionIndex
-              ? {
-                  ...section,
-                  items: [
-                    ...section.items,
-                    "",
-                  ],
-                }
-              : section
-        ),
-    }));
-  };
-
-  const removeGearItem = (
-    sectionIndex,
-    itemIndex
-  ) => {
-    setForm((current) => ({
-      ...current,
-      gearSections:
-        current.gearSections.map(
-          (section, i) =>
-            i === sectionIndex
-              ? {
-                  ...section,
-                  items:
-                    section.items.filter(
-                      (_, itemI) =>
-                        itemI !== itemIndex
-                    ),
-                }
-              : section
-        ),
-    }));
-  };
-
-  const addGearSection = () => {
-    setForm((current) => ({
-      ...current,
-      gearSections: [
-        ...current.gearSections,
-        {
-          ...emptyGearSection,
-          items: [""],
-        },
-      ],
-    }));
-  };
-
-  const removeGearSection = (
-    index
-  ) => {
-    setForm((current) => ({
-      ...current,
-      gearSections:
-        current.gearSections.filter(
-          (_, i) => i !== index
-        ),
-    }));
-  };
-
-  /* ---------------- GALLERY ---------------- */
+  /* ==================================================
+     GALLERY
+  ================================================== */
 
   const addGalleryImage = () => {
     setForm((current) => ({
       ...current,
+
       gallery: [
         ...current.gallery,
         "",
@@ -766,12 +779,14 @@ function EditTrek() {
   ) => {
     setForm((current) => ({
       ...current,
-      gallery: current.gallery.map(
-        (image, i) =>
-          i === index
-            ? value
-            : image
-      ),
+
+      gallery:
+        current.gallery.map(
+          (image, i) =>
+            i === index
+              ? value
+              : image
+        ),
     }));
   };
 
@@ -780,6 +795,7 @@ function EditTrek() {
   ) => {
     setForm((current) => ({
       ...current,
+
       gallery:
         current.gallery.filter(
           (_, i) => i !== index
@@ -787,11 +803,14 @@ function EditTrek() {
     }));
   };
 
-  /* ---------------- VIDEOS ---------------- */
+  /* ==================================================
+     VIDEOS
+  ================================================== */
 
   const addVideo = () => {
     setForm((current) => ({
       ...current,
+
       videos: [
         ...current.videos,
         "",
@@ -805,12 +824,14 @@ function EditTrek() {
   ) => {
     setForm((current) => ({
       ...current,
-      videos: current.videos.map(
-        (video, i) =>
-          i === index
-            ? value
-            : video
-      ),
+
+      videos:
+        current.videos.map(
+          (video, i) =>
+            i === index
+              ? value
+              : video
+        ),
     }));
   };
 
@@ -819,6 +840,7 @@ function EditTrek() {
   ) => {
     setForm((current) => ({
       ...current,
+
       videos:
         current.videos.filter(
           (_, i) => i !== index
@@ -826,7 +848,9 @@ function EditTrek() {
     }));
   };
 
-  /* ---------------- UPDATE MONGODB ---------------- */
+  /* ==================================================
+     UPDATE MONGODB
+  ================================================== */
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -842,6 +866,10 @@ function EditTrek() {
     try {
       const cleanData = {
         ...form,
+
+        /* ------------------------------------------
+           BASIC
+        ------------------------------------------ */
 
         name: form.name.trim(),
 
@@ -881,6 +909,10 @@ function EditTrek() {
         meals:
           form.meals.trim(),
 
+        /* ------------------------------------------
+           MEDIA
+        ------------------------------------------ */
+
         mainImage:
           form.mainImage.trim(),
 
@@ -889,6 +921,10 @@ function EditTrek() {
 
         elevationImage:
           form.elevationImage.trim(),
+
+        /* ------------------------------------------
+           PRICING
+        ------------------------------------------ */
 
         price:
           Number(form.price) || 0,
@@ -903,47 +939,64 @@ function EditTrek() {
             String(
               form.maxAltitude
             )
-              .replace(/,/g, "")
+              .replace(
+                /,/g,
+                ""
+              )
               .replace(
                 /[^\d.]/g,
                 ""
               )
           ) || 0,
 
+        /* ------------------------------------------
+           RICH TEXT CONTENT
+
+           Keep arrays for backend compatibility.
+        ------------------------------------------ */
+
         highlights:
-          form.highlights
-            .map((item) =>
-              item.trim()
-            )
-            .filter(Boolean),
+          form.highlights?.trim()
+            ? [
+                form.highlights.trim(),
+              ]
+            : [],
 
         shortItinerary:
-          form.shortItinerary
-            .map((item) =>
-              item.trim()
-            )
-            .filter(Boolean),
+          form.shortItinerary?.trim()
+            ? [
+                form.shortItinerary.trim(),
+              ]
+            : [],
 
         importantInformation:
-          form.importantInformation
-            .map((item) =>
-              item.trim()
-            )
-            .filter(Boolean),
+          form.importantInformation?.trim()
+            ? [
+                form.importantInformation.trim(),
+              ]
+            : [],
+
+        /* ------------------------------------------
+           INCLUDED / EXCLUDED
+        ------------------------------------------ */
 
         included:
-          form.included
-            .map((item) =>
-              item.trim()
-            )
-            .filter(Boolean),
+          form.included?.trim()
+            ? [
+                form.included.trim(),
+              ]
+            : [],
 
         excluded:
-          form.excluded
-            .map((item) =>
-              item.trim()
-            )
-            .filter(Boolean),
+          form.excluded?.trim()
+            ? [
+                form.excluded.trim(),
+              ]
+            : [],
+
+        /* ------------------------------------------
+           GALLERY
+        ------------------------------------------ */
 
         gallery:
           form.gallery
@@ -952,6 +1005,10 @@ function EditTrek() {
             )
             .filter(Boolean),
 
+        /* ------------------------------------------
+           VIDEOS
+        ------------------------------------------ */
+
         videos:
           form.videos
             .map((item) =>
@@ -959,13 +1016,19 @@ function EditTrek() {
             )
             .filter(Boolean),
 
+        /* ------------------------------------------
+           DETAILED ITINERARY
+        ------------------------------------------ */
+
         itinerary:
           form.itinerary
             .map(
               (item, index) => ({
                 day: index + 1,
+
                 title:
                   item.title.trim(),
+
                 description:
                   item.description ||
                   "",
@@ -977,11 +1040,19 @@ function EditTrek() {
                 item.description
             ),
 
+        /* ------------------------------------------
+           EQUIPMENT
+
+           Rich text is stored inside items[0]
+           so existing backend structure remains.
+        ------------------------------------------ */
+
         gearSections:
           form.gearSections
             .map((section) => ({
               title:
                 section.title.trim(),
+
               items:
                 section.items
                   .map((item) =>
@@ -996,11 +1067,16 @@ function EditTrek() {
                   0
             ),
 
+        /* ------------------------------------------
+           FAQ
+        ------------------------------------------ */
+
         faqs:
           form.faqs
             .map((faq) => ({
               question:
                 faq.question.trim(),
+
               answer:
                 faq.answer || "",
             }))
@@ -1010,20 +1086,31 @@ function EditTrek() {
                 faq.answer
             ),
 
+        /* ------------------------------------------
+           DEPARTURES
+        ------------------------------------------ */
+
         departures:
           form.departures
             .filter(
               (departure) =>
                 departure.date
             )
-            .map((departure) => ({
-              date:
-                departure.date,
-              available:
-                Boolean(
-                  departure.available
-                ),
-            })),
+            .map(
+              (departure) => ({
+                date:
+                  departure.date,
+
+                available:
+                  Boolean(
+                    departure.available
+                  ),
+              })
+            ),
+
+        /* ------------------------------------------
+           SEO
+        ------------------------------------------ */
 
         seo: {
           ...form.seo,
@@ -1061,6 +1148,10 @@ function EditTrek() {
         },
       };
 
+      /* --------------------------------------------
+         REQUIRED VALIDATION
+      -------------------------------------------- */
+
       if (!cleanData.name) {
         throw new Error(
           "Trek name is required."
@@ -1082,6 +1173,10 @@ function EditTrek() {
         "API URL:",
         `${API_BASE_URL}/treks/${id}`
       );
+
+      /* --------------------------------------------
+         PUT REQUEST
+      -------------------------------------------- */
 
       const response = await fetch(
         `${API_BASE_URL}/treks/${id}`,
@@ -1163,6 +1258,10 @@ function EditTrek() {
     }
   };
 
+  /* ==================================================
+     TABS
+  ================================================== */
+
   const tabs = [
     ["basic", "Basic Information"],
     ["content", "Content"],
@@ -1175,7 +1274,9 @@ function EditTrek() {
     ["publishing", "Publishing"],
   ];
 
-  /* ---------------- LOADING ---------------- */
+  /* ==================================================
+     LOADING
+  ================================================== */
 
   if (loading) {
     return (
@@ -1213,10 +1314,16 @@ function EditTrek() {
     );
   }
 
+  /* ==================================================
+     MAIN UI
+  ================================================== */
+
   return (
     <div className="add-trek-page">
 
-      {/* HEADER */}
+      {/* =================================================
+          HEADER
+      ================================================= */}
 
       <div className="add-trek-header">
 
@@ -1246,7 +1353,9 @@ function EditTrek() {
 
       </div>
 
-      {/* TABS */}
+      {/* =================================================
+          TABS
+      ================================================= */}
 
       <div className="add-trek-tabs">
 
@@ -1276,7 +1385,9 @@ function EditTrek() {
         onSubmit={handleSubmit}
       >
 
-        {/* BASIC */}
+        {/* =================================================
+            BASIC INFORMATION
+        ================================================= */}
 
         {activeTab === "basic" && (
           <section className="form-section">
@@ -1513,7 +1624,9 @@ function EditTrek() {
           </section>
         )}
 
-        {/* CONTENT */}
+        {/* =================================================
+            CONTENT
+        ================================================= */}
 
         {activeTab === "content" && (
           <section className="form-section">
@@ -1521,6 +1634,8 @@ function EditTrek() {
             <h2>
               Trek Content
             </h2>
+
+            {/* SHORT DESCRIPTION */}
 
             <label className="full-width">
               Short Description
@@ -1540,6 +1655,8 @@ function EditTrek() {
               />
             </label>
 
+            {/* TREK OVERVIEW */}
+
             <label className="full-width">
               Trek Overview
 
@@ -1554,179 +1671,76 @@ function EditTrek() {
                   )
                 }
                 placeholder="Write a detailed trek overview..."
-                minHeight={300}
+                minHeight={350}
               />
             </label>
 
-            <div className="array-editor">
+            {/* HIGHLIGHTS */}
 
-              <h3>
-                Trek Highlights
-              </h3>
+            <label className="full-width">
+              Trek Highlights
 
-              {form.highlights.map(
-                (item, index) => (
-                  <div
-                    className="array-row"
-                    key={index}
-                  >
-
-                    <input
-                      value={item}
-                      onChange={(e) =>
-                        updateArrayItem(
-                          "highlights",
-                          index,
-                          e.target.value
-                        )
-                      }
-                      placeholder="Everest Base Camp"
-                    />
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        removeArrayItem(
-                          "highlights",
-                          index
-                        )
-                      }
-                    >
-                      Remove
-                    </button>
-
-                  </div>
-                )
-              )}
-
-              <button
-                type="button"
-                className="secondary-btn"
-                onClick={() =>
-                  addArrayItem(
-                    "highlights"
+              <RichTextEditor
+                value={
+                  form.highlights
+                }
+                onChange={(value) =>
+                  updateRichText(
+                    "highlights",
+                    value
                   )
                 }
-              >
-                + Add Highlight
-              </button>
+                placeholder="Write all major highlights of this trek. Use bullet lists, headings and formatting where needed..."
+                minHeight={280}
+              />
+            </label>
 
-            </div>
+            {/* SHORT ITINERARY */}
 
-            <div className="array-editor">
+            <label className="full-width">
+              Short Itinerary
 
-              <h3>
-                Short Itinerary
-              </h3>
-
-              {form.shortItinerary.map(
-                (item, index) => (
-                  <div
-                    className="array-row"
-                    key={index}
-                  >
-
-                    <input
-                      value={item}
-                      onChange={(e) =>
-                        updateArrayItem(
-                          "shortItinerary",
-                          index,
-                          e.target.value
-                        )
-                      }
-                      placeholder="Day 1: Arrival in Kathmandu"
-                    />
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        removeArrayItem(
-                          "shortItinerary",
-                          index
-                        )
-                      }
-                    >
-                      Remove
-                    </button>
-
-                  </div>
-                )
-              )}
-
-              <button
-                type="button"
-                className="secondary-btn"
-                onClick={() =>
-                  addArrayItem(
-                    "shortItinerary"
+              <RichTextEditor
+                value={
+                  form.shortItinerary
+                }
+                onChange={(value) =>
+                  updateRichText(
+                    "shortItinerary",
+                    value
                   )
                 }
-              >
-                + Add Short Itinerary
-              </button>
+                placeholder="Write the complete short itinerary from Day 1 to Day 14..."
+                minHeight={500}
+              />
+            </label>
 
-            </div>
+            {/* IMPORTANT INFORMATION */}
 
-            <div className="array-editor">
+            <label className="full-width">
+              Important Information
 
-              <h3>
-                Important Information
-              </h3>
-
-              {form.importantInformation.map(
-                (item, index) => (
-                  <div
-                    className="array-row"
-                    key={index}
-                  >
-
-                    <input
-                      value={item}
-                      onChange={(e) =>
-                        updateArrayItem(
-                          "importantInformation",
-                          index,
-                          e.target.value
-                        )
-                      }
-                      placeholder="Important information for travellers"
-                    />
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        removeArrayItem(
-                          "importantInformation",
-                          index
-                        )
-                      }
-                    >
-                      Remove
-                    </button>
-
-                  </div>
-                )
-              )}
-
-              <button
-                type="button"
-                className="secondary-btn"
-                onClick={() =>
-                  addArrayItem(
-                    "importantInformation"
+              <RichTextEditor
+                value={
+                  form.importantInformation
+                }
+                onChange={(value) =>
+                  updateRichText(
+                    "importantInformation",
+                    value
                   )
                 }
-              >
-                + Add Information
-              </button>
-
-            </div>
+                placeholder="Write important traveller information including difficulty, maximum altitude, best season, accommodation, weather, Lukla flights, permits, safety, insurance, preparation and other useful information..."
+                minHeight={500}
+              />
+            </label>
 
           </section>
         )}
 
-        {/* ITINERARY */}
+        {/* =================================================
+            DETAILED ITINERARY
+        ================================================= */}
 
         {activeTab === "itinerary" && (
           <section className="form-section">
@@ -1799,7 +1813,7 @@ function EditTrek() {
                         )
                       }
                       placeholder="Write the detailed itinerary for this day..."
-                      minHeight={260}
+                      minHeight={300}
                     />
                   </label>
 
@@ -1820,7 +1834,9 @@ function EditTrek() {
           </section>
         )}
 
-        {/* PRICING */}
+        {/* =================================================
+            PRICING
+        ================================================= */}
 
         {activeTab === "pricing" && (
           <section className="form-section">
@@ -1842,7 +1858,7 @@ function EditTrek() {
                   onChange={
                     handleChange
                   }
-                  placeholder="1299"
+                  placeholder="1399"
                 />
               </label>
 
@@ -1895,60 +1911,31 @@ function EditTrek() {
 
             </div>
 
+            {/* PRICE INCLUDES */}
+
             <div className="array-editor">
 
               <h3>
                 Price Includes
               </h3>
 
-              {form.included.map(
-                (item, index) => (
-                  <div
-                    className="array-row"
-                    key={index}
-                  >
-
-                    <input
-                      value={item}
-                      onChange={(e) =>
-                        updateArrayItem(
-                          "included",
-                          index,
-                          e.target.value
-                        )
-                      }
-                      placeholder="Trekking guide"
-                    />
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        removeArrayItem(
-                          "included",
-                          index
-                        )
-                      }
-                    >
-                      Remove
-                    </button>
-
-                  </div>
-                )
-              )}
-
-              <button
-                type="button"
-                className="secondary-btn"
-                onClick={() =>
-                  addArrayItem(
-                    "included"
+              <RichTextEditor
+                value={
+                  form.included
+                }
+                onChange={(value) =>
+                  updateRichText(
+                    "included",
+                    value
                   )
                 }
-              >
-                + Add Included Item
-              </button>
+                placeholder="Write everything included in the trek package..."
+                minHeight={300}
+              />
 
             </div>
+
+            {/* PRICE EXCLUDES */}
 
             <div className="array-editor">
 
@@ -1956,54 +1943,23 @@ function EditTrek() {
                 Price Excludes
               </h3>
 
-              {form.excluded.map(
-                (item, index) => (
-                  <div
-                    className="array-row"
-                    key={index}
-                  >
-
-                    <input
-                      value={item}
-                      onChange={(e) =>
-                        updateArrayItem(
-                          "excluded",
-                          index,
-                          e.target.value
-                        )
-                      }
-                      placeholder="International flights"
-                    />
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        removeArrayItem(
-                          "excluded",
-                          index
-                        )
-                      }
-                    >
-                      Remove
-                    </button>
-
-                  </div>
-                )
-              )}
-
-              <button
-                type="button"
-                className="secondary-btn"
-                onClick={() =>
-                  addArrayItem(
-                    "excluded"
+              <RichTextEditor
+                value={
+                  form.excluded
+                }
+                onChange={(value) =>
+                  updateRichText(
+                    "excluded",
+                    value
                   )
                 }
-              >
-                + Add Excluded Item
-              </button>
+                placeholder="Write everything not included in the trek package..."
+                minHeight={300}
+              />
 
             </div>
+
+            {/* DEPARTURES */}
 
             <div className="departure-editor">
 
@@ -2085,7 +2041,9 @@ function EditTrek() {
           </section>
         )}
 
-        {/* EQUIPMENT */}
+        {/* =================================================
+            EQUIPMENT
+        ================================================= */}
 
         {activeTab === "equipment" && (
           <section className="form-section">
@@ -2096,7 +2054,10 @@ function EditTrek() {
 
             <p className="section-help">
               Organize recommended trekking
-              equipment into different categories.
+              equipment by category. Use the
+              rich text editor to add bullet
+              lists, headings, links, images
+              and formatted equipment information.
             </p>
 
             {form.gearSections.map(
@@ -2111,99 +2072,37 @@ function EditTrek() {
 
                   <div className="gear-section-header">
 
-                    <input
-                      value={
-                        section.title
-                      }
-                      onChange={(e) =>
-                        updateGearTitle(
-                          sectionIndex,
-                          e.target.value
-                        )
-                      }
-                    />
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        removeGearSection(
-                          sectionIndex
-                        )
-                      }
-                    >
-                      Remove Section
-                    </button>
+                    <h3>
+                      {section.title}
+                    </h3>
 
                   </div>
 
-                  {section.items.map(
-                    (
-                      item,
-                      itemIndex
-                    ) => (
-                      <div
-                        className="array-row"
-                        key={itemIndex}
-                      >
-
-                        <input
-                          value={item}
-                          onChange={(e) =>
-                            updateGearItem(
-                              sectionIndex,
-                              itemIndex,
-                              e.target.value
-                            )
-                          }
-                          placeholder="Trekking boots"
-                        />
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            removeGearItem(
-                              sectionIndex,
-                              itemIndex
-                            )
-                          }
-                        >
-                          Remove
-                        </button>
-
-                      </div>
-                    )
-                  )}
-
-                  <button
-                    type="button"
-                    className="secondary-btn"
-                    onClick={() =>
-                      addGearItem(
-                        sectionIndex
+                  <RichTextEditor
+                    value={
+                      section.items?.[0] ||
+                      ""
+                    }
+                    onChange={(value) =>
+                      updateGearContent(
+                        sectionIndex,
+                        value
                       )
                     }
-                  >
-                    + Add Equipment
-                  </button>
+                    placeholder={`Write ${section.title} equipment and recommendations...`}
+                    minHeight={280}
+                  />
 
                 </div>
               )
             )}
 
-            <button
-              type="button"
-              className="primary-btn"
-              onClick={
-                addGearSection
-              }
-            >
-              + Add Equipment Section
-            </button>
-
           </section>
         )}
 
-        {/* MEDIA */}
+        {/* =================================================
+            MEDIA
+        ================================================= */}
 
         {activeTab === "media" && (
           <section className="form-section">
@@ -2234,7 +2133,10 @@ function EditTrek() {
               </h3>
 
               {form.gallery.map(
-                (image, index) => (
+                (
+                  image,
+                  index
+                ) => (
                   <div
                     className="array-row"
                     key={index}
@@ -2319,7 +2221,10 @@ function EditTrek() {
               </h3>
 
               {form.videos.map(
-                (video, index) => (
+                (
+                  video,
+                  index
+                ) => (
                   <div
                     className="array-row"
                     key={index}
@@ -2364,7 +2269,9 @@ function EditTrek() {
           </section>
         )}
 
-        {/* SEO */}
+        {/* =================================================
+            SEO
+        ================================================= */}
 
         {activeTab === "seo" && (
           <section className="form-section">
@@ -2532,7 +2439,9 @@ function EditTrek() {
           </section>
         )}
 
-        {/* FAQ */}
+        {/* =================================================
+            FAQ
+        ================================================= */}
 
         {activeTab === "faq" && (
           <section className="form-section">
@@ -2542,7 +2451,10 @@ function EditTrek() {
             </h2>
 
             {form.faqs.map(
-              (faq, index) => (
+              (
+                faq,
+                index
+              ) => (
                 <div
                   className="faq-editor"
                   key={index}
@@ -2619,7 +2531,9 @@ function EditTrek() {
           </section>
         )}
 
-        {/* PUBLISHING */}
+        {/* =================================================
+            PUBLISHING
+        ================================================= */}
 
         {activeTab === "publishing" && (
           <section className="form-section">
@@ -2644,6 +2558,7 @@ function EditTrek() {
                 />
 
                 <div>
+
                   <strong>
                     Publish this trek
                   </strong>
@@ -2653,6 +2568,7 @@ function EditTrek() {
                     appear on the public
                     trekking page.
                   </p>
+
                 </div>
 
               </label>
@@ -2671,6 +2587,7 @@ function EditTrek() {
                 />
 
                 <div>
+
                   <strong>
                     Featured Trek
                   </strong>
@@ -2679,6 +2596,7 @@ function EditTrek() {
                     Mark this trek as a
                     featured package.
                   </p>
+
                 </div>
 
               </label>
@@ -2688,7 +2606,9 @@ function EditTrek() {
           </section>
         )}
 
-        {/* ERROR */}
+        {/* =================================================
+            ERROR
+        ================================================= */}
 
         {error && (
           <div
@@ -2706,7 +2626,9 @@ function EditTrek() {
           </div>
         )}
 
-        {/* SUCCESS */}
+        {/* =================================================
+            SUCCESS
+        ================================================= */}
 
         {saved && (
           <div
@@ -2725,7 +2647,9 @@ function EditTrek() {
           </div>
         )}
 
-        {/* SAVE */}
+        {/* =================================================
+            SAVE ACTIONS
+        ================================================= */}
 
         <div className="form-actions">
 
@@ -2739,9 +2663,7 @@ function EditTrek() {
           <button
             type="submit"
             className="save-trek-btn"
-            disabled={
-              saving
-            }
+            disabled={saving}
           >
             {saving
               ? "Updating Trek..."
@@ -2759,6 +2681,3 @@ function EditTrek() {
 }
 
 export default EditTrek;
-
-
-
