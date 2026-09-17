@@ -1,46 +1,289 @@
-
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+
 import "./TrekkingDetails.css";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ||
   "https://backpacker-gateways-2.onrender.com/api";
 
-function TrekkingDetails() {
+/* =========================================================
+   HTML / RICH TEXT HELPERS
+========================================================= */
+
+const stripHtml = (value = "") => {
+  return String(value)
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/\s+/g, " ")
+    .trim();
+};
+
+const escapeHtml = (value = "") => {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&quot;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+};
+
+const formatInlineMarkdown = (text = "") => {
+  let value = escapeHtml(text);
+
+  /*
+    Bold first so **text** does not get interpreted
+    incorrectly as italic.
+  */
+  value = value.replace(
+    /\*\*(.*?)\*\*/g,
+    "<strong>$1</strong>"
+  );
+
+  value = value.replace(
+    /__(.*?)__/g,
+    "<strong>$1</strong>"
+  );
+
+  value = value.replace(
+    /\*(.*?)\*/g,
+    "<em>$1</em>"
+  );
+
+  value = value.replace(
+    /_(.*?)_/g,
+    "<em>$1</em>"
+  );
+
+  return value;
+};
+
+/*
+  Converts plain text / simple markdown into HTML.
+
+  Rich Editor already produces HTML, so existing HTML
+  is returned without converting it again.
+*/
+const markdownToHtml = (value = "") => {
+  if (!value) return "";
+
+  const text = String(value).trim();
+
+  /* Already HTML from TipTap / RichTextEditor */
+  if (/<[a-z][\s\S]*>/i.test(text)) {
+    return text;
+  }
+
+  /*
+    Normalize headings that may have been pasted into
+    one long line.
+  */
+  const normalized = text
+    .replace(/\s+###\s+/g, "\n### ")
+    .replace(/\s+##\s+/g, "\n## ")
+    .replace(/\s+#\s+/g, "\n# ");
+
+  const lines = normalized
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  const output = [];
+
+  let bulletItems = [];
+
+  const flushBullets = () => {
+    if (!bulletItems.length) return;
+
+    output.push(
+      `<ul>${bulletItems
+        .map(
+          (item) =>
+            `<li>${formatInlineMarkdown(item)}</li>`
+        )
+        .join("")}</ul>`
+    );
+
+    bulletItems = [];
+  };
+
+  lines.forEach((line) => {
+    /*
+      Normal bullet:
+      - item
+      * item
+    */
+    if (/^[-*]\s+/.test(line)) {
+      bulletItems.push(
+        line.replace(/^[-*]\s+/, "").trim()
+      );
+      return;
+    }
+
+    flushBullets();
+
+    if (line.startsWith("### ")) {
+      output.push(
+        `<h4>${formatInlineMarkdown(
+          line.substring(4)
+        )}</h4>`
+      );
+      return;
+    }
+
+    if (line.startsWith("## ")) {
+      output.push(
+        `<h3>${formatInlineMarkdown(
+          line.substring(3)
+        )}</h3>`
+      );
+      return;
+    }
+
+    if (line.startsWith("# ")) {
+      output.push(
+        `<h2>${formatInlineMarkdown(
+          line.substring(2)
+        )}</h2>`
+      );
+      return;
+    }
+
+    output.push(
+      `<p>${formatInlineMarkdown(line)}</p>`
+    );
+  });
+
+  flushBullets();
+
+  return output.join("");
+};
+
+/*
+  Supports both:
+  - Rich Editor HTML strings
+  - arrays from MongoDB
+*/
+const richTextValue = (value) => {
+  if (Array.isArray(value)) {
+    return value
+      .filter(Boolean)
+      .map((item) => markdownToHtml(item))
+      .join("");
+  }
+
+  return markdownToHtml(value);
+};
+
+const hasRichText = (value) => {
+  const html = richTextValue(value);
+
+  const text = stripHtml(html);
+
+  return text.length > 0;
+};
+
+/* =========================================================
+   META HELPERS
+========================================================= */
+
+const setMetaTag = (
+  selector,
+  attributes,
+  content
+) => {
+  if (!content) return;
+
+  let element =
+    document.head.querySelector(selector);
+
+  if (!element) {
+    element = document.createElement("meta");
+
+    Object.entries(attributes).forEach(
+      ([key, value]) => {
+        element.setAttribute(key, value);
+      }
+    );
+
+    document.head.appendChild(element);
+  }
+
+  element.setAttribute("content", content);
+};
+
+const removeMetaTag = (selector) => {
+  const element =
+    document.head.querySelector(selector);
+
+  if (element) {
+    element.remove();
+  }
+};
+
+const setLinkTag = (selector, attributes) => {
+  let element =
+    document.head.querySelector(selector);
+
+  if (!element) {
+    element = document.createElement("link");
+
+    Object.entries(attributes).forEach(
+      ([key, value]) => {
+        element.setAttribute(key, value);
+      }
+    );
+
+    document.head.appendChild(element);
+  } else {
+    Object.entries(attributes).forEach(
+      ([key, value]) => {
+        element.setAttribute(key, value);
+      }
+    );
+  }
+};
+
+/* =========================================================
+   COMPONENT
+========================================================= */
+
+export default function TrekkingDetails() {
   const { slug } = useParams();
 
   const [trek, setTrek] = useState(null);
-  const [activeImage, setActiveImage] = useState(0);
-  const [openDay, setOpenDay] = useState(0);
-  const [showBooking, setShowBooking] = useState(false);
-
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] =
+    useState(true);
   const [error, setError] = useState("");
 
-  // =========================================================
-  // LOAD TREK FROM MONGODB
-  // =========================================================
+  const [showBookingModal, setShowBookingModal] =
+    useState(false);
+
+  /* =======================================================
+     FETCH TREK
+  ======================================================= */
 
   useEffect(() => {
     const fetchTrek = async () => {
       try {
         setLoading(true);
         setError("");
-        setTrek(null);
 
         const response = await fetch(
           `${API_BASE_URL}/treks/slug/${slug}`
         );
 
-        const result = await response.json();
-
         if (!response.ok) {
           throw new Error(
-            result?.message ||
-              "Trekking package not found."
+            "Failed to load trekking package."
           );
         }
+
+        const result =
+          await response.json();
 
         const trekData =
           result?.data?.trek ||
@@ -49,22 +292,20 @@ function TrekkingDetails() {
 
         if (!trekData) {
           throw new Error(
-            "Trekking package data was not found."
+            "Trekking package not found."
           );
         }
 
         setTrek(trekData);
-        setActiveImage(0);
-        setOpenDay(0);
       } catch (err) {
         console.error(
-          "Fetch trek details error:",
+          "Error fetching trek:",
           err
         );
 
         setError(
           err.message ||
-            "Failed to load trekking package."
+            "Unable to load trekking package."
         );
       } finally {
         setLoading(false);
@@ -76,1460 +317,1224 @@ function TrekkingDetails() {
     }
   }, [slug]);
 
-  // =========================================================
-  // DYNAMIC SEO
-  // =========================================================
+  /* =======================================================
+     SEO + JSON-LD
+  ======================================================= */
 
   useEffect(() => {
-    if (!trek) {
-      return;
-    }
+    if (!trek) return;
 
     const seo = trek.seo || {};
 
-    const stripHtml = (html = "") => {
-      const temp = document.createElement("div");
-      temp.innerHTML = html;
-
-      return (
-        temp.textContent ||
-        temp.innerText ||
-        ""
-      );
-    };
-
-    const setMetaTag = (
-      attribute,
-      value,
-      content
-    ) => {
-      if (!content) {
-        return;
-      }
-
-      let element = document.head.querySelector(
-        `meta[${attribute}="${value}"]`
-      );
-
-      if (!element) {
-        element = document.createElement("meta");
-
-        element.setAttribute(
-          attribute,
-          value
-        );
-
-        document.head.appendChild(element);
-      }
-
-      element.setAttribute(
-        "content",
-        content
-      );
-    };
-
-    // ---------------------------------------------------------
-    // PAGE TITLE
-    // ---------------------------------------------------------
-
-    document.title =
+    const metaTitle =
       seo.metaTitle ||
-      `${trek.name} | Nepal Trekking | Backpacker Gateways`;
-
-    // ---------------------------------------------------------
-    // META DESCRIPTION
-    // ---------------------------------------------------------
+      `${trek.name || "Nepal Trek"} | Backpacker Gateways`;
 
     const metaDescription =
       seo.metaDescription ||
       stripHtml(
-        trek.description || ""
+        trek.description ||
+          trek.overview ||
+          ""
       ).slice(0, 160);
 
-    setMetaTag(
-      "name",
-      "description",
-      metaDescription
-    );
-
-    // ---------------------------------------------------------
-    // KEYWORDS
-    // ---------------------------------------------------------
-
-    const keywordList = [
+    const keywords = [
       seo.primaryKeyword,
-
       ...(Array.isArray(
         seo.secondaryKeywords
       )
         ? seo.secondaryKeywords
         : []),
-
       ...(Array.isArray(
         seo.lsiKeywords
       )
         ? seo.lsiKeywords
         : []),
-    ].filter(Boolean);
+    ]
+      .filter(Boolean)
+      .flat()
+      .join(", ");
 
-    if (keywordList.length > 0) {
+    document.title = metaTitle;
+
+    setMetaTag(
+      'meta[name="description"]',
+      { name: "description" },
+      metaDescription
+    );
+
+    if (keywords) {
       setMetaTag(
-        "name",
-        "keywords",
-        keywordList.join(", ")
+        'meta[name="keywords"]',
+        { name: "keywords" },
+        keywords
       );
     }
 
-    // ---------------------------------------------------------
-    // AUTHOR
-    // ---------------------------------------------------------
-
     setMetaTag(
-      "name",
-      "author",
+      'meta[name="author"]',
+      { name: "author" },
       "Backpacker Gateways"
     );
 
-    // ---------------------------------------------------------
-    // ROBOTS
-    // ---------------------------------------------------------
-
     setMetaTag(
-      "name",
-      "robots",
+      'meta[name="robots"]',
+      { name: "robots" },
       trek.published === false
         ? "noindex,nofollow"
         : "index,follow"
     );
 
-    // ---------------------------------------------------------
-    // CANONICAL
-    // ---------------------------------------------------------
-
     const canonicalUrl =
       seo.canonical ||
       `${window.location.origin}/trekking/${trek.slug}`;
 
-    let canonical =
-      document.head.querySelector(
-        'link[rel="canonical"]'
-      );
-
-    if (!canonical) {
-      canonical = document.createElement(
-        "link"
-      );
-
-      canonical.setAttribute(
-        "rel",
-        "canonical"
-      );
-
-      document.head.appendChild(
-        canonical
-      );
-    }
-
-    canonical.setAttribute(
-      "href",
-      canonicalUrl
+    setLinkTag(
+      'link[rel="canonical"]',
+      {
+        rel: "canonical",
+        href: canonicalUrl,
+      }
     );
 
-    // ---------------------------------------------------------
-    // OPEN GRAPH
-    // ---------------------------------------------------------
+    /* Open Graph */
 
     setMetaTag(
-      "property",
-      "og:title",
-      seo.metaTitle ||
-        `${trek.name} | Nepal Trekking`
+      'meta[property="og:title"]',
+      { property: "og:title" },
+      metaTitle
     );
 
     setMetaTag(
-      "property",
-      "og:description",
+      'meta[property="og:description"]',
+      { property: "og:description" },
       metaDescription
     );
 
     setMetaTag(
-      "property",
-      "og:type",
-      "website"
+      'meta[property="og:type"]',
+      { property: "og:type" },
+      "article"
     );
 
     setMetaTag(
-      "property",
-      "og:url",
+      'meta[property="og:url"]',
+      { property: "og:url" },
       canonicalUrl
     );
 
     if (trek.mainImage) {
       setMetaTag(
-        "property",
-        "og:image",
+        'meta[property="og:image"]',
+        { property: "og:image" },
         trek.mainImage
+      );
+    } else {
+      removeMetaTag(
+        'meta[property="og:image"]'
       );
     }
 
-    // ---------------------------------------------------------
-    // TWITTER / X
-    // ---------------------------------------------------------
+    /* Twitter */
 
     setMetaTag(
-      "name",
-      "twitter:card",
+      'meta[name="twitter:card"]',
+      { name: "twitter:card" },
       "summary_large_image"
     );
 
     setMetaTag(
-      "name",
-      "twitter:title",
-      seo.metaTitle ||
-        `${trek.name} | Nepal Trekking`
+      'meta[name="twitter:title"]',
+      { name: "twitter:title" },
+      metaTitle
     );
 
     setMetaTag(
-      "name",
-      "twitter:description",
+      'meta[name="twitter:description"]',
+      { name: "twitter:description" },
       metaDescription
     );
 
     if (trek.mainImage) {
       setMetaTag(
-        "name",
-        "twitter:image",
+        'meta[name="twitter:image"]',
+        { name: "twitter:image" },
         trek.mainImage
       );
-    }
-
-    // ---------------------------------------------------------
-    // CLEANUP
-    // ---------------------------------------------------------
-
-    return () => {
-      document.title =
-        "Backpacker Gateways";
-    };
-  }, [trek]);
-
-  // =========================================================
-  // STRUCTURED DATA / JSON-LD
-  // =========================================================
-
-  useEffect(() => {
-    if (!trek) {
-      return;
-    }
-
-    const stripHtml = (html = "") => {
-      const temp = document.createElement("div");
-      temp.innerHTML = html;
-
-      return (
-        temp.textContent ||
-        temp.innerText ||
-        ""
+    } else {
+      removeMetaTag(
+        'meta[name="twitter:image"]'
       );
-    };
+    }
 
-    const canonicalUrl =
-      trek.seo?.canonical ||
-      `${window.location.origin}/trekking/${trek.slug}`;
+    /* JSON-LD */
 
-    const images = [
-      trek.mainImage,
-      ...(Array.isArray(trek.gallery)
-        ? trek.gallery
-        : []),
-    ].filter(Boolean);
+    const existingJsonLd =
+      document.getElementById(
+        "trek-jsonld"
+      );
 
-    const structuredData = {
+    if (existingJsonLd) {
+      existingJsonLd.remove();
+    }
+
+    const jsonLd = {
       "@context":
         "https://schema.org",
-
       "@type": "TouristTrip",
 
-      name: trek.name,
+      name: trek.name || "",
 
-      description:
-        trek.seo?.metaDescription ||
-        stripHtml(
-          trek.description || ""
-        ).slice(0, 500),
+      description: stripHtml(
+        trek.description ||
+          trek.overview ||
+          ""
+      ),
 
-      url: canonicalUrl,
+      image: trek.mainImage
+        ? [trek.mainImage]
+        : [],
 
-      image: images,
+      itinerary:
+        Array.isArray(trek.itinerary)
+          ? trek.itinerary.map(
+              (day) => ({
+                "@type":
+                  "TouristAttraction",
 
-      touristType: [
-        "Adventure tourists",
-        "Hikers",
-        "Trekkers",
-      ],
+                name:
+                  day.title ||
+                  `Day ${
+                    day.day || ""
+                  }`,
 
-      provider: {
-        "@type": "TravelAgency",
-        name: "Backpacker Gateways",
-        url:
-          window.location.origin,
-      },
-
-      itinerary: {
-        "@type": "ItemList",
-
-        itemListElement:
-          Array.isArray(trek.itinerary)
-            ? trek.itinerary.map(
-                (day, index) => ({
-                  "@type":
-                    "ListItem",
-
-                  position:
-                    index + 1,
-
-                  name:
-                    day.title ||
-                    `Day ${
-                      day.day ||
-                      index + 1
-                    }`,
-
-                  description:
-                    stripHtml(
-                      day.description ||
-                        ""
-                    ),
-                })
-              )
-            : [],
-      },
+                description:
+                  stripHtml(
+                    day.description ||
+                      ""
+                  ),
+              })
+            )
+          : [],
 
       offers: {
         "@type": "Offer",
 
         price:
-          Number(
-            trek.discountPrice ||
-              trek.price ||
-              0
-          ),
+          trek.discountPrice ||
+          trek.price ||
+          "",
 
         priceCurrency:
-          trek.currency ||
-          "USD",
+          trek.currency || "USD",
 
         availability:
-          trek.published === false
-            ? "https://schema.org/OutOfStock"
-            : "https://schema.org/InStock",
+          "https://schema.org/InStock",
 
         url: canonicalUrl,
       },
 
-      location: {
-        "@type": "Country",
+      provider: {
+        "@type":
+          "TravelAgency",
+
         name:
-          trek.country ||
-          "Nepal",
+          "Backpacker Gateways",
+
+        url:
+          window.location.origin,
       },
 
-      duration:
-        trek.duration
-          ? `P${Number(
-              trek.duration
-            )}D`
-          : undefined,
+      touristType: [
+        "Adventure Traveler",
+        "Hiker",
+        "Trekker",
+      ],
+
+      countryOfOrigin: {
+        "@type": "Country",
+        name: "Nepal",
+      },
+
+      duration: trek.duration
+        ? `P${Number(
+            trek.duration
+          )}D`
+        : undefined,
     };
 
-    // Remove undefined values
-    Object.keys(structuredData).forEach(
-      (key) => {
-        if (
-          structuredData[key] ===
-          undefined
-        ) {
-          delete structuredData[key];
-        }
-      }
-    );
-
-    let script =
-      document.getElementById(
-        "trekking-jsonld"
+    const script =
+      document.createElement(
+        "script"
       );
 
-    if (!script) {
-      script =
-        document.createElement(
-          "script"
-        );
-
-      script.type =
-        "application/ld+json";
-
-      script.id =
-        "trekking-jsonld";
-
-      document.head.appendChild(
-        script
-      );
-    }
+    script.id = "trek-jsonld";
+    script.type =
+      "application/ld+json";
 
     script.textContent =
-      JSON.stringify(
-        structuredData
-      );
+      JSON.stringify(jsonLd);
+
+    document.head.appendChild(
+      script
+    );
 
     return () => {
-      const existingScript =
+      const jsonLdElement =
         document.getElementById(
-          "trekking-jsonld"
+          "trek-jsonld"
         );
 
-      if (existingScript) {
-        existingScript.remove();
+      if (jsonLdElement) {
+        jsonLdElement.remove();
       }
     };
   }, [trek]);
 
-  // =========================================================
-  // BOOKING
-  // =========================================================
-
-  const openBooking = () => {
-    setShowBooking(true);
-  };
-
-  const closeBooking = () => {
-    setShowBooking(false);
-  };
-
-  const handleBooking = (e) => {
-    e.preventDefault();
-
-    const formData =
-      new FormData(e.target);
-
-    const name =
-      formData.get("name");
-
-    const date =
-      formData.get("date");
-
-    const travellers =
-      formData.get("travellers");
-
-    const phone =
-      formData.get("phone");
-
-    const message = `Hello Backpacker Gateways,
-
-I am interested in booking:
-
-Trek: ${trek.name}
-Preferred Date: ${date}
-Travellers: ${travellers}
-Name: ${name}
-Phone / WhatsApp: ${phone}`;
-
-    window.open(
-      `https://wa.me/9779709914688?text=${encodeURIComponent(
-        message
-      )}`,
-      "_blank"
-    );
-  };
-
-  // =========================================================
-  // LOADING
-  // =========================================================
+  /* =======================================================
+     LOADING
+  ======================================================= */
 
   if (loading) {
     return (
-      <div className="trek-not-found">
-        <h1>Loading Trek...</h1>
-
-        <p>
-          Please wait while we load
-          the trekking package.
-        </p>
+      <div className="trek-details-loading">
+        Loading trekking package...
       </div>
     );
   }
 
-  // =========================================================
-  // ERROR
-  // =========================================================
+  /* =======================================================
+     ERROR
+  ======================================================= */
 
   if (error || !trek) {
     return (
-      <div className="trek-not-found">
-
-        <h1>Trek Not Found</h1>
+      <div className="trek-details-error">
+        <h2>
+          Trekking Package Not Found
+        </h2>
 
         <p>
           {error ||
-            "The trekking package you are looking for is not available."}
+            "The trekking package you are looking for does not exist."}
         </p>
 
         <Link to="/trekking">
-          ← Back to Trekking Packages
+          Back to Trekking
         </Link>
-
       </div>
     );
   }
 
-  // =========================================================
-  // IMAGES
-  // =========================================================
+  /* =======================================================
+     RICH TEXT VALUES
+  ======================================================= */
 
-  const images = [
-    trek.mainImage,
+  const highlightsHtml =
+    richTextValue(
+      trek.highlights
+    );
 
-    ...(Array.isArray(
-      trek.gallery
-    )
-      ? trek.gallery
-      : []),
-  ].filter(Boolean);
+  const shortItineraryHtml =
+    richTextValue(
+      trek.shortItinerary
+    );
 
-  const heroImage =
-    images[activeImage] ||
-    "/backpacker-logo.png";
+  const importantInformationHtml =
+    richTextValue(
+      trek.importantInformation
+    );
 
-  // =========================================================
-  // PAGE
-  // =========================================================
+  const includedHtml =
+    richTextValue(trek.included);
+
+  const excludedHtml =
+    richTextValue(trek.excluded);
+
+  /* =======================================================
+     PRICE
+  ======================================================= */
+
+  const hasDiscount =
+    trek.discountPrice &&
+    Number(trek.discountPrice) <
+      Number(trek.price);
+
+  /* =======================================================
+     RENDER
+  ======================================================= */
 
   return (
     <div className="trek-details-page">
 
-      {/* HERO */}
+      {/* =================================================
+          HERO
+      ================================================= */}
 
       <section className="trek-details-hero">
 
-        <img
-          src={heroImage}
-          alt={
-            trek.seo?.imageAlt ||
-            `${trek.name} Nepal trekking`
-          }
-        />
+        <div className="trek-details-hero-content">
 
-        <div className="trek-details-hero-overlay">
-
-          <div className="trek-details-container">
-
-            <Link
-              to="/trekking"
-              className="trek-back-link"
-            >
-              ← All Trekking Packages
+          <div className="trek-details-breadcrumb">
+            <Link to="/">
+              Home
             </Link>
 
-            <p className="trek-details-eyebrow">
-              BACKPACKER GATEWAYS
-            </p>
+            <span>/</span>
 
-            <h1>
+            <Link to="/trekking">
+              Trekking
+            </Link>
+
+            <span>/</span>
+
+            <span>
               {trek.name}
-            </h1>
+            </span>
+          </div>
 
+          <h1>
+            {trek.name}
+          </h1>
+
+          {trek.description && (
             <div
               className="trek-details-hero-description"
               dangerouslySetInnerHTML={{
                 __html:
-                  trek.description ||
-                  "",
+                  richTextValue(
+                    trek.description
+                  ),
               }}
             />
+          )}
 
-          </div>
         </div>
+
       </section>
 
-      {/* GALLERY */}
-
-      {images.length > 1 && (
-        <section className="trek-gallery-section">
-
-          <div className="trek-details-container">
-
-            <div className="trek-gallery">
-
-              {images.map(
-                (image, index) => (
-                  <button
-                    key={index}
-                    className={`trek-gallery-thumb ${
-                      activeImage ===
-                      index
-                        ? "active"
-                        : ""
-                    }`}
-                    onClick={() =>
-                      setActiveImage(
-                        index
-                      )
-                    }
-                  >
-
-                    <img
-                      src={image}
-                      alt={`${trek.name} view ${
-                        index + 1
-                      }`}
-                    />
-
-                  </button>
-                )
-              )}
-
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* MAIN */}
+      {/* =================================================
+          MAIN CONTENT
+      ================================================= */}
 
       <main className="trek-details-container">
 
-        <div className="trek-details-layout">
+        <div className="trek-details-main">
 
-          {/* CONTENT */}
+          {/* ===============================================
+              MAIN IMAGE
+          =============================================== */}
 
-          <div className="trek-details-content">
+          {trek.mainImage && (
+            <div className="trek-main-image-wrapper">
 
-            {/* QUICK INFO */}
+              <img
+                src={trek.mainImage}
+                alt={
+                  trek.name ||
+                  "Nepal Trekking"
+                }
+                className="trek-main-image"
+              />
 
-            <section className="trek-info-grid">
+            </div>
+          )}
 
-              <div className="trek-info-box">
-                <span>
-                  Duration
+          {/* ===============================================
+              QUICK INFO
+          =============================================== */}
+
+          <div className="trek-quick-info">
+
+            {trek.duration && (
+              <div className="quick-info-item">
+
+                <span className="quick-info-icon">
+                  🗓️
                 </span>
 
-                <strong>
-                  {trek.duration ||
-                    "N/A"}
-                </strong>
-              </div>
+                <div>
+                  <strong>
+                    Duration
+                  </strong>
 
-              <div className="trek-info-box">
-                <span>
-                  Difficulty
+                  <p>
+                    {trek.duration}
+                  </p>
+                </div>
+
+              </div>
+            )}
+
+            {trek.difficulty && (
+              <div className="quick-info-item">
+
+                <span className="quick-info-icon">
+                  🥾
                 </span>
 
-                <strong>
-                  {trek.difficulty ||
-                    "N/A"}
-                </strong>
-              </div>
+                <div>
+                  <strong>
+                    Difficulty
+                  </strong>
 
-              <div className="trek-info-box">
-                <span>
-                  Max Altitude
+                  <p>
+                    {trek.difficulty}
+                  </p>
+                </div>
+
+              </div>
+            )}
+
+            {trek.maxAltitude && (
+              <div className="quick-info-item">
+
+                <span className="quick-info-icon">
+                  ⛰️
                 </span>
 
-                <strong>
-                  {trek.maxAltitude ||
-                    "N/A"}
-                </strong>
-              </div>
+                <div>
+                  <strong>
+                    Max Altitude
+                  </strong>
 
-              <div className="trek-info-box">
-                <span>
-                  Best Season
+                  <p>
+                    {trek.maxAltitude}
+                  </p>
+                </div>
+
+              </div>
+            )}
+
+            {trek.region && (
+              <div className="quick-info-item">
+
+                <span className="quick-info-icon">
+                  📍
                 </span>
 
-                <strong>
-                  {trek.bestSeason ||
-                    "N/A"}
-                </strong>
+                <div>
+                  <strong>
+                    Region
+                  </strong>
+
+                  <p>
+                    {trek.region}
+                  </p>
+                </div>
+
               </div>
+            )}
 
-              <div className="trek-info-box">
-                <span>
-                  Activity
-                </span>
+          </div>
 
-                <strong>
-                  {trek.activity ||
-                    "Trekking"}
-                </strong>
-              </div>
+          {/* ===============================================
+              HIGHLIGHTS
+          =============================================== */}
 
-              <div className="trek-info-box">
-                <span>
-                  Country
-                </span>
+          {Array.isArray(
+            trek.highlights
+          ) &&
+            trek.highlights.filter(
+              Boolean
+            ).length > 0 && (
 
-                <strong>
-                  {trek.country ||
-                    "Nepal"}
-                </strong>
-              </div>
-
-              <div className="trek-info-box">
-                <span>
-                  Start Point
-                </span>
-
-                <strong>
-                  {trek.startPoint ||
-                    "N/A"}
-                </strong>
-              </div>
-
-              <div className="trek-info-box">
-                <span>
-                  End Point
-                </span>
-
-                <strong>
-                  {trek.endPoint ||
-                    "N/A"}
-                </strong>
-              </div>
-
-            </section>
-
-            {/* HIGHLIGHTS */}
-
-            {trek.highlights
-              ?.length > 0 && (
               <section className="trek-section-block">
 
-                <p className="section-label">
-                  TREK HIGHLIGHTS
-                </p>
-
                 <h2>
-                  Why Trek This Route?
+                  Trek Highlights
                 </h2>
 
                 <div className="highlight-grid">
 
-                  {trek.highlights.map(
-                    (
-                      highlight,
-                      index
-                    ) => (
-                      <div
-                        className="highlight-item"
-                        key={index}
-                      >
+                  {trek.highlights
+                    .filter(Boolean)
+                    .map(
+                      (
+                        highlight,
+                        index
+                      ) => (
 
-                        <span>
-                          ✓
-                        </span>
+                        <div
+                          className="highlight-item"
+                          key={index}
+                        >
 
-                        <p>
-                          {highlight}
-                        </p>
+                          <span>
+                            ✓
+                          </span>
 
-                      </div>
-                    )
-                  )}
+                          <div>
+                            {stripHtml(
+                              String(
+                                highlight
+                              )
+                            )
+                              ? stripHtml(
+                                  String(
+                                    highlight
+                                  )
+                                )
+                              : highlight}
+                          </div>
+
+                        </div>
+
+                      )
+                    )}
 
                 </div>
+
               </section>
+
             )}
 
-            {/* OVERVIEW */}
+          {/* ===============================================
+              OVERVIEW
+          =============================================== */}
 
+          {trek.overview && (
             <section className="trek-section-block">
 
-              <p className="section-label">
-                TREK OVERVIEW
-              </p>
-
               <h2>
-                About {trek.name}
+                Trek Overview
               </h2>
 
               <div
                 className="trek-long-text"
                 dangerouslySetInnerHTML={{
                   __html:
-                    trek.overview ||
-                    trek.description ||
-                    "",
+                    richTextValue(
+                      trek.overview
+                    ),
+                }}
+              />
+
+            </section>
+          )}
+
+          {/* ===============================================
+              SHORT ITINERARY
+          =============================================== */}
+
+          {hasRichText(
+            trek.shortItinerary
+          ) && (
+
+            <section className="trek-section-block">
+
+              <h2>
+                Short Itinerary
+              </h2>
+
+              <div
+                className="trek-long-text"
+                dangerouslySetInnerHTML={{
+                  __html:
+                    shortItineraryHtml,
                 }}
               />
 
             </section>
 
-            {/* ACCOMMODATION / MEALS */}
+          )}
 
-            <section className="trek-section-block">
+          {/* ===============================================
+              DETAILED ITINERARY
+          =============================================== */}
 
-              <div className="trek-two-column">
+          {Array.isArray(
+            trek.itinerary
+          ) &&
+            trek.itinerary.length >
+              0 && (
 
-                <div>
-
-                  <p className="section-label">
-                    ACCOMMODATION
-                  </p>
-
-                  <h3>
-                    {trek.accommodation ||
-                      "Not specified"}
-                  </h3>
-
-                </div>
-
-                <div>
-
-                  <p className="section-label">
-                    MEALS
-                  </p>
-
-                  <h3>
-                    {trek.meals ||
-                      "Not specified"}
-                  </h3>
-
-                </div>
-
-              </div>
-            </section>
-
-            {/* SHORT ITINERARY */}
-
-            {trek.shortItinerary
-              ?.length > 0 && (
               <section className="trek-section-block">
 
-                <p className="section-label">
-                  QUICK ITINERARY
-                </p>
-
                 <h2>
-                  Trek Overview
+                  Detailed Itinerary
                 </h2>
 
-                <ul className="included-list">
-
-                  {trek.shortItinerary.map(
-                    (
-                      item,
-                      index
-                    ) => (
-                      <li
-                        key={index}
-                      >
-
-                        <span>
-                          ✓
-                        </span>
-
-                        {item}
-
-                      </li>
-                    )
-                  )}
-
-                </ul>
-
-              </section>
-            )}
-
-            {/* ITINERARY */}
-
-            {trek.itinerary
-              ?.length > 0 && (
-              <section className="trek-section-block">
-
-                <p className="section-label">
-                  ITINERARY
-                </p>
-
-                <h2>
-                  Detailed Trek Itinerary
-                </h2>
-
-                <div className="itinerary-list">
+                <div className="trek-itinerary">
 
                   {trek.itinerary.map(
                     (
                       day,
                       index
+                    ) => (
+
+                      <div
+                        className="itinerary-day"
+                        key={
+                          day._id ||
+                          day.id ||
+                          index
+                        }
+                      >
+
+                        <div className="itinerary-day-header">
+
+                          <span className="itinerary-day-number">
+                            {day.day ||
+                              index +
+                                1}
+                          </span>
+
+                          <h3>
+                            {day.title ||
+                              `Day ${
+                                day.day ||
+                                index +
+                                  1
+                              }`}
+                          </h3>
+
+                        </div>
+
+                        <div className="itinerary-description">
+
+                          <div
+                            className="trek-long-text"
+                            dangerouslySetInnerHTML={{
+                              __html:
+                                richTextValue(
+                                  day.description
+                                ),
+                            }}
+                          />
+
+                        </div>
+
+                        {day.accommodation && (
+                          <p>
+                            <strong>
+                              Accommodation:
+                            </strong>{" "}
+                            {
+                              day.accommodation
+                            }
+                          </p>
+                        )}
+
+                        {day.meals && (
+                          <p>
+                            <strong>
+                              Meals:
+                            </strong>{" "}
+                            {
+                              day.meals
+                            }
+                          </p>
+                        )}
+
+                      </div>
+
+                    )
+                  )}
+
+                </div>
+
+              </section>
+
+            )}
+
+          {/* ===============================================
+              IMPORTANT INFORMATION
+          =============================================== */}
+
+          {hasRichText(
+            trek.importantInformation
+          ) && (
+
+            <section className="trek-section-block">
+
+              <h2>
+                Important Information
+              </h2>
+
+              <div
+                className="trek-long-text"
+                dangerouslySetInnerHTML={{
+                  __html:
+                    importantInformationHtml,
+                }}
+              />
+
+            </section>
+
+          )}
+
+          {/* ===============================================
+              PRICE INCLUDES
+          =============================================== */}
+
+          {hasRichText(
+            trek.included
+          ) && (
+
+            <section className="trek-section-block">
+
+              <h2>
+                Price Includes
+              </h2>
+
+              <div
+                className="trek-long-text"
+                dangerouslySetInnerHTML={{
+                  __html:
+                    includedHtml,
+                }}
+              />
+
+            </section>
+
+          )}
+
+          {/* ===============================================
+              PRICE EXCLUDES
+          =============================================== */}
+
+          {hasRichText(
+            trek.excluded
+          ) && (
+
+            <section className="trek-section-block">
+
+              <h2>
+                Price Excludes
+              </h2>
+
+              <div
+                className="trek-long-text"
+                dangerouslySetInnerHTML={{
+                  __html:
+                    excludedHtml,
+                }}
+              />
+
+            </section>
+
+          )}
+
+          {/* ===============================================
+              EQUIPMENT
+          =============================================== */}
+
+          {Array.isArray(
+            trek.gearSections
+          ) &&
+            trek.gearSections.length >
+              0 && (
+
+              <section className="trek-section-block">
+
+                <h2>
+                  Equipment & Packing List
+                </h2>
+
+                {trek.gearSections
+                  .filter(
+                    (section) =>
+                      hasRichText(
+                        section.items
+                      )
+                  )
+                  .map(
+                    (
+                      section,
+                      index
                     ) => {
 
-                      const isOpen =
-                        openDay ===
-                        index;
+                      const sectionHtml =
+                        richTextValue(
+                          section.items
+                        );
 
                       return (
                         <div
-                          className={`itinerary-item ${
-                            isOpen
-                              ? "open"
-                              : ""
-                          }`}
-                          key={index}
+                          key={
+                            section._id ||
+                            index
+                          }
+                          style={{
+                            marginBottom:
+                              "24px",
+                          }}
                         >
 
-                          <button
-                            className="itinerary-header"
-                            onClick={() =>
-                              setOpenDay(
-                                isOpen
-                                  ? -1
-                                  : index
-                              )
-                            }
-                          >
-
-                            <div>
-
-                              <span>
-                                Day{" "}
-                                {day.day ||
-                                  index +
-                                    1}
-                              </span>
-
-                              <strong>
-                                {day.title}
-                              </strong>
-
-                            </div>
-
-                            <span className="itinerary-arrow">
-                              {isOpen
-                                ? "−"
-                                : "+"}
-                            </span>
-
-                          </button>
-
-                          {isOpen && (
-                            <div className="itinerary-description">
-
-                              <div
-                                dangerouslySetInnerHTML={{
-                                  __html:
-                                    day.description ||
-                                    "",
-                                }}
-                              />
-
-                            </div>
+                          {section.title && (
+                            <h3>
+                              {
+                                section.title
+                              }
+                            </h3>
                           )}
+
+                          <div
+                            className="trek-long-text"
+                            dangerouslySetInnerHTML={{
+                              __html:
+                                sectionHtml,
+                            }}
+                          />
 
                         </div>
                       );
                     }
                   )}
 
-                </div>
               </section>
+
             )}
 
-            {/* IMPORTANT INFORMATION */}
+          {/* ===============================================
+              FAQ
+          =============================================== */}
 
-            {trek.importantInformation
-              ?.length > 0 && (
+          {Array.isArray(
+            trek.faqs
+          ) &&
+            trek.faqs.length >
+              0 && (
+
               <section className="trek-section-block">
 
-                <p className="section-label">
-                  IMPORTANT INFORMATION
-                </p>
-
                 <h2>
-                  Before You Trek
+                  Frequently Asked Questions
                 </h2>
 
-                <ul className="included-list">
-
-                  {trek.importantInformation.map(
-                    (
-                      item,
-                      index
-                    ) => (
-                      <li
-                        key={index}
-                      >
-
-                        <span>
-                          ✓
-                        </span>
-
-                        {item}
-
-                      </li>
-                    )
-                  )}
-
-                </ul>
-
-              </section>
-            )}
-
-            {/* INCLUDED */}
-
-            {trek.included
-              ?.length > 0 && (
-              <section className="trek-section-block">
-
-                <p className="section-label">
-                  PRICE INCLUDES
-                </p>
-
-                <h2>
-                  What's Included
-                </h2>
-
-                <ul className="included-list">
-
-                  {trek.included.map(
-                    (
-                      item,
-                      index
-                    ) => (
-                      <li
-                        key={index}
-                      >
-
-                        <span>
-                          ✓
-                        </span>
-
-                        {item}
-
-                      </li>
-                    )
-                  )}
-
-                </ul>
-
-              </section>
-            )}
-
-            {/* EXCLUDED */}
-
-            {trek.excluded
-              ?.length > 0 && (
-              <section className="trek-section-block">
-
-                <p className="section-label">
-                  PRICE EXCLUDES
-                </p>
-
-                <h2>
-                  What's Not Included
-                </h2>
-
-                <ul className="excluded-list">
-
-                  {trek.excluded.map(
-                    (
-                      item,
-                      index
-                    ) => (
-                      <li
-                        key={index}
-                      >
-
-                        <span>
-                          ×
-                        </span>
-
-                        {item}
-
-                      </li>
-                    )
-                  )}
-
-                </ul>
-
-              </section>
-            )}
-
-            {/* GEAR */}
-
-            {trek.gearSections
-              ?.length > 0 && (
-              <section className="trek-section-block">
-
-                <p className="section-label">
-                  TREKKING GEAR
-                </p>
-
-                <h2>
-                  Recommended Equipment
-                </h2>
-
-                {trek.gearSections.map(
-                  (
-                    section,
-                    index
-                  ) => (
-                    <div
-                      key={index}
-                      style={{
-                        marginBottom:
-                          "24px",
-                      }}
-                    >
-
-                      <h3>
-                        {section.title}
-                      </h3>
-
-                      <ul className="included-list">
-
-                        {section.items?.map(
-                          (
-                            item,
-                            itemIndex
-                          ) => (
-                            <li
-                              key={
-                                itemIndex
-                              }
-                            >
-
-                              <span>
-                                ✓
-                              </span>
-
-                              {item}
-
-                            </li>
-                          )
-                        )}
-
-                      </ul>
-
-                    </div>
-                  )
-                )}
-
-              </section>
-            )}
-
-            {/* FAQ */}
-
-            {trek.faqs
-              ?.length > 0 && (
-              <section className="trek-section-block">
-
-                <p className="section-label">
-                  FREQUENTLY ASKED QUESTIONS
-                </p>
-
-                <h2>
-                  FAQs About This Trek
-                </h2>
-
-                <div className="faq-list">
+                <div className="trek-faq">
 
                   {trek.faqs.map(
                     (
                       faq,
                       index
                     ) => (
-                      <details
+
+                      <div
                         className="faq-item"
-                        key={index}
+                        key={
+                          faq._id ||
+                          faq.id ||
+                          index
+                        }
                       >
 
-                        <summary>
-                          {faq.question}
-                        </summary>
+                        <h3>
+                          {faq.question ||
+                            faq.title ||
+                            `Question ${
+                              index +
+                              1
+                            }`}
+                        </h3>
 
                         <div
+                          className="faq-answer trek-long-text"
                           dangerouslySetInnerHTML={{
                             __html:
-                              faq.answer ||
-                              "",
+                              richTextValue(
+                                faq.answer ||
+                                  faq.description ||
+                                  ""
+                              ),
                           }}
                         />
 
-                      </details>
+                      </div>
+
                     )
                   )}
 
                 </div>
+
               </section>
+
+            )}
+
+          {/* ===============================================
+              GALLERY
+          =============================================== */}
+
+          {Array.isArray(
+            trek.gallery
+          ) &&
+            trek.gallery.length >
+              0 && (
+
+              <section className="trek-section-block">
+
+                <h2>
+                  Trek Gallery
+                </h2>
+
+                <div className="trek-gallery">
+
+                  {trek.gallery.map(
+                    (
+                      image,
+                      index
+                    ) => {
+
+                      const imageUrl =
+                        typeof image ===
+                        "string"
+                          ? image
+                          : image?.url ||
+                            image?.src;
+
+                      if (!imageUrl)
+                        return null;
+
+                      return (
+                        <img
+                          key={index}
+                          src={imageUrl}
+                          alt={`${trek.name} ${
+                            index + 1
+                          }`}
+                          loading="lazy"
+                        />
+                      );
+                    }
+                  )}
+
+                </div>
+
+              </section>
+
+            )}
+
+        </div>
+
+        {/* =================================================
+            SIDEBAR
+        ================================================= */}
+
+        <aside className="trek-details-sidebar">
+
+          <div className="booking-card">
+
+            <div className="booking-card-price">
+
+              {hasDiscount ? (
+                <>
+                  <span className="old-price">
+                    {trek.currency ||
+                      "USD"}{" "}
+                    {trek.price}
+                  </span>
+
+                  <strong>
+                    {trek.currency ||
+                      "USD"}{" "}
+                    {trek.discountPrice}
+                  </strong>
+                </>
+              ) : (
+                <strong>
+                  {trek.price
+                    ? `${
+                        trek.currency ||
+                        "USD"
+                      } ${
+                        trek.price
+                      }`
+                    : "Contact for Price"}
+                </strong>
+              )}
+
+            </div>
+
+            {trek.price && (
+              <p className="price-note">
+                Per person
+              </p>
+            )}
+
+            <button
+              type="button"
+              className="booking-btn"
+              onClick={() =>
+                setShowBookingModal(
+                  true
+                )
+              }
+            >
+              Book This Trek
+            </button>
+
+            <a
+              href="https://wa.me/9779709914688"
+              target="_blank"
+              rel="noreferrer"
+              className="whatsapp-direct-btn"
+            >
+              WhatsApp Us
+            </a>
+
+          </div>
+
+          {/* Sidebar Quick Information */}
+
+          <div className="sidebar-info-card">
+
+            <h3>
+              Trek Information
+            </h3>
+
+            {trek.duration && (
+              <div className="sidebar-info-row">
+                <span>
+                  Duration
+                </span>
+
+                <strong>
+                  {trek.duration}
+                </strong>
+              </div>
+            )}
+
+            {trek.difficulty && (
+              <div className="sidebar-info-row">
+                <span>
+                  Difficulty
+                </span>
+
+                <strong>
+                  {trek.difficulty}
+                </strong>
+              </div>
+            )}
+
+            {trek.maxAltitude && (
+              <div className="sidebar-info-row">
+                <span>
+                  Max Altitude
+                </span>
+
+                <strong>
+                  {trek.maxAltitude}
+                </strong>
+              </div>
+            )}
+
+            {trek.region && (
+              <div className="sidebar-info-row">
+                <span>
+                  Region
+                </span>
+
+                <strong>
+                  {trek.region}
+                </strong>
+              </div>
+            )}
+
+            {trek.bestSeason && (
+              <div className="sidebar-info-row">
+                <span>
+                  Best Season
+                </span>
+
+                <strong>
+                  {trek.bestSeason}
+                </strong>
+              </div>
             )}
 
           </div>
 
-          {/* BOOKING SIDEBAR */}
+        </aside>
 
-          <aside className="trek-booking-sidebar">
-
-            <div className="trek-booking-card">
-
-              <p className="booking-label">
-                STARTING FROM
-              </p>
-
-              <div className="trek-price">
-
-                {trek.currency ===
-                "USD"
-                  ? "$"
-                  : `${trek.currency || ""} `}
-
-                {trek.discountPrice ||
-                  trek.price ||
-                  0}
-
-              </div>
-
-              {trek.discountPrice &&
-                trek.price &&
-                Number(
-                  trek.discountPrice
-                ) <
-                  Number(
-                    trek.price
-                  ) && (
-                  <p
-                    style={{
-                      textDecoration:
-                        "line-through",
-                      opacity: 0.6,
-                    }}
-                  >
-
-                    {trek.currency ===
-                    "USD"
-                      ? "$"
-                      : `${trek.currency || ""} `}
-
-                    {trek.price}
-
-                  </p>
-                )}
-
-              <p className="price-note">
-                Per person
-              </p>
-
-              <div className="booking-divider" />
-
-              <div className="booking-summary">
-
-                <div>
-                  <span>
-                    Duration
-                  </span>
-
-                  <strong>
-                    {trek.duration ||
-                      "N/A"}
-                  </strong>
-                </div>
-
-                <div>
-                  <span>
-                    Difficulty
-                  </span>
-
-                  <strong>
-                    {trek.difficulty ||
-                      "N/A"}
-                  </strong>
-                </div>
-
-                <div>
-                  <span>
-                    Best Season
-                  </span>
-
-                  <strong>
-                    {trek.bestSeason ||
-                      "N/A"}
-                  </strong>
-                </div>
-
-              </div>
-
-              <button
-                className="book-trek-main-btn"
-                onClick={
-                  openBooking
-                }
-              >
-                Book Your Trek
-              </button>
-
-              <a
-                href="https://wa.me/9779709914688"
-                target="_blank"
-                rel="noreferrer"
-                className="whatsapp-direct-btn"
-              >
-                WhatsApp Us
-              </a>
-
-              <p className="booking-small-note">
-                Choose your preferred
-                date and send us your
-                enquiry.
-              </p>
-
-            </div>
-          </aside>
-
-        </div>
       </main>
 
-      {/* MOBILE BOOKING CTA */}
+      {/* =================================================
+          MOBILE BOOKING CTA
+      ================================================= */}
 
-      <div className="mobile-booking-bar">
-
-        <div>
-
-          <span>
-            From
-          </span>
-
-          <strong>
-
-            {trek.currency ===
-            "USD"
-              ? "$"
-              : `${trek.currency || ""} `}
-
-            {trek.discountPrice ||
-              trek.price ||
-              0}
-
-          </strong>
-
-        </div>
+      <div className="mobile-booking-cta">
 
         <button
-          onClick={
-            openBooking
+          type="button"
+          onClick={() =>
+            setShowBookingModal(
+              true
+            )
           }
         >
-          Book Your Trek
+          Book This Trek
         </button>
+
+        <a
+          href="https://wa.me/9779709914688"
+          target="_blank"
+          rel="noreferrer"
+        >
+          WhatsApp
+        </a>
 
       </div>
 
-      {/* BOOKING MODAL */}
+      {/* =================================================
+          BOOKING MODAL
+      ================================================= */}
 
-      {showBooking && (
+      {showBookingModal && (
         <div
           className="booking-modal-overlay"
-          onClick={
-            closeBooking
+          onClick={() =>
+            setShowBookingModal(
+              false
+            )
           }
         >
 
           <div
             className="booking-modal"
-            onClick={(e) =>
-              e.stopPropagation()
+            onClick={(event) =>
+              event.stopPropagation()
             }
           >
 
             <button
-              className="modal-close"
-              onClick={
-                closeBooking
+              type="button"
+              className="booking-modal-close"
+              onClick={() =>
+                setShowBookingModal(
+                  false
+                )
               }
             >
               ×
             </button>
 
-            <p className="section-label">
-              BACKPACKER GATEWAYS
-            </p>
-
             <h2>
-              Book Your Trek
+              Book {trek.name}
             </h2>
 
-            <p className="selected-trek">
-              {trek.name}
+            <p>
+              Contact Backpacker
+              Gateways to plan
+              your trek.
             </p>
 
-            <form
-              onSubmit={
-                handleBooking
-              }
+            <a
+              href={`https://wa.me/9779709914688?text=${encodeURIComponent(
+                `Hello Backpacker Gateways, I am interested in ${trek.name}.`
+              )}`}
+              target="_blank"
+              rel="noreferrer"
+              className="modal-whatsapp-btn"
             >
-
-              <label>
-
-                Preferred Trek Date
-
-                <input
-                  type="date"
-                  name="date"
-                  required
-                />
-
-              </label>
-
-              <label>
-
-                Number of Travellers
-
-                <input
-                  type="number"
-                  name="travellers"
-                  min="1"
-                  defaultValue="1"
-                  required
-                />
-
-              </label>
-
-              <label>
-
-                Your Name
-
-                <input
-                  type="text"
-                  name="name"
-                  placeholder="Full name"
-                  required
-                />
-
-              </label>
-
-              <label>
-
-                Phone / WhatsApp
-
-                <input
-                  type="tel"
-                  name="phone"
-                  placeholder="+977..."
-                  required
-                />
-
-              </label>
-
-              <button
-                type="submit"
-                className="modal-whatsapp-btn"
-              >
-                Send Enquiry on WhatsApp
-              </button>
-
-            </form>
+              Continue on WhatsApp
+            </a>
 
           </div>
+
         </div>
       )}
 
     </div>
   );
 }
-
-export default TrekkingDetails;
-
