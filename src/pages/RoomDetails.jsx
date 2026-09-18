@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { getRoomBySlug } from "../services/roomApi";
@@ -11,9 +10,8 @@ const RoomDetails = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // =========================================================
-  // LOAD ROOM BY SEO SLUG
-  // =========================================================
+  const [activeImage, setActiveImage] = useState(0);
+  const [showGallery, setShowGallery] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -57,10 +55,6 @@ const RoomDetails = () => {
     };
   }, [slug]);
 
-  // =========================================================
-  // SEO
-  // =========================================================
-
   useEffect(() => {
     if (!room) return;
 
@@ -73,73 +67,38 @@ const RoomDetails = () => {
     const fallbackDescription =
       `Book the ${roomName} in ${destination}, Nepal with Backpacker Gateways. Enjoy comfortable accommodation, Himalayan hospitality and convenient access to local attractions and trekking routes.`;
 
-    const title =
-      room.seoTitle?.trim() || fallbackTitle;
-
+    const title = room.seoTitle?.trim() || fallbackTitle;
     const description =
       room.seoDescription?.trim() || fallbackDescription;
 
-    const cleanSlug =
-      room.seoSlug?.trim() || slug;
+    const cleanSlug = room.seoSlug?.trim() || slug;
 
     const canonicalUrl =
       `${window.location.origin}/rooms/${cleanSlug}`;
 
-    // =======================================================
-    // PAGE TITLE
-    // =======================================================
-
     document.title = title;
-
-    // =======================================================
-    // META DESCRIPTION
-    // =======================================================
 
     let metaDescription =
       document.querySelector('meta[name="description"]');
 
     if (!metaDescription) {
       metaDescription = document.createElement("meta");
-
-      metaDescription.setAttribute(
-        "name",
-        "description"
-      );
-
+      metaDescription.setAttribute("name", "description");
       document.head.appendChild(metaDescription);
     }
 
-    metaDescription.setAttribute(
-      "content",
-      description
-    );
-
-    // =======================================================
-    // CANONICAL
-    // =======================================================
+    metaDescription.setAttribute("content", description);
 
     let canonical =
       document.querySelector('link[rel="canonical"]');
 
     if (!canonical) {
       canonical = document.createElement("link");
-
-      canonical.setAttribute(
-        "rel",
-        "canonical"
-      );
-
+      canonical.setAttribute("rel", "canonical");
       document.head.appendChild(canonical);
     }
 
-    canonical.setAttribute(
-      "href",
-      canonicalUrl
-    );
-
-    // =======================================================
-    // OPEN GRAPH
-    // =======================================================
+    canonical.setAttribute("href", canonicalUrl);
 
     const setMetaProperty = (property, content) => {
       let tag =
@@ -149,51 +108,21 @@ const RoomDetails = () => {
 
       if (!tag) {
         tag = document.createElement("meta");
-
-        tag.setAttribute(
-          "property",
-          property
-        );
-
+        tag.setAttribute("property", property);
         document.head.appendChild(tag);
       }
 
-      tag.setAttribute(
-        "content",
-        content
-      );
+      tag.setAttribute("content", content);
     };
 
-    setMetaProperty(
-      "og:title",
-      title
-    );
-
-    setMetaProperty(
-      "og:description",
-      description
-    );
-
-    setMetaProperty(
-      "og:url",
-      canonicalUrl
-    );
-
-    setMetaProperty(
-      "og:type",
-      "website"
-    );
+    setMetaProperty("og:title", title);
+    setMetaProperty("og:description", description);
+    setMetaProperty("og:url", canonicalUrl);
+    setMetaProperty("og:type", "website");
 
     if (room.images?.length > 0) {
-      setMetaProperty(
-        "og:image",
-        room.images[0]
-      );
+      setMetaProperty("og:image", room.images[0]);
     }
-
-    // =======================================================
-    // TWITTER CARD
-    // =======================================================
 
     const setMetaName = (name, content) => {
       let tag =
@@ -203,19 +132,11 @@ const RoomDetails = () => {
 
       if (!tag) {
         tag = document.createElement("meta");
-
-        tag.setAttribute(
-          "name",
-          name
-        );
-
+        tag.setAttribute("name", name);
         document.head.appendChild(tag);
       }
 
-      tag.setAttribute(
-        "content",
-        content
-      );
+      tag.setAttribute("content", content);
     };
 
     setMetaName(
@@ -223,31 +144,15 @@ const RoomDetails = () => {
       "summary_large_image"
     );
 
-    setMetaName(
-      "twitter:title",
-      title
-    );
-
-    setMetaName(
-      "twitter:description",
-      description
-    );
+    setMetaName("twitter:title", title);
+    setMetaName("twitter:description", description);
 
     if (room.images?.length > 0) {
-      setMetaName(
-        "twitter:image",
-        room.images[0]
-      );
+      setMetaName("twitter:image", room.images[0]);
     }
 
-    // =======================================================
-    // JSON-LD STRUCTURED DATA
-    // =======================================================
-
     const existingSchema =
-      document.getElementById(
-        "room-jsonld"
-      );
+      document.getElementById("room-jsonld");
 
     if (existingSchema) {
       existingSchema.remove();
@@ -255,15 +160,9 @@ const RoomDetails = () => {
 
     const schema = {
       "@context": "https://schema.org",
-
       "@type": "HotelRoom",
-
       name: roomName,
-
-      description:
-        room.description ||
-        description,
-
+      description: room.description || description,
       url: canonicalUrl,
 
       image:
@@ -272,96 +171,62 @@ const RoomDetails = () => {
           : [],
 
       occupancy: {
-        "@type":
-          "QuantitativeValue",
-
-        maxValue:
-          Number(room.capacity || 1)
+        "@type": "QuantitativeValue",
+        maxValue: Number(room.capacity || 1)
       },
 
       bed: room.beds
         ? {
-            "@type":
-              "BedDetails",
-
-            typeOfBed:
-              room.beds
+            "@type": "BedDetails",
+            typeOfBed: room.beds
           }
         : undefined,
 
       amenityFeature:
         Array.isArray(room.amenities)
-          ? room.amenities.map(
-              (amenity) => ({
-                "@type":
-                  "LocationFeatureSpecification",
-
-                name:
-                  amenity,
-
-                value: true
-              })
-            )
+          ? room.amenities.map((amenity) => ({
+              "@type":
+                "LocationFeatureSpecification",
+              name: amenity,
+              value: true
+            }))
           : [],
 
       address: {
-        "@type":
-          "PostalAddress",
-
-        addressLocality:
-          destination,
-
-        addressCountry:
-          "NP"
+        "@type": "PostalAddress",
+        addressLocality: destination,
+        addressCountry: "NP"
       },
 
       offers: {
-        "@type":
-          "Offer",
-
-        price:
-          Number(room.price || 0),
-
-        priceCurrency:
-          "NPR",
+        "@type": "Offer",
+        price: Number(room.price || 0),
+        priceCurrency: "NPR",
 
         availability:
           room.available
             ? "https://schema.org/InStock"
             : "https://schema.org/OutOfStock",
 
-        url:
-          canonicalUrl
+        url: canonicalUrl
       }
     };
 
-    // Remove undefined properties
     const cleanSchema =
       JSON.parse(
         JSON.stringify(schema)
       );
 
     const script =
-      document.createElement(
-        "script"
-      );
+      document.createElement("script");
 
-    script.id =
-      "room-jsonld";
-
-    script.type =
-      "application/ld+json";
-
+    script.id = "room-jsonld";
+    script.type = "application/ld+json";
     script.textContent =
-      JSON.stringify(
-        cleanSchema
-      );
+      JSON.stringify(cleanSchema);
 
-    document.head.appendChild(
-      script
-    );
+    document.head.appendChild(script);
 
-    // Cleanup
     return () => {
       const schemaElement =
         document.getElementById(
@@ -374,23 +239,64 @@ const RoomDetails = () => {
     };
   }, [room, slug]);
 
-  // =========================================================
-  // BOOKING
-  // =========================================================
+  useEffect(() => {
+    if (!showGallery) return;
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setShowGallery(false);
+      }
+
+      if (event.key === "ArrowRight") {
+        setActiveImage((current) => {
+          if (!room?.images?.length) return current;
+
+          return (
+            (current + 1) %
+            room.images.filter(Boolean).length
+          );
+        });
+      }
+
+      if (event.key === "ArrowLeft") {
+        setActiveImage((current) => {
+          if (!room?.images?.length) return current;
+
+          const total =
+            room.images.filter(Boolean).length;
+
+          return (
+            (current - 1 + total) %
+            total
+          );
+        });
+      }
+    };
+
+    document.addEventListener(
+      "keydown",
+      handleKeyDown
+    );
+
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener(
+        "keydown",
+        handleKeyDown
+      );
+
+      document.body.style.overflow = "";
+    };
+  }, [showGallery, room]);
 
   const handleBooking = () => {
     if (!room?._id || !room?.available) {
       return;
     }
 
-    navigate(
-      `/booking?room=${room._id}`
-    );
+    navigate(`/booking?room=${room._id}`);
   };
-
-  // =========================================================
-  // LOADING
-  // =========================================================
 
   if (loading) {
     return (
@@ -428,7 +334,7 @@ const RoomDetails = () => {
           <div
             className="spinner"
             aria-hidden="true"
-          ></div>
+          />
 
           <p>
             Preparing your Himalayan stay...
@@ -437,10 +343,6 @@ const RoomDetails = () => {
       </>
     );
   }
-
-  // =========================================================
-  // ERROR
-  // =========================================================
 
   if (error || !room) {
     return (
@@ -487,9 +389,7 @@ const RoomDetails = () => {
         `}</style>
 
         <div className="details-error">
-          <h2>
-            No room selected
-          </h2>
+          <h2>No room selected</h2>
 
           <p>
             {error ||
@@ -507,31 +407,60 @@ const RoomDetails = () => {
     );
   }
 
-  // =========================================================
-  // ROOM DATA
-  // =========================================================
-
   const destination =
-    room.destination ||
-    "Kathmandu";
+    room.destination || "Kathmandu";
 
   const roomName =
-    room.name ||
-    "Himalayan Room";
+    room.name || "Himalayan Room";
 
-  const heroImage =
-    Array.isArray(room.images) &&
-    room.images.length > 0
-      ? room.images[0]
+  const images =
+    Array.isArray(room.images)
+      ? room.images.filter(Boolean)
+      : [];
+
+  const mainImage =
+    images.length > 0
+      ? images[0]
       : "";
 
-  // =========================================================
-  // PAGE
-  // =========================================================
+  const sideImages =
+    images.slice(1, 5);
+
+  const hiddenPhotos =
+    Math.max(images.length - 5, 0);
+
+  const nextImage = () => {
+    if (images.length <= 1) return;
+
+    setActiveImage(
+      (current) =>
+        (current + 1) % images.length
+    );
+  };
+
+  const previousImage = () => {
+    if (images.length <= 1) return;
+
+    setActiveImage(
+      (current) =>
+        (current - 1 + images.length) %
+        images.length
+    );
+  };
+
+  const openGallery = (index = 0) => {
+    setActiveImage(index);
+    setShowGallery(true);
+  };
 
   return (
     <>
       <style>{`
+
+        * {
+          box-sizing: border-box;
+        }
+
         .details-page {
           background: #f7f8f6;
           min-height: 100vh;
@@ -539,107 +468,231 @@ const RoomDetails = () => {
           color: #18231d;
         }
 
-        .details-hero {
-          position: relative;
-          min-height: 520px;
-          overflow: hidden;
-          display: flex;
-          align-items: flex-end;
-          background: #18231d;
-          contain: layout paint;
-        }
+        /* =================================================
+           BOOKING.COM STYLE GALLERY
+        ================================================= */
 
-        .details-hero-image {
-          position: absolute;
-          inset: 0;
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          display: block;
-        }
-
-        .details-hero-overlay {
-          position: absolute;
-          inset: 0;
-          background:
-            linear-gradient(
-              to top,
-              rgba(0, 0, 0, 0.78),
-              rgba(0, 0, 0, 0.15)
-            );
-        }
-
-        .details-hero-content {
-          position: relative;
-          z-index: 2;
-          width: 100%;
+        .room-gallery-wrapper {
           max-width: 1250px;
           margin: 0 auto;
-          padding: 70px 6% 55px;
-          box-sizing: border-box;
+          padding: 28px 6% 0;
+        }
+
+        .room-gallery {
+          display: grid;
+          grid-template-columns: 2fr 1fr;
+          gap: 6px;
+          height: 530px;
+          overflow: hidden;
+          border-radius: 14px;
+          background: #ddd;
+        }
+
+        .gallery-main {
+          position: relative;
+          min-width: 0;
+          overflow: hidden;
+          background: #18231d;
+          cursor: pointer;
+        }
+
+        .gallery-main img {
+          width: 100%;
+          height: 100%;
+          display: block;
+          object-fit: cover;
+          transition: transform 0.35s ease;
+        }
+
+        .gallery-main:hover img {
+          transform: scale(1.015);
+        }
+
+        .gallery-side {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          grid-template-rows: repeat(2, 1fr);
+          gap: 6px;
+          min-width: 0;
+        }
+
+        .gallery-tile {
+          position: relative;
+          min-width: 0;
+          min-height: 0;
+          overflow: hidden;
+          border: 0;
+          padding: 0;
+          background: #ddd;
+          cursor: pointer;
+        }
+
+        .gallery-tile img {
+          width: 100%;
+          height: 100%;
+          display: block;
+          object-fit: cover;
+          transition: transform 0.35s ease;
+        }
+
+        .gallery-tile:hover img {
+          transform: scale(1.04);
+        }
+
+        .gallery-overlay {
+          position: absolute;
+          inset: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(0,0,0,0.52);
+          color: white;
+          font-size: 15px;
+          font-weight: 700;
+        }
+
+        .gallery-overlay:hover {
+          background: rgba(0,0,0,0.62);
+        }
+
+        .gallery-main-label {
+          position: absolute;
+          left: 20px;
+          bottom: 18px;
+          z-index: 2;
+          padding: 9px 13px;
+          border-radius: 7px;
+          background: rgba(0,0,0,0.48);
+          color: white;
+          font-size: 13px;
+          font-weight: 700;
+          backdrop-filter: blur(5px);
+        }
+
+        .gallery-view-button {
+          position: absolute;
+          right: 18px;
+          bottom: 18px;
+          z-index: 2;
+          border: 1px solid rgba(255,255,255,0.8);
+          border-radius: 7px;
+          padding: 9px 13px;
+          background: rgba(0,0,0,0.48);
+          color: white;
+          font-size: 12px;
+          font-weight: 700;
+          cursor: pointer;
+          backdrop-filter: blur(5px);
+        }
+
+        .gallery-view-button:hover {
+          background: rgba(0,0,0,0.7);
+        }
+
+        .no-image-gallery {
+          min-height: 250px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: #e8ebe7;
+          color: #68716b;
+          border-radius: 14px;
+        }
+
+        /* =================================================
+           ROOM HEADER
+        ================================================= */
+
+        .room-header {
+          max-width: 1250px;
+          margin: 0 auto;
+          padding: 28px 6% 10px;
         }
 
         .details-back {
           display: inline-block;
-          margin-bottom: 25px;
-          color: white;
+          margin-bottom: 18px;
+          color: #536058;
           text-decoration: none;
           font-size: 13px;
           font-weight: 700;
-          opacity: 0.9;
         }
 
         .details-back:hover {
-          opacity: 1;
+          color: #8b6b3f;
+        }
+
+        .room-header-row {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 30px;
+        }
+
+        .room-header-main {
+          min-width: 0;
         }
 
         .details-availability {
           display: inline-block;
-          padding: 8px 13px;
-          border-radius: 30px;
-          background: rgba(255, 255, 255, 0.95);
+          padding: 7px 12px;
+          border-radius: 20px;
+          background: #eaf4ed;
           color: #28613b;
           font-size: 12px;
           font-weight: 700;
-          margin-bottom: 15px;
+          margin-bottom: 12px;
         }
 
         .details-availability.unavailable {
+          background: #f8eaea;
           color: #9b3636;
         }
 
-        .details-hero h1 {
-          margin: 0 0 15px;
-          color: white;
-          font-size: clamp(38px, 6vw, 68px);
-          line-height: 1.05;
+        .room-header h1 {
+          margin: 0 0 9px;
+          color: #18231d;
+          font-size: clamp(30px, 4vw, 46px);
+          line-height: 1.1;
         }
 
-        .details-hero-description {
-          max-width: 700px;
+        .room-location {
           margin: 0;
-          color: rgba(255, 255, 255, 0.9);
-          font-size: 17px;
-          line-height: 1.7;
-        }
-
-        .details-location {
-          margin-top: 15px;
-          color: rgba(255, 255, 255, 0.9);
+          color: #68716b;
           font-size: 14px;
           font-weight: 600;
         }
 
+        .room-header-price {
+          flex-shrink: 0;
+          text-align: right;
+        }
+
+        .room-header-price strong {
+          display: block;
+          color: #8b6b3f;
+          font-size: 25px;
+        }
+
+        .room-header-price span {
+          color: #68716b;
+          font-size: 12px;
+        }
+
+        /* =================================================
+           CONTENT
+        ================================================= */
+
         .details-container {
           max-width: 1250px;
           margin: 0 auto;
-          padding: 70px 6% 100px;
-          box-sizing: border-box;
+          padding: 45px 6% 100px;
         }
 
         .details-grid {
           display: grid;
-          grid-template-columns: minmax(0, 1fr) 380px;
+          grid-template-columns:
+            minmax(0, 1fr) 380px;
           gap: 55px;
           align-items: start;
         }
@@ -671,7 +724,8 @@ const RoomDetails = () => {
 
         .room-highlights {
           display: grid;
-          grid-template-columns: repeat(3, 1fr);
+          grid-template-columns:
+            repeat(3, 1fr);
           gap: 15px;
           margin-bottom: 55px;
         }
@@ -703,7 +757,8 @@ const RoomDetails = () => {
 
         .amenities-grid {
           display: grid;
-          grid-template-columns: repeat(2, 1fr);
+          grid-template-columns:
+            repeat(2, 1fr);
           gap: 12px;
           margin-top: 25px;
         }
@@ -733,6 +788,10 @@ const RoomDetails = () => {
           font-weight: 700;
         }
 
+        /* =================================================
+           BOOKING CARD
+        ================================================= */
+
         .booking-card {
           position: sticky;
           top: 25px;
@@ -740,7 +799,9 @@ const RoomDetails = () => {
           background: white;
           border: 1px solid #e2e6e1;
           border-radius: 20px;
-          box-shadow: 0 15px 40px rgba(24, 35, 29, 0.08);
+          box-shadow:
+            0 15px 40px
+            rgba(24,35,29,0.08);
         }
 
         .booking-card h3 {
@@ -838,7 +899,100 @@ const RoomDetails = () => {
           color: #8b6b3f;
         }
 
+        /* =================================================
+           FULL SCREEN CAROUSEL
+        ================================================= */
+
+        .gallery-modal {
+          position: fixed;
+          inset: 0;
+          z-index: 99999;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 30px;
+          background: rgba(0,0,0,0.94);
+        }
+
+        .gallery-modal-image {
+          max-width: 90vw;
+          max-height: 84vh;
+          object-fit: contain;
+          border-radius: 6px;
+          user-select: none;
+        }
+
+        .gallery-close {
+          position: absolute;
+          top: 18px;
+          right: 22px;
+          width: 46px;
+          height: 46px;
+          border: 0;
+          border-radius: 50%;
+          background: rgba(255,255,255,0.14);
+          color: white;
+          font-size: 30px;
+          cursor: pointer;
+          z-index: 5;
+        }
+
+        .gallery-arrow {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 52px;
+          height: 52px;
+          border: 0;
+          border-radius: 50%;
+          background: rgba(255,255,255,0.16);
+          color: white;
+          font-size: 32px;
+          cursor: pointer;
+          z-index: 5;
+        }
+
+        .gallery-arrow:hover,
+        .gallery-close:hover {
+          background: rgba(255,255,255,0.3);
+        }
+
+        .gallery-arrow-left {
+          left: 22px;
+        }
+
+        .gallery-arrow-right {
+          right: 22px;
+        }
+
+        .gallery-modal-counter {
+          position: absolute;
+          bottom: 22px;
+          left: 50%;
+          transform: translateX(-50%);
+          padding: 8px 14px;
+          border-radius: 20px;
+          background: rgba(0,0,0,0.55);
+          color: white;
+          font-size: 13px;
+          font-weight: 700;
+        }
+
+        /* =================================================
+           RESPONSIVE
+        ================================================= */
+
         @media (max-width: 900px) {
+
+          .room-gallery-wrapper {
+            padding-left: 3%;
+            padding-right: 3%;
+          }
+
+          .room-gallery {
+            height: 460px;
+          }
+
           .details-grid {
             grid-template-columns: 1fr;
           }
@@ -846,19 +1000,73 @@ const RoomDetails = () => {
           .booking-card {
             position: static;
           }
+
+          .details-container {
+            padding-left: 3%;
+            padding-right: 3%;
+          }
+
         }
 
         @media (max-width: 650px) {
-          .details-hero {
-            min-height: 470px;
+
+          .room-gallery-wrapper {
+            padding:
+              12px 12px 0;
+          }
+
+          .room-gallery {
+            grid-template-columns: 1.6fr 1fr;
+            height: 310px;
+            gap: 4px;
+            border-radius: 10px;
+          }
+
+          .gallery-side {
+            gap: 4px;
+          }
+
+          .gallery-main-label {
+            left: 10px;
+            bottom: 10px;
+            padding: 7px 9px;
+            font-size: 11px;
+          }
+
+          .gallery-view-button {
+            right: 8px;
+            bottom: 8px;
+            padding: 7px 9px;
+            font-size: 10px;
+          }
+
+          .gallery-overlay {
+            font-size: 12px;
+            text-align: center;
+            padding: 5px;
+          }
+
+          .room-header {
+            padding:
+              20px 18px 5px;
+          }
+
+          .room-header-row {
+            display: block;
+          }
+
+          .room-header h1 {
+            font-size: 31px;
+          }
+
+          .room-header-price {
+            margin-top: 14px;
+            text-align: left;
           }
 
           .details-container {
-            padding: 50px 18px 70px;
-          }
-
-          .details-hero-content {
-            padding: 50px 18px 40px;
+            padding:
+              35px 18px 70px;
           }
 
           .room-highlights {
@@ -869,87 +1077,220 @@ const RoomDetails = () => {
             grid-template-columns: 1fr;
           }
 
-          .details-hero h1 {
-            font-size: 40px;
-          }
-
-          .details-hero-description {
-            font-size: 15px;
-            line-height: 1.6;
-          }
-
           .booking-card {
             padding: 24px;
           }
+
+          .gallery-modal {
+            padding: 15px;
+          }
+
+          .gallery-modal-image {
+            max-width: 96vw;
+            max-height: 80vh;
+          }
+
+          .gallery-arrow {
+            width: 42px;
+            height: 42px;
+            font-size: 26px;
+          }
+
+          .gallery-arrow-left {
+            left: 8px;
+          }
+
+          .gallery-arrow-right {
+            right: 8px;
+          }
+
+          .gallery-close {
+            top: 10px;
+            right: 10px;
+          }
+
         }
+
       `}</style>
 
       <div className="details-page">
 
-        {/* ===================================================
-            HERO
-        =================================================== */}
+        {/* =================================================
+            BOOKING STYLE PHOTO GALLERY
+        ================================================= */}
 
-        <section className="details-hero">
+        <div className="room-gallery-wrapper">
 
-          {heroImage && (
-            <img
-              className="details-hero-image"
-              src={heroImage}
-              alt={`${roomName} in ${destination}, Nepal`}
-              width="1600"
-              height="900"
-              fetchPriority="high"
-              decoding="async"
-            />
-          )}
+          {images.length > 0 ? (
 
-          <div
-            className="details-hero-overlay"
-            aria-hidden="true"
-          ></div>
+            <section className="room-gallery">
 
-          <div className="details-hero-content">
+              {/* BIG LEFT PHOTO */}
 
-            <Link
-              to="/rooms"
-              className="details-back"
-            >
-              ← Back to Rooms
-            </Link>
+              <button
+                type="button"
+                className="gallery-main"
+                onClick={() =>
+                  openGallery(0)
+                }
+                aria-label="View main room photo"
+              >
 
-            <div
-              className={`details-availability ${
-                !room.available
-                  ? "unavailable"
-                  : ""
-              }`}
-            >
-              {room.available
-                ? "Available Now"
-                : "Currently Unavailable"}
+                <img
+                  src={mainImage}
+                  alt={`${roomName} in ${destination}, Nepal`}
+                  width="1600"
+                  height="1000"
+                  fetchPriority="high"
+                  decoding="async"
+                />
+
+                <span className="gallery-main-label">
+                  {roomName}
+                </span>
+
+                {images.length > 1 && (
+                  <span className="gallery-view-button">
+                    📷 View all photos
+                  </span>
+                )}
+
+              </button>
+
+              {/* 4 SMALL RIGHT PHOTOS */}
+
+              <div className="gallery-side">
+
+                {sideImages.map(
+                  (image, index) => {
+
+                    const actualIndex =
+                      index + 1;
+
+                    const isLastTile =
+                      actualIndex === 4 &&
+                      hiddenPhotos > 0;
+
+                    return (
+                      <button
+                        type="button"
+                        key={`${image}-${actualIndex}`}
+                        className="gallery-tile"
+                        onClick={() => {
+
+                          if (isLastTile) {
+                            openGallery(
+                              actualIndex
+                            );
+                            return;
+                          }
+
+                          openGallery(
+                            actualIndex
+                          );
+                        }}
+                        aria-label={
+                          isLastTile
+                            ? "View all room photos"
+                            : `View photo ${
+                                actualIndex + 1
+                              }`
+                        }
+                      >
+
+                        <img
+                          src={image}
+                          alt=""
+                          loading="lazy"
+                          decoding="async"
+                        />
+
+                        {isLastTile && (
+                          <span className="gallery-overlay">
+                            +{hiddenPhotos} Photos
+                          </span>
+                        )}
+
+                      </button>
+                    );
+                  }
+                )}
+
+              </div>
+
+            </section>
+
+          ) : (
+
+            <div className="no-image-gallery">
+              No room photos available
             </div>
 
-            <h1>
-              {roomName} in {destination}
-            </h1>
+          )}
 
-            <p className="details-hero-description">
-              {room.description ||
-                `Enjoy a comfortable stay in ${destination}, Nepal with Backpacker Gateways.`}
-            </p>
+        </div>
 
-            <div className="details-location">
-              📍 {destination}, Nepal
+        {/* =================================================
+            ROOM TITLE / LOCATION
+        ================================================= */}
+
+        <header className="room-header">
+
+          <Link
+            to="/rooms"
+            className="details-back"
+          >
+            ← Back to Rooms
+          </Link>
+
+          <div className="room-header-row">
+
+            <div className="room-header-main">
+
+              <div
+                className={`details-availability ${
+                  !room.available
+                    ? "unavailable"
+                    : ""
+                }`}
+              >
+                {room.available
+                  ? "Available Now"
+                  : "Currently Unavailable"}
+              </div>
+
+              <h1>
+                {roomName} in {destination}
+              </h1>
+
+              <p className="room-location">
+                📍 {destination}, Nepal
+              </p>
+
+            </div>
+
+            <div className="room-header-price">
+
+              <strong>
+                NPR{" "}
+                {Number(
+                  room.price || 0
+                ).toLocaleString("en-NP")}
+              </strong>
+
+              <span>
+                per night
+              </span>
+
             </div>
 
           </div>
 
-        </section>
+        </header>
 
-        {/* ===================================================
+        {/* =================================================
             CONTENT
-        =================================================== */}
+        ================================================= */}
 
         <main className="details-container">
 
@@ -962,20 +1303,14 @@ const RoomDetails = () => {
               </span>
 
               <h2>
-                Comfortable accommodation in {destination}.
+                Comfortable accommodation in{" "}
+                {destination}.
               </h2>
 
               <p>
-                Stay in the {roomName} in {destination},
-                Nepal and enjoy peaceful surroundings,
-                warm hospitality and convenient access
-                to Himalayan adventures. Our accommodation
-                is designed for travellers looking for
-                comfort, convenience and an authentic
-                Nepal travel experience.
+                {room.description ||
+                  `Stay in the ${roomName} in ${destination}, Nepal and enjoy peaceful surroundings, warm hospitality and convenient access to Himalayan adventures. Our accommodation is designed for travellers looking for comfort, convenience and an authentic Nepal travel experience.`}
               </p>
-
-              {/* HIGHLIGHTS */}
 
               <div className="room-highlights">
 
@@ -990,7 +1325,9 @@ const RoomDetails = () => {
                   </strong>
 
                   <span>
-                    Up to {room.capacity || 1} guests
+                    Up to{" "}
+                    {room.capacity || 1}{" "}
+                    guests
                   </span>
 
                 </div>
@@ -1006,7 +1343,8 @@ const RoomDetails = () => {
                   </strong>
 
                   <span>
-                    {room.beds || "Comfortable bedding"}
+                    {room.beds ||
+                      "Comfortable bedding"}
                   </span>
 
                 </div>
@@ -1022,14 +1360,13 @@ const RoomDetails = () => {
                   </strong>
 
                   <span>
-                    Himalayan stay in {destination}
+                    Himalayan stay in{" "}
+                    {destination}
                   </span>
 
                 </div>
 
               </div>
-
-              {/* AMENITIES */}
 
               <span className="section-label">
                 Room Amenities
@@ -1041,7 +1378,9 @@ const RoomDetails = () => {
 
               <div className="amenities-grid">
 
-                {Array.isArray(room.amenities) &&
+                {Array.isArray(
+                  room.amenities
+                ) &&
                 room.amenities.length > 0 ? (
 
                   room.amenities.map(
@@ -1118,7 +1457,7 @@ const RoomDetails = () => {
                       ? "unavailable-dot"
                       : ""
                   }`}
-                ></span>
+                />
 
                 {room.available
                   ? "Room available for booking"
@@ -1157,9 +1496,86 @@ const RoomDetails = () => {
         </main>
 
       </div>
+
+      {/* =====================================================
+          FULL SCREEN PHOTO CAROUSEL
+      ===================================================== */}
+
+      {showGallery &&
+        images.length > 0 && (
+
+          <div
+            className="gallery-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Room photo gallery"
+            onClick={() =>
+              setShowGallery(false)
+            }
+          >
+
+            <button
+              type="button"
+              className="gallery-close"
+              onClick={(event) => {
+                event.stopPropagation();
+                setShowGallery(false);
+              }}
+              aria-label="Close gallery"
+            >
+              ×
+            </button>
+
+            {images.length > 1 && (
+              <button
+                type="button"
+                className="gallery-arrow gallery-arrow-left"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  previousImage();
+                }}
+                aria-label="Previous photo"
+              >
+                ‹
+              </button>
+            )}
+
+            <img
+              className="gallery-modal-image"
+              src={images[activeImage]}
+              alt={`${roomName} photo ${
+                activeImage + 1
+              }`}
+              onClick={(event) =>
+                event.stopPropagation()
+              }
+              decoding="async"
+            />
+
+            {images.length > 1 && (
+              <button
+                type="button"
+                className="gallery-arrow gallery-arrow-right"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  nextImage();
+                }}
+                aria-label="Next photo"
+              >
+                ›
+              </button>
+            )}
+
+            <div className="gallery-modal-counter">
+              {activeImage + 1} /{" "}
+              {images.length}
+            </div>
+
+          </div>
+        )}
+
     </>
   );
 };
 
 export default RoomDetails;
-
