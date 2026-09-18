@@ -7,7 +7,10 @@ const {
   createRoom,
   updateRoom,
   deleteRoom,
+  uploadImage,
 } = require("../controllers/roomController");
+
+const upload = require("../middleware/upload");
 
 const router = express.Router();
 
@@ -22,29 +25,36 @@ router.get("/search", getRooms);
 // GET /api/rooms
 // GET ALL / FILTER ROOMS
 // =====================================================
-//
-// Example:
-// GET /api/rooms
-//
-// With filters:
-// GET /api/rooms?destination=Kathmandu&guests=2
-// =====================================================
 
 router.get("/", getRooms);
 
 // =====================================================
 // GET /api/rooms/slug/:slug
 // GET SINGLE ROOM BY SEO SLUG
-// =====================================================
-//
-// Example:
-// GET /api/rooms/slug/deluxe-mountain-view-room-kathmandu
-//
-// IMPORTANT:
-// This route must come BEFORE /:id
+// IMPORTANT: Must come BEFORE /:id
 // =====================================================
 
 router.get("/slug/:slug", getRoomBySlug);
+
+// =====================================================
+// POST /api/rooms/upload-image
+// UPLOAD + OPTIMIZE ROOM IMAGE
+// =====================================================
+//
+// Accepts:
+// JPG
+// JPEG
+// PNG
+// WebP
+//
+// Frontend field name: image
+// =====================================================
+
+router.post(
+  "/upload-image",
+  upload.single("image"),
+  uploadImage
+);
 
 // =====================================================
 // GET /api/rooms/:id
@@ -75,4 +85,3 @@ router.put("/:id", updateRoom);
 router.delete("/:id", deleteRoom);
 
 module.exports = router;
-
