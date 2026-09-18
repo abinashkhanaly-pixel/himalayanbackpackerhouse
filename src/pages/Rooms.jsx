@@ -2,11 +2,136 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getRooms } from "../services/roomApi";
 
+const PAGE_TITLE = "Luxury Hotels in Nepal | Backpacker Gateways";
+
+const PAGE_DESCRIPTION =
+  "Discover luxury hotels in Nepal, from Kathmandu and Pokhara to Chitwan and other popular destinations. Compare rooms, facilities and book your stay with Backpacker Gateways.";
+
+const PAGE_CANONICAL =
+  "https://www.backpackergateways.com/rooms";
+
 export default function Rooms() {
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const previousTitle = document.title;
+
+    const metaSelectors = [
+      'meta[name="description"]',
+      'meta[name="keywords"]',
+      'meta[property="og:title"]',
+      'meta[property="og:description"]',
+      'meta[property="og:url"]',
+      'meta[property="og:type"]',
+      'meta[property="og:image"]',
+      'meta[name="twitter:title"]',
+      'meta[name="twitter:description"]',
+      'meta[name="twitter:card"]',
+      'link[rel="canonical"]',
+    ];
+
+    const previousMeta = metaSelectors.map((selector) => {
+      const element = document.head.querySelector(selector);
+
+      return {
+        selector,
+        element,
+        attributes: element
+          ? Array.from(element.attributes).map((attr) => [
+              attr.name,
+              attr.value,
+            ])
+          : null,
+      };
+    });
+
+    const setMeta = (selector, attribute, content) => {
+      let element = document.head.querySelector(selector);
+
+      if (!element) {
+        element = document.createElement(
+          attribute === "href" ? "link" : "meta"
+        );
+
+        if (attribute === "href") {
+          element.setAttribute("rel", "canonical");
+        }
+
+        document.head.appendChild(element);
+      }
+
+      element.setAttribute(attribute, content);
+    };
+
+    document.title = PAGE_TITLE;
+
+    setMeta(
+      'meta[name="description"]',
+      "content",
+      PAGE_DESCRIPTION
+    );
+
+    setMeta(
+      'meta[name="keywords"]',
+      "content",
+      "luxury hotels in Nepal, luxury hotels Nepal, hotels in Nepal, best hotels in Nepal, luxury hotel Kathmandu, luxury hotel Pokhara, hotels Kathmandu, hotels Pokhara, Nepal hotels, Backpacker Gateways"
+    );
+
+    setMeta(
+      'meta[property="og:title"]',
+      "content",
+      PAGE_TITLE
+    );
+
+    setMeta(
+      'meta[property="og:description"]',
+      "content",
+      PAGE_DESCRIPTION
+    );
+
+    setMeta(
+      'meta[property="og:url"]',
+      "content",
+      PAGE_CANONICAL
+    );
+
+    setMeta(
+      'meta[property="og:type"]',
+      "content",
+      "website"
+    );
+
+    setMeta(
+      'meta[property="og:image"]',
+      "content",
+      "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=1600&q=80"
+    );
+
+    setMeta(
+      'meta[name="twitter:card"]',
+      "content",
+      "summary_large_image"
+    );
+
+    setMeta(
+      'meta[name="twitter:title"]',
+      "content",
+      PAGE_TITLE
+    );
+
+    setMeta(
+      'meta[name="twitter:description"]',
+      "content",
+      PAGE_DESCRIPTION
+    );
+
+    setMeta(
+      'link[rel="canonical"]',
+      "href",
+      PAGE_CANONICAL
+    );
+
     async function loadRooms() {
       try {
         const result = await getRooms();
@@ -29,6 +154,44 @@ export default function Rooms() {
     }
 
     loadRooms();
+
+    return () => {
+      document.title = previousTitle;
+
+      previousMeta.forEach(
+        ({ selector, element, attributes }) => {
+          const currentElement =
+            document.head.querySelector(selector);
+
+          if (element && attributes) {
+            if (currentElement) {
+              Array.from(currentElement.attributes).forEach(
+                (attr) => {
+                  currentElement.removeAttribute(attr.name);
+                }
+              );
+
+              attributes.forEach(([name, value]) => {
+                currentElement.setAttribute(name, value);
+              });
+            } else {
+              const restored =
+                document.createElement(
+                  element.tagName.toLowerCase()
+                );
+
+              attributes.forEach(([name, value]) => {
+                restored.setAttribute(name, value);
+              });
+
+              document.head.appendChild(restored);
+            }
+          } else if (currentElement) {
+            currentElement.remove();
+          }
+        }
+      );
+    };
   }, []);
 
   return (
@@ -37,25 +200,30 @@ export default function Rooms() {
       {/* HERO */}
 
       <section className="rooms-hero">
+
         <div className="rooms-hero-overlay">
+
           <div className="rooms-hero-content">
 
-            <span>HIMALAYAN STAYS</span>
+            <span>LUXURY HOTELS IN NEPAL</span>
 
             <h1>
-              Stay in the Heart
+              Luxury Hotels
               <br />
-              of the Himalayas
+              in Nepal
             </h1>
 
             <p>
-              Discover authentic mountain lodges in the
-              Everest Region and premium luxury hotels
-              in Kathmandu.
+              Discover luxury hotels and premium stays
+              across Nepal. From Kathmandu and Pokhara
+              to Chitwan and the Himalayas, find comfortable
+              rooms, excellent facilities and memorable stays.
             </p>
 
           </div>
+
         </div>
+
       </section>
 
       {/* ROOMS */}
@@ -66,15 +234,19 @@ export default function Rooms() {
 
           <div className="section-heading">
 
-            <span>EXPLORE OUR STAYS</span>
+            <span>
+              EXPLORE HOTELS IN NEPAL
+            </span>
 
             <h2>
-              Mountain Lodges & Luxury Hotels
+              Luxury Hotels in Nepal
             </h2>
 
             <p>
-              From traditional Everest Region lodges
-              to comfortable luxury hotels in Kathmandu.
+              Explore carefully selected hotels and stays
+              across Nepal. Compare rooms, prices,
+              facilities and locations before booking
+              your next Himalayan stay.
             </p>
 
           </div>
@@ -83,7 +255,7 @@ export default function Rooms() {
 
           {loading && (
             <div className="loading">
-              Loading mountain stays...
+              Loading luxury hotels in Nepal...
             </div>
           )}
 
@@ -94,8 +266,12 @@ export default function Rooms() {
             <>
 
               <div className="rooms-count">
-                <strong>{rooms.length}</strong>{" "}
-                stays available
+
+                <strong>
+                  {rooms.length}
+                </strong>{" "}
+                hotels and stays available
+
               </div>
 
               <div className="rooms-grid">
@@ -116,7 +292,9 @@ export default function Rooms() {
                           room.images?.[0] ||
                           "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=1200&q=80"
                         }
-                        alt={`${room.name} in ${room.destination || "Nepal"}`}
+                        alt={`${room.name} in ${
+                          room.destination || "Nepal"
+                        }`}
                         loading="lazy"
                         decoding="async"
                         onError={(e) => {
@@ -206,8 +384,6 @@ export default function Rooms() {
 
                       <div className="buttons">
 
-                        {/* SEO-FRIENDLY ROOM URL */}
-
                         <Link
                           to={`/rooms/${
                             room.seoSlug || room._id
@@ -216,8 +392,6 @@ export default function Rooms() {
                         >
                           View Details
                         </Link>
-
-                        {/* BOOKING STILL USES ROOM ID */}
 
                         <Link
                           to={`/booking?room=${room._id}`}
@@ -247,16 +421,53 @@ export default function Rooms() {
             <div className="no-rooms">
 
               <h2>
-                No rooms found
+                Luxury Hotels in Nepal
               </h2>
 
               <p>
-                The rooms API did not return any rooms.
+                No hotel rooms are currently available.
+                Please check again soon.
               </p>
 
             </div>
 
           )}
+
+        </div>
+
+      </section>
+
+      {/* SEO CONTENT */}
+
+      <section className="rooms-seo-section">
+
+        <div className="rooms-seo-container">
+
+          <h2>
+            Find Luxury Hotels in Nepal
+          </h2>
+
+          <p>
+            Looking for luxury hotels in Nepal?
+            Backpacker Gateways helps travelers discover
+            quality hotels and comfortable stays in some
+            of Nepal's most popular destinations.
+          </p>
+
+          <p>
+            Explore hotels in Kathmandu, Pokhara,
+            Chitwan and other destinations across Nepal.
+            Compare room types, prices, facilities and
+            locations to find a stay that matches your
+            travel plans.
+          </p>
+
+          <p>
+            Whether you are visiting Nepal for a holiday,
+            business trip, trekking adventure or cultural
+            experience, explore our hotel collection and
+            find your ideal place to stay.
+          </p>
 
         </div>
 
@@ -338,7 +549,7 @@ export default function Rooms() {
         }
 
         .rooms-hero-content p {
-          max-width: 650px;
+          max-width: 680px;
 
           margin: 0;
 
@@ -362,7 +573,7 @@ export default function Rooms() {
         /* HEADING */
 
         .section-heading {
-          max-width: 750px;
+          max-width: 800px;
           margin: 0 auto 50px;
           text-align: center;
         }
@@ -564,6 +775,11 @@ export default function Rooms() {
           font-size: 14px;
 
           line-height: 1.65;
+
+          display: -webkit-box;
+          -webkit-line-clamp: 4;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
         }
 
         /* INFO */
@@ -681,6 +897,52 @@ export default function Rooms() {
             #8b6b3f;
         }
 
+        /* SEO CONTENT */
+
+        .rooms-seo-section {
+          padding:
+            0 6% 90px;
+        }
+
+        .rooms-seo-container {
+          max-width: 950px;
+          margin: 0 auto;
+
+          padding: 45px;
+
+          background: white;
+
+          border:
+            1px solid #e2e6e1;
+
+          border-radius: 22px;
+        }
+
+        .rooms-seo-container h2 {
+          margin:
+            0 0 20px;
+
+          font-size:
+            clamp(28px, 4vw, 40px);
+
+          line-height: 1.2;
+        }
+
+        .rooms-seo-container p {
+          margin:
+            0 0 16px;
+
+          color: #68716b;
+
+          font-size: 16px;
+
+          line-height: 1.8;
+        }
+
+        .rooms-seo-container p:last-child {
+          margin-bottom: 0;
+        }
+
         /* LOADING */
 
         .loading {
@@ -734,8 +996,23 @@ export default function Rooms() {
             min-height: 430px;
           }
 
+          .rooms-hero-content {
+            padding:
+              50px 20px;
+          }
+
+          .rooms-hero-content h1 {
+            font-size:
+              clamp(42px, 12vw, 58px);
+          }
+
+          .rooms-hero-content p {
+            font-size: 16px;
+          }
+
           .rooms-section {
-            padding: 60px 18px;
+            padding:
+              60px 18px;
           }
 
           .rooms-grid {
@@ -752,6 +1029,15 @@ export default function Rooms() {
 
           .buttons {
             flex-direction: column;
+          }
+
+          .rooms-seo-section {
+            padding:
+              0 18px 60px;
+          }
+
+          .rooms-seo-container {
+            padding: 28px 22px;
           }
 
         }
