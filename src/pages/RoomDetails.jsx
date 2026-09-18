@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { getRoomBySlug } from "../services/roomApi";
@@ -417,6 +416,20 @@ const RoomDetails = () => {
   const hiddenPhotos =
     Math.max(totalImages - 5, 0);
 
+  const amenities =
+    Array.isArray(room.amenities)
+      ? room.amenities.filter(Boolean)
+      : [];
+
+  /*
+   * If Admin description contains HTML from ReactQuill,
+   * it will be displayed with bold headings, paragraphs
+   * and lists.
+   */
+  const hasRichDescription =
+    typeof room.description === "string" &&
+    room.description.trim().length > 0;
+
   /* =========================================================
      PAGE
   ========================================================= */
@@ -433,12 +446,6 @@ const RoomDetails = () => {
         {totalImages > 0 ? (
 
           <section className="room-gallery">
-
-            {/* =================================================
-                MAIN PHOTO
-                Desktop = large image
-                Mobile = single image
-            ================================================= */}
 
             <div
               className="gallery-main"
@@ -468,21 +475,15 @@ const RoomDetails = () => {
                 decoding="async"
               />
 
-              {/* Room name */}
               <span className="gallery-main-label">
                 {roomName}
               </span>
 
-              {/* Desktop view all */}
               {totalImages > 1 && (
                 <span className="gallery-view-button">
                   📷 View all photos
                 </span>
               )}
-
-              {/* =================================================
-                  MOBILE NEXT ARROW
-              ================================================= */}
 
               {totalImages > 1 && (
                 <button
@@ -498,10 +499,6 @@ const RoomDetails = () => {
                 </button>
               )}
 
-              {/* =================================================
-                  MOBILE PHOTO COUNTER
-              ================================================= */}
-
               {totalImages > 1 && (
                 <span className="mobile-gallery-counter">
                   {activeImage + 1} / {totalImages}
@@ -509,10 +506,6 @@ const RoomDetails = () => {
               )}
 
             </div>
-
-            {/* =================================================
-                DESKTOP 4 SMALL PHOTOS
-            ================================================= */}
 
             <div className="gallery-side">
 
@@ -643,8 +636,12 @@ const RoomDetails = () => {
 
           <div className="content-section">
 
+            {/* =================================================
+                ABOUT THIS PROPERTY
+            ================================================= */}
+
             <span className="section-label">
-              Your Himalayan Stay
+              About this property
             </span>
 
             <h2>
@@ -652,111 +649,509 @@ const RoomDetails = () => {
               {destination}.
             </h2>
 
-            <p>
-              {room.description ||
-                `Stay in the ${roomName} in ${destination}, Nepal and enjoy peaceful surroundings, warm hospitality and convenient access to Himalayan adventures. Our accommodation is designed for travellers looking for comfort, convenience and an authentic Nepal travel experience.`}
-            </p>
+            {hasRichDescription ? (
 
-            <div className="room-highlights">
+              <div
+                className="property-description"
+                dangerouslySetInnerHTML={{
+                  __html: room.description,
+                }}
+              />
 
-              <div className="highlight">
+            ) : (
 
-                <div className="highlight-icon">
-                  👥
-                </div>
+              <div className="property-description">
 
-                <strong>
-                  Guests
-                </strong>
+                <p>
+                  <strong>
+                    Comfortable Accommodation:
+                  </strong>{" "}
+                  {roomName} in {destination} offers
+                  a comfortable stay for travellers
+                  looking for convenience, friendly
+                  hospitality and easy access to
+                  local attractions.
+                </p>
 
-                <span>
-                  Up to{" "}
-                  {room.capacity || 1}{" "}
-                  guests
-                </span>
+                <p>
+                  <strong>
+                    Exceptional Facilities:
+                  </strong>{" "}
+                  Guests can enjoy comfortable
+                  accommodation, essential room
+                  facilities, WiFi and convenient
+                  services designed for a relaxing
+                  stay.
+                </p>
+
+                <p>
+                  <strong>
+                    Dining Experience:
+                  </strong>{" "}
+                  Guests can enjoy convenient dining
+                  options and local Nepalese flavours,
+                  with breakfast and meals available
+                  according to the property's services.
+                </p>
+
+                <p>
+                  <strong>
+                    Convenient Location:
+                  </strong>{" "}
+                  Located in {destination}, Nepal,
+                  the property provides convenient
+                  access to local attractions,
+                  restaurants, shopping areas and
+                  travel connections.
+                </p>
+
+                <p>
+                  <strong>
+                    Stay Experience:
+                  </strong>{" "}
+                  Whether you are travelling as a
+                  couple, family, solo traveller or
+                  business guest, this accommodation
+                  provides a convenient base for
+                  exploring Nepal.
+                </p>
 
               </div>
 
-              <div className="highlight">
+            )}
 
-                <div className="highlight-icon">
-                  🛏️
+            {/* =================================================
+                PROPERTY HIGHLIGHTS
+            ================================================= */}
+
+            <div className="property-info-section">
+
+              <span className="section-label">
+                Property Highlights
+              </span>
+
+              <div className="property-highlights">
+
+                <div className="property-highlight-card">
+
+                  <strong>
+                    Great Location
+                  </strong>
+
+                  <span>
+                    Convenient access to
+                    attractions and local
+                    travel connections in{" "}
+                    {destination}.
+                  </span>
+
                 </div>
 
-                <strong>
-                  Sleeping
-                </strong>
+                <div className="property-highlight-card">
 
-                <span>
-                  {room.beds ||
-                    "Comfortable bedding"}
-                </span>
+                  <strong>
+                    Comfortable Rooms
+                  </strong>
 
-              </div>
+                  <span>
+                    Designed for a relaxing
+                    stay after sightseeing,
+                    trekking or travelling.
+                  </span>
 
-              <div className="highlight">
-
-                <div className="highlight-icon">
-                  🏔️
                 </div>
 
-                <strong>
-                  Experience
-                </strong>
+                <div className="property-highlight-card">
 
-                <span>
-                  Himalayan stay in{" "}
-                  {destination}
-                </span>
+                  <strong>
+                    Guest Friendly
+                  </strong>
+
+                  <span>
+                    Suitable for couples,
+                    families, solo travellers
+                    and business guests.
+                  </span>
+
+                </div>
+
+                <div className="property-highlight-card">
+
+                  <strong>
+                    Himalayan Experience
+                  </strong>
+
+                  <span>
+                    A convenient base for
+                    discovering Nepal and
+                    planning your next adventure.
+                  </span>
+
+                </div>
 
               </div>
 
             </div>
 
-            <span className="section-label">
-              Room Amenities
-            </span>
+            {/* =================================================
+                MOST POPULAR FACILITIES
+            ================================================= */}
 
-            <h2>
-              Everything you need.
-            </h2>
+            <div className="property-info-section">
 
-            <div className="amenities-grid">
+              <span className="section-label">
+                Most Popular Facilities
+              </span>
 
-              {Array.isArray(
-                room.amenities
-              ) &&
-              room.amenities.length > 0 ? (
+              <h2>
+                Facilities guests can enjoy.
+              </h2>
 
-                room.amenities.map(
-                  (amenity, index) => (
+              <div className="facilities-list">
 
-                    <div
-                      className="amenity-card"
-                      key={`${room._id}-${index}`}
-                    >
+                {amenities.length > 0 ? (
 
-                      <span className="amenity-icon">
+                  amenities.map(
+                    (amenity, index) => (
+
+                      <div
+                        className="facility-item"
+                        key={`${room._id}-facility-${index}`}
+                      >
+
+                        <span className="facility-check">
+                          ✓
+                        </span>
+
+                        <strong>
+                          {amenity}
+                        </strong>
+
+                      </div>
+
+                    )
+                  )
+
+                ) : (
+
+                  <>
+                    <div className="facility-item">
+                      <span className="facility-check">
                         ✓
                       </span>
-
-                      <span>
-                        {amenity}
-                      </span>
-
+                      <strong>
+                        Comfortable Rooms
+                      </strong>
                     </div>
 
-                  )
-                )
+                    <div className="facility-item">
+                      <span className="facility-check">
+                        ✓
+                      </span>
+                      <strong>
+                        Free WiFi
+                      </strong>
+                    </div>
 
-              ) : (
+                    <div className="facility-item">
+                      <span className="facility-check">
+                        ✓
+                      </span>
+                      <strong>
+                        Room Service
+                      </strong>
+                    </div>
+
+                    <div className="facility-item">
+                      <span className="facility-check">
+                        ✓
+                      </span>
+                      <strong>
+                        Restaurant
+                      </strong>
+                    </div>
+
+                  </>
+
+                )}
+
+              </div>
+
+            </div>
+
+            {/* =================================================
+                DINING EXPERIENCE
+            ================================================= */}
+
+            <div className="property-info-section">
+
+              <span className="section-label">
+                Dining Experience
+              </span>
+
+              <h2>
+                Food and breakfast.
+              </h2>
+
+              <div className="property-text-box">
 
                 <p>
-                  Standard room amenities
-                  are available.
+                  <strong>
+                    Dining Experience:
+                  </strong>{" "}
+                  Guests can enjoy convenient
+                  dining options during their stay,
+                  with opportunities to experience
+                  Nepalese cuisine and a variety of
+                  local and international flavours,
+                  depending on the property's
+                  available services.
                 </p>
 
-              )}
+                <p>
+                  <strong>
+                    Breakfast:
+                  </strong>{" "}
+                  Breakfast availability and options
+                  may vary by property and booking
+                  plan. Please check the selected room
+                  and booking details for the latest
+                  information.
+                </p>
+
+              </div>
+
+            </div>
+
+            {/* =================================================
+                BREAKFAST INFORMATION
+            ================================================= */}
+
+            <div className="property-info-section">
+
+              <span className="section-label">
+                Breakfast Information
+              </span>
+
+              <div className="breakfast-box">
+
+                <strong>
+                  Breakfast options
+                </strong>
+
+                <p>
+                  Breakfast options may include
+                  continental, Nepalese, Asian,
+                  vegetarian and other selections
+                  depending on the property.
+                </p>
+
+              </div>
+
+            </div>
+
+            {/* =================================================
+                ROOMS WITH
+            ================================================= */}
+
+            <div className="property-info-section">
+
+              <span className="section-label">
+                Rooms with
+              </span>
+
+              <div className="rooms-with-list">
+
+                <div>
+                  ✓ Comfortable bedding
+                </div>
+
+                <div>
+                  ✓ Private accommodation
+                </div>
+
+                <div>
+                  ✓ Guest facilities
+                </div>
+
+                <div>
+                  ✓ Convenient room amenities
+                </div>
+
+                {room.beds && (
+                  <div>
+                    ✓ {room.beds}
+                  </div>
+                )}
+
+                {room.capacity && (
+                  <div>
+                    ✓ Sleeps up to{" "}
+                    {room.capacity} guests
+                  </div>
+                )}
+
+              </div>
+
+            </div>
+
+            {/* =================================================
+                CONVENIENT LOCATION
+            ================================================= */}
+
+            <div className="property-info-section">
+
+              <span className="section-label">
+                Convenient Location
+              </span>
+
+              <h2>
+                Explore {destination}.
+              </h2>
+
+              <div className="property-text-box">
+
+                <p>
+                  <strong>
+                    Convenient Location:
+                  </strong>{" "}
+                  Located in {destination}, Nepal,
+                  this property provides a convenient
+                  starting point for exploring nearby
+                  attractions, restaurants, shopping
+                  areas and local experiences.
+                </p>
+
+                <p>
+                  <strong>
+                    Travel Access:
+                  </strong>{" "}
+                  Guests can easily plan sightseeing,
+                  trekking, tours and onward travel
+                  from the property.
+                </p>
+
+              </div>
+
+            </div>
+
+            {/* =================================================
+                ROOM HIGHLIGHTS
+            ================================================= */}
+
+            <div className="property-info-section">
+
+              <span className="section-label">
+                Room Highlights
+              </span>
+
+              <div className="room-highlights">
+
+                <div className="highlight">
+
+                  <div className="highlight-icon">
+                    👥
+                  </div>
+
+                  <strong>
+                    Guests
+                  </strong>
+
+                  <span>
+                    Up to{" "}
+                    {room.capacity || 1}{" "}
+                    guests
+                  </span>
+
+                </div>
+
+                <div className="highlight">
+
+                  <div className="highlight-icon">
+                    🛏️
+                  </div>
+
+                  <strong>
+                    Sleeping
+                  </strong>
+
+                  <span>
+                    {room.beds ||
+                      "Comfortable bedding"}
+                  </span>
+
+                </div>
+
+                <div className="highlight">
+
+                  <div className="highlight-icon">
+                    🏔️
+                  </div>
+
+                  <strong>
+                    Experience
+                  </strong>
+
+                  <span>
+                    Himalayan stay in{" "}
+                    {destination}
+                  </span>
+
+                </div>
+
+              </div>
+
+            </div>
+
+            {/* =================================================
+                ROOM AMENITIES
+            ================================================= */}
+
+            <div className="property-info-section">
+
+              <span className="section-label">
+                Room Amenities
+              </span>
+
+              <h2>
+                Everything you need.
+              </h2>
+
+              <div className="amenities-grid">
+
+                {amenities.length > 0 ? (
+
+                  amenities.map(
+                    (amenity, index) => (
+
+                      <div
+                        className="amenity-card"
+                        key={`${room._id}-${index}`}
+                      >
+
+                        <span className="amenity-icon">
+                          ✓
+                        </span>
+
+                        <span>
+                          {amenity}
+                        </span>
+
+                      </div>
+
+                    )
+                  )
+
+                ) : (
+
+                  <p>
+                    Standard room amenities
+                    are available.
+                  </p>
+
+                )}
+
+              </div>
 
             </div>
 
@@ -855,7 +1250,6 @@ const RoomDetails = () => {
             onClick={closeGallery}
           >
 
-            {/* Close */}
             <button
               type="button"
               className="gallery-close"
@@ -868,7 +1262,6 @@ const RoomDetails = () => {
               ×
             </button>
 
-            {/* Previous */}
             {totalImages > 1 && (
               <button
                 type="button"
@@ -883,7 +1276,6 @@ const RoomDetails = () => {
               </button>
             )}
 
-            {/* Image */}
             <img
               className="gallery-modal-image"
               src={images[activeImage]}
@@ -896,7 +1288,6 @@ const RoomDetails = () => {
               decoding="async"
             />
 
-            {/* Next */}
             {totalImages > 1 && (
               <button
                 type="button"
@@ -911,13 +1302,13 @@ const RoomDetails = () => {
               </button>
             )}
 
-            {/* Counter */}
             <div className="gallery-modal-counter">
               {activeImage + 1} /{" "}
               {totalImages}
             </div>
 
           </div>
+
         )}
 
     </div>
@@ -925,4 +1316,3 @@ const RoomDetails = () => {
 };
 
 export default RoomDetails;
-
