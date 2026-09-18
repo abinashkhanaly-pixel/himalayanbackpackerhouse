@@ -1,4 +1,5 @@
 const Room = require("../models/Room");
+const { uploadRoomImage } = require("../utils/imageUpload");
 
 // =====================================================
 // SEO SLUG HELPER
@@ -76,8 +77,11 @@ const generateSeoDescription = (roomData) => {
     return roomData.seoDescription.trim();
   }
 
-  const name = roomData.name?.trim() || "comfortable room";
-  const destination = roomData.destination?.trim();
+  const name =
+    roomData.name?.trim() || "comfortable room";
+
+  const destination =
+    roomData.destination?.trim();
 
   if (destination) {
     return `Book ${name} in ${destination}. Check room details, amenities, availability and pricing with Backpacker Gateways.`;
@@ -336,16 +340,17 @@ const createRoom = async (req, res) => {
       ? makeSlug(roomData.seoSlug)
       : "";
 
-    // If SEO slug is empty,
-    // generate automatically from name + destination
-
     if (!baseSlug) {
       const nameSlug = makeSlug(roomData.name);
+
       const destinationSlug = makeSlug(
         roomData.destination
       );
 
-      baseSlug = [nameSlug, destinationSlug]
+      baseSlug = [
+        nameSlug,
+        destinationSlug,
+      ]
         .filter(Boolean)
         .join("-");
     }
@@ -354,9 +359,8 @@ const createRoom = async (req, res) => {
       baseSlug = "room";
     }
 
-    roomData.seoSlug = await getUniqueSlug(
-      baseSlug
-    );
+    roomData.seoSlug =
+      await getUniqueSlug(baseSlug);
 
     // ---------------------------------------------
     // SEO TITLE
@@ -407,9 +411,8 @@ const updateRoom = async (req, res) => {
     // GET EXISTING ROOM
     // ---------------------------------------------
 
-    const existingRoom = await Room.findById(
-      req.params.id
-    );
+    const existingRoom =
+      await Room.findById(req.params.id);
 
     if (!existingRoom) {
       return res.status(404).json({
@@ -430,12 +433,10 @@ const updateRoom = async (req, res) => {
       ? makeSlug(roomData.seoSlug)
       : makeSlug(existingRoom.seoSlug);
 
-    // If slug is empty,
-    // generate from room name + destination
-
     if (!baseSlug) {
       const nameSlug = makeSlug(
-        roomData.name || existingRoom.name
+        roomData.name ||
+          existingRoom.name
       );
 
       const destinationSlug = makeSlug(
@@ -443,7 +444,10 @@ const updateRoom = async (req, res) => {
           existingRoom.destination
       );
 
-      baseSlug = [nameSlug, destinationSlug]
+      baseSlug = [
+        nameSlug,
+        destinationSlug,
+      ]
         .filter(Boolean)
         .join("-");
     }
@@ -452,13 +456,14 @@ const updateRoom = async (req, res) => {
       baseSlug = `room-${existingRoom._id}`;
     }
 
-    roomData.seoSlug = await getUniqueSlug(
-      baseSlug,
-      existingRoom._id
-    );
+    roomData.seoSlug =
+      await getUniqueSlug(
+        baseSlug,
+        existingRoom._id
+      );
 
     // ---------------------------------------------
-    // SEO TITLE
+    // MERGED ROOM DATA
     // ---------------------------------------------
 
     const mergedRoomData = {
@@ -466,8 +471,14 @@ const updateRoom = async (req, res) => {
       ...roomData,
     };
 
+    // ---------------------------------------------
+    // SEO TITLE
+    // ---------------------------------------------
+
     roomData.seoTitle =
-      generateSeoTitle(mergedRoomData);
+      generateSeoTitle(
+        mergedRoomData
+      );
 
     // ---------------------------------------------
     // SEO DESCRIPTION
@@ -482,14 +493,15 @@ const updateRoom = async (req, res) => {
     // UPDATE
     // ---------------------------------------------
 
-    const room = await Room.findByIdAndUpdate(
-      req.params.id,
-      roomData,
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
+    const room =
+      await Room.findByIdAndUpdate(
+        req.params.id,
+        roomData,
+        {
+          new: true,
+          runValidators: true,
+        }
+      );
 
     res.json({
       success: true,
@@ -517,7 +529,9 @@ const updateRoom = async (req, res) => {
 const deleteRoom = async (req, res) => {
   try {
     const room =
-      await Room.findByIdAndDelete(req.params.id);
+      await Room.findByIdAndDelete(
+        req.params.id
+      );
 
     if (!room) {
       return res.status(404).json({
@@ -544,6 +558,44 @@ const deleteRoom = async (req, res) => {
 };
 
 // =====================================================
+// UPLOAD ROOM IMAGE
+// POST /api/rooms/upload-image
+// =====================================================
+
+const uploadImage = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "Please select an image.",
+      });
+    }
+
+    const result =
+      await uploadRoomImage(req.file);
+
+    res.status(201).json({
+      success: true,
+      message:
+        "Image uploaded and optimized successfully.",
+      data: result,
+    });
+  } catch (error) {
+    console.error(
+      "Upload Room Image Error:",
+      error
+    );
+
+    res.status(400).json({
+      success: false,
+      message:
+        error.message ||
+        "Image upload failed.",
+    });
+  }
+};
+
+// =====================================================
 // EXPORT
 // =====================================================
 
@@ -555,4 +607,5 @@ module.exports = {
   createRoom,
   updateRoom,
   deleteRoom,
+  uploadImage,
 };

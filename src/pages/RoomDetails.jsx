@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { getRoomBySlug } from "../services/roomApi";
@@ -15,6 +16,8 @@ const RoomDetails = () => {
   // =========================================================
 
   useEffect(() => {
+    let cancelled = false;
+
     const loadRoom = async () => {
       if (!slug) {
         setError("No room selected.");
@@ -28,20 +31,30 @@ const RoomDetails = () => {
 
         const result = await getRoomBySlug(slug);
 
+        if (cancelled) return;
+
         if (result?.success === false || !result?.data) {
           throw new Error("Room not found");
         }
 
         setRoom(result.data);
       } catch (err) {
+        if (cancelled) return;
+
         console.error("Room details error:", err);
         setError("Unable to load room details.");
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
 
     loadRoom();
+
+    return () => {
+      cancelled = true;
+    };
   }, [slug]);
 
   // =========================================================
@@ -86,8 +99,7 @@ const RoomDetails = () => {
       document.querySelector('meta[name="description"]');
 
     if (!metaDescription) {
-      metaDescription =
-        document.createElement("meta");
+      metaDescription = document.createElement("meta");
 
       metaDescription.setAttribute(
         "name",
@@ -110,8 +122,7 @@ const RoomDetails = () => {
       document.querySelector('link[rel="canonical"]');
 
     if (!canonical) {
-      canonical =
-        document.createElement("link");
+      canonical = document.createElement("link");
 
       canonical.setAttribute(
         "rel",
@@ -130,18 +141,14 @@ const RoomDetails = () => {
     // OPEN GRAPH
     // =======================================================
 
-    const setMetaProperty = (
-      property,
-      content
-    ) => {
+    const setMetaProperty = (property, content) => {
       let tag =
         document.querySelector(
           `meta[property="${property}"]`
         );
 
       if (!tag) {
-        tag =
-          document.createElement("meta");
+        tag = document.createElement("meta");
 
         tag.setAttribute(
           "property",
@@ -188,18 +195,14 @@ const RoomDetails = () => {
     // TWITTER CARD
     // =======================================================
 
-    const setMetaName = (
-      name,
-      content
-    ) => {
+    const setMetaName = (name, content) => {
       let tag =
         document.querySelector(
           `meta[name="${name}"]`
         );
 
       if (!tag) {
-        tag =
-          document.createElement("meta");
+        tag = document.createElement("meta");
 
         tag.setAttribute(
           "name",
@@ -251,24 +254,22 @@ const RoomDetails = () => {
     }
 
     const schema = {
-      "@context":
-        "https://schema.org",
+      "@context": "https://schema.org",
 
-      "@type":
-        "HotelRoom",
+      "@type": "HotelRoom",
 
-      name:
-        roomName,
+      name: roomName,
 
       description:
         room.description ||
         description,
 
-      url:
-        canonicalUrl,
+      url: canonicalUrl,
 
       image:
-        room.images || [],
+        Array.isArray(room.images)
+          ? room.images
+          : [],
 
       occupancy: {
         "@type":
@@ -298,8 +299,7 @@ const RoomDetails = () => {
                 name:
                   amenity,
 
-                value:
-                  true
+                value: true
               })
             )
           : [],
@@ -342,7 +342,9 @@ const RoomDetails = () => {
       );
 
     const script =
-      document.createElement("script");
+      document.createElement(
+        "script"
+      );
 
     script.id =
       "room-jsonld";
@@ -423,7 +425,10 @@ const RoomDetails = () => {
         `}</style>
 
         <div className="details-loading">
-          <div className="spinner"></div>
+          <div
+            className="spinner"
+            aria-hidden="true"
+          ></div>
 
           <p>
             Preparing your Himalayan stay...
@@ -502,6 +507,10 @@ const RoomDetails = () => {
     );
   }
 
+  // =========================================================
+  // ROOM DATA
+  // =========================================================
+
   const destination =
     room.destination ||
     "Kathmandu";
@@ -509,6 +518,12 @@ const RoomDetails = () => {
   const roomName =
     room.name ||
     "Himalayan Room";
+
+  const heroImage =
+    Array.isArray(room.images) &&
+    room.images.length > 0
+      ? room.images[0]
+      : "";
 
   // =========================================================
   // PAGE
@@ -531,6 +546,7 @@ const RoomDetails = () => {
           display: flex;
           align-items: flex-end;
           background: #18231d;
+          contain: layout paint;
         }
 
         .details-hero-image {
@@ -539,6 +555,7 @@ const RoomDetails = () => {
           width: 100%;
           height: 100%;
           object-fit: cover;
+          display: block;
         }
 
         .details-hero-overlay {
@@ -608,7 +625,7 @@ const RoomDetails = () => {
 
         .details-location {
           margin-top: 15px;
-          color: rgba(255,255,255,0.9);
+          color: rgba(255, 255, 255, 0.9);
           font-size: 14px;
           font-weight: 600;
         }
@@ -855,6 +872,15 @@ const RoomDetails = () => {
           .details-hero h1 {
             font-size: 40px;
           }
+
+          .details-hero-description {
+            font-size: 15px;
+            line-height: 1.6;
+          }
+
+          .booking-card {
+            padding: 24px;
+          }
         }
       `}</style>
 
@@ -866,15 +892,22 @@ const RoomDetails = () => {
 
         <section className="details-hero">
 
-          {room.images?.length > 0 && (
+          {heroImage && (
             <img
               className="details-hero-image"
-              src={room.images[0]}
+              src={heroImage}
               alt={`${roomName} in ${destination}, Nepal`}
+              width="1600"
+              height="900"
+              fetchPriority="high"
+              decoding="async"
             />
           )}
 
-          <div className="details-hero-overlay"></div>
+          <div
+            className="details-hero-overlay"
+            aria-hidden="true"
+          ></div>
 
           <div className="details-hero-content">
 
@@ -897,14 +930,13 @@ const RoomDetails = () => {
                 : "Currently Unavailable"}
             </div>
 
-            {/* SEO H1 */}
-
             <h1>
               {roomName} in {destination}
             </h1>
 
             <p className="details-hero-description">
-              {room.description}
+              {room.description ||
+                `Enjoy a comfortable stay in ${destination}, Nepal with Backpacker Gateways.`}
             </p>
 
             <div className="details-location">
@@ -958,7 +990,7 @@ const RoomDetails = () => {
                   </strong>
 
                   <span>
-                    Up to {room.capacity} guests
+                    Up to {room.capacity || 1} guests
                   </span>
 
                 </div>
@@ -974,7 +1006,7 @@ const RoomDetails = () => {
                   </strong>
 
                   <span>
-                    {room.beds}
+                    {room.beds || "Comfortable bedding"}
                   </span>
 
                 </div>
@@ -1009,7 +1041,8 @@ const RoomDetails = () => {
 
               <div className="amenities-grid">
 
-                {room.amenities?.length > 0 ? (
+                {Array.isArray(room.amenities) &&
+                room.amenities.length > 0 ? (
 
                   room.amenities.map(
                     (amenity, index) => (
@@ -1129,3 +1162,4 @@ const RoomDetails = () => {
 };
 
 export default RoomDetails;
+

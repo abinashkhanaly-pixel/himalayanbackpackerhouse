@@ -7,9 +7,11 @@ import {
   createRoom,
   updateRoom,
   deleteRoom,
+  uploadRoomImage,
 } from "../services/roomApi";
 
-const API_URL = "https://backpacker-gateways-2.onrender.com";
+const API_URL =
+  "https://backpacker-gateways-2.onrender.com";
 
 export default function AdminRooms() {
   const [rooms, setRooms] = useState([]);
@@ -26,20 +28,21 @@ export default function AdminRooms() {
   const [form, setForm] = useState({
     name: "",
     destination: "",
-
-    // SEO
     seoSlug: "",
     seoTitle: "",
     seoDescription: "",
-
     description: "",
     price: "",
     capacity: "",
     beds: "",
     amenities: "",
-    images: "",
+    images: [],
     available: true,
   });
+
+  const [imageUrlInput, setImageUrlInput] = useState("");
+  const [uploadingImages, setUploadingImages] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState("");
 
   // =========================
   // COMMUNITY FORM
@@ -56,10 +59,11 @@ export default function AdminRooms() {
   });
 
   const [editingId, setEditingId] = useState(null);
+  const [savingRoom, setSavingRoom] = useState(false);
 
-  /* =========================
-     ROOMS
-  ========================= */
+  // =========================
+  // ROOMS
+  // =========================
 
   const loadRooms = async () => {
     try {
@@ -82,18 +86,22 @@ export default function AdminRooms() {
     }
   };
 
-  /* =========================
-     COMMUNITY POSTS
-  ========================= */
+  // =========================
+  // COMMUNITY POSTS
+  // =========================
 
   const loadPosts = async () => {
     try {
       setPostsLoading(true);
 
-      const response = await fetch(`${API_URL}/api/community`);
+      const response = await fetch(
+        `${API_URL}/api/community`
+      );
 
       if (!response.ok) {
-        throw new Error("Unable to load community posts");
+        throw new Error(
+          "Unable to load community posts"
+        );
       }
 
       const data = await response.json();
@@ -108,7 +116,10 @@ export default function AdminRooms() {
         setPosts([]);
       }
     } catch (error) {
-      console.error("COMMUNITY ADMIN ERROR:", error);
+      console.error(
+        "COMMUNITY ADMIN ERROR:",
+        error
+      );
       setPosts([]);
     } finally {
       setPostsLoading(false);
@@ -120,123 +131,314 @@ export default function AdminRooms() {
     loadPosts();
   }, []);
 
-  /* =========================
-     ROOM FORM
-  ========================= */
+  // =========================
+  // ROOM FORM
+  // =========================
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const {
+      name,
+      value,
+      type,
+      checked,
+    } = e.target;
 
-    setForm({
-      ...form,
-      [name]: type === "checkbox" ? checked : value,
-    });
+    setForm((previous) => ({
+      ...previous,
+      [name]:
+        type === "checkbox"
+          ? checked
+          : value,
+    }));
   };
 
   const resetForm = () => {
     setForm({
       name: "",
       destination: "",
-
-      // SEO
       seoSlug: "",
       seoTitle: "",
       seoDescription: "",
-
       description: "",
       price: "",
       capacity: "",
       beds: "",
       amenities: "",
-      images: "",
+      images: [],
       available: true,
     });
 
+    setImageUrlInput("");
+    setUploadStatus("");
     setEditingId(null);
   };
+
+  // =========================
+  // ADD IMAGE URL
+  // =========================
+
+  const addImageUrl = () => {
+    const url = imageUrlInput.trim();
+
+    if (!url) return;
+
+    setForm((previous) => {
+      if (previous.images.includes(url)) {
+        return previous;
+      }
+
+      return {
+        ...previous,
+        images: [
+          ...previous.images,
+          url,
+        ],
+      };
+    });
+
+    setImageUrlInput("");
+  };
+
+  // =========================
+  // REMOVE IMAGE
+  // =========================
+
+  const removeImage = (index) => {
+    setForm((previous) => ({
+      ...previous,
+      images: previous.images.filter(
+        (_, imageIndex) =>
+          imageIndex !== index
+      ),
+    }));
+  };
+
+  // =========================
+  // UPLOAD IMAGES
+  // =========================
+
+  const handleImageUpload = async (
+    event
+  ) => {
+    const files = Array.from(
+      event.target.files || []
+    );
+
+    if (!files.length) return;
+
+    try {
+      setUploadingImages(true);
+      setUploadStatus(
+        `Uploading ${files.length} image${
+          files.length > 1 ? "s" : ""
+        }...`
+      );
+
+      const uploadedUrls = [];
+
+      for (
+        let index = 0;
+        index < files.length;
+        index++
+      ) {
+        const file = files[index];
+
+        setUploadStatus(
+          `Uploading image ${
+            index + 1
+          } of ${files.length}...`
+        );
+
+        const result =
+          await uploadRoomImage(file);
+
+        const uploadedUrl =
+          result?.data?.url ||
+          result?.url;
+
+        if (!uploadedUrl) {
+          throw new Error(
+            "Image uploaded but no image URL was returned."
+          );
+        }
+
+        uploadedUrls.push(uploadedUrl);
+      }
+
+      setForm((previous) => ({
+        ...previous,
+        images: [
+          ...previous.images,
+          ...uploadedUrls,
+        ],
+      }));
+
+      setUploadStatus(
+        `${uploadedUrls.length} image${
+          uploadedUrls.length > 1
+            ? "s"
+            : ""
+        } uploaded successfully.`
+      );
+    } catch (error) {
+      console.error(
+        "IMAGE UPLOAD ERROR:",
+        error
+      );
+
+      setUploadStatus("");
+
+      alert(
+        error.message ||
+          "Image upload failed."
+      );
+    } finally {
+      setUploadingImages(false);
+
+      event.target.value = "";
+    }
+  };
+
+  // =========================
+  // ROOM SUBMIT
+  // =========================
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (uploadingImages) {
+      alert(
+        "Please wait until image uploads are finished."
+      );
+      return;
+    }
+
     try {
+      setSavingRoom(true);
+
+      const cleanSlug = form.seoSlug
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, "-");
+
       const roomData = {
-        name: form.name,
-        destination: form.destination,
+        name: form.name.trim(),
+        destination:
+          form.destination.trim(),
 
-        // =========================
-        // SEO DATA
-        // =========================
+        // SEO
+        seoSlug: cleanSlug,
+        seoTitle:
+          form.seoTitle.trim(),
+        seoDescription:
+          form.seoDescription.trim(),
 
-        seoSlug: form.seoSlug
-          .trim()
-          .toLowerCase()
-          .replace(/\s+/g, "-"),
-
-        seoTitle: form.seoTitle.trim(),
-
-        seoDescription: form.seoDescription.trim(),
-
-        // =========================
-        // ROOM DATA
-        // =========================
-
-        description: form.description,
+        // ROOM
+        description:
+          form.description,
         price: Number(form.price),
-        capacity: Number(form.capacity),
+        capacity: Number(
+          form.capacity
+        ),
         beds: form.beds,
 
-        amenities: form.amenities
-          .split(",")
-          .map((item) => item.trim())
-          .filter(Boolean),
+        amenities:
+          form.amenities
+            .split(",")
+            .map((item) =>
+              item.trim()
+            )
+            .filter(Boolean),
 
         images: form.images
-          .split(",")
-          .map((item) => item.trim())
+          .map((image) =>
+            image.trim()
+          )
           .filter(Boolean),
 
         available: form.available,
       };
 
       if (editingId) {
-        await updateRoom(editingId, roomData);
+        await updateRoom(
+          editingId,
+          roomData
+        );
 
-        alert("Room updated successfully");
+        alert(
+          "Room updated successfully"
+        );
       } else {
         await createRoom(roomData);
 
-        alert("Room added successfully");
+        alert(
+          "Room added successfully"
+        );
       }
 
       resetForm();
 
       await loadRooms();
     } catch (error) {
-      console.error("ROOM SAVE ERROR:", error);
-      alert(error.message);
+      console.error(
+        "ROOM SAVE ERROR:",
+        error
+      );
+
+      alert(
+        error.message ||
+          "Unable to save room."
+      );
+    } finally {
+      setSavingRoom(false);
     }
   };
+
+  // =========================
+  // EDIT ROOM
+  // =========================
 
   const handleEdit = (room) => {
     setEditingId(room._id);
 
     setForm({
       name: room.name || "",
-      destination: room.destination || "",
+      destination:
+        room.destination || "",
 
-      // SEO
-      seoSlug: room.seoSlug || "",
-      seoTitle: room.seoTitle || "",
-      seoDescription: room.seoDescription || "",
+      seoSlug:
+        room.seoSlug || "",
+      seoTitle:
+        room.seoTitle || "",
+      seoDescription:
+        room.seoDescription || "",
 
-      description: room.description || "",
-      price: room.price || "",
-      capacity: room.capacity || "",
-      beds: room.beds || "",
-      amenities: room.amenities?.join(", ") || "",
-      images: room.images?.join(", ") || "",
-      available: room.available ?? true,
+      description:
+        room.description || "",
+      price:
+        room.price ?? "",
+      capacity:
+        room.capacity ?? "",
+      beds:
+        room.beds || "",
+
+      amenities:
+        room.amenities?.join(
+          ", "
+        ) || "",
+
+      images: Array.isArray(
+        room.images
+      )
+        ? room.images
+        : [],
+
+      available:
+        room.available ?? true,
     });
+
+    setImageUrlInput("");
+    setUploadStatus("");
 
     window.scrollTo({
       top: 0,
@@ -244,17 +446,26 @@ export default function AdminRooms() {
     });
   };
 
-  const handleDelete = async (id) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this room?"
-    );
+  // =========================
+  // DELETE ROOM
+  // =========================
+
+  const handleDelete = async (
+    id
+  ) => {
+    const confirmDelete =
+      window.confirm(
+        "Are you sure you want to delete this room?"
+      );
 
     if (!confirmDelete) return;
 
     try {
       await deleteRoom(id);
 
-      alert("Room deleted successfully");
+      alert(
+        "Room deleted successfully"
+      );
 
       await loadRooms();
     } catch (error) {
@@ -263,20 +474,32 @@ export default function AdminRooms() {
     }
   };
 
-  /* =========================
-     COMMUNITY POST FORM
-  ========================= */
+  // =========================
+  // COMMUNITY FORM
+  // =========================
 
-  const handleCommunityChange = (e) => {
-    const { name, value, type, checked } = e.target;
+  const handleCommunityChange = (
+    e
+  ) => {
+    const {
+      name,
+      value,
+      type,
+      checked,
+    } = e.target;
 
     setCommunityForm({
       ...communityForm,
-      [name]: type === "checkbox" ? checked : value,
+      [name]:
+        type === "checkbox"
+          ? checked
+          : value,
     });
   };
 
-  const handleContentChange = (value) => {
+  const handleContentChange = (
+    value
+  ) => {
     setCommunityForm({
       ...communityForm,
       content: value,
@@ -295,27 +518,38 @@ export default function AdminRooms() {
     });
   };
 
-  const handleCreatePost = async (e) => {
+  const handleCreatePost = async (
+    e
+  ) => {
     e.preventDefault();
 
     try {
       setCreatingPost(true);
 
-      const response = await fetch(`${API_URL}/api/community`, {
-        method: "POST",
+      const response =
+        await fetch(
+          `${API_URL}/api/community`,
+          {
+            method: "POST",
 
-        headers: {
-          "Content-Type": "application/json",
-        },
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
 
-        body: JSON.stringify(communityForm),
-      });
+            body: JSON.stringify(
+              communityForm
+            ),
+          }
+        );
 
-      const data = await response.json();
+      const data =
+        await response.json();
 
       if (!response.ok) {
         throw new Error(
-          data.message || "Unable to create community post"
+          data.message ||
+            "Unable to create community post"
         );
       }
 
@@ -327,84 +561,115 @@ export default function AdminRooms() {
 
       await loadPosts();
     } catch (error) {
-      console.error("CREATE POST ERROR:", error);
+      console.error(
+        "CREATE POST ERROR:",
+        error
+      );
+
       alert(error.message);
     } finally {
       setCreatingPost(false);
     }
   };
 
-  /* =========================
-     COMMUNITY ACTIONS
-  ========================= */
+  // =========================
+  // COMMUNITY ACTIONS
+  // =========================
 
-  const updatePostStatus = async (post, status) => {
+  const updatePostStatus = async (
+    post,
+    status
+  ) => {
     try {
-      const response = await fetch(
-        `${API_URL}/api/community/${post._id}`,
-        {
-          method: "PUT",
+      const response =
+        await fetch(
+          `${API_URL}/api/community/${post._id}`,
+          {
+            method: "PUT",
 
-          headers: {
-            "Content-Type": "application/json",
-          },
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
 
-          body: JSON.stringify({
-            status,
-          }),
-        }
-      );
+            body: JSON.stringify({
+              status,
+            }),
+          }
+        );
 
-      const data = await response.json();
+      const data =
+        await response.json();
 
       if (!response.ok) {
         throw new Error(
-          data.message || "Unable to update post"
+          data.message ||
+            "Unable to update post"
         );
       }
 
-      alert(`Post ${status} successfully`);
+      alert(
+        `Post ${status} successfully`
+      );
 
       await loadPosts();
     } catch (error) {
-      console.error("POST STATUS ERROR:", error);
+      console.error(
+        "POST STATUS ERROR:",
+        error
+      );
+
       alert(error.message);
     }
   };
 
-  const deletePost = async (id) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this community post?"
-    );
+  const deletePost = async (
+    id
+  ) => {
+    const confirmDelete =
+      window.confirm(
+        "Are you sure you want to delete this community post?"
+      );
 
     if (!confirmDelete) return;
 
     try {
-      const response = await fetch(
-        `${API_URL}/api/community/${id}`,
-        {
-          method: "DELETE",
-        }
-      );
+      const response =
+        await fetch(
+          `${API_URL}/api/community/${id}`,
+          {
+            method: "DELETE",
+          }
+        );
 
-      const data = await response.json();
+      const data =
+        await response.json();
 
       if (!response.ok) {
         throw new Error(
-          data.message || "Unable to delete community post"
+          data.message ||
+            "Unable to delete community post"
         );
       }
 
-      alert("Community post deleted successfully");
+      alert(
+        "Community post deleted successfully"
+      );
 
       await loadPosts();
     } catch (error) {
-      console.error("DELETE POST ERROR:", error);
+      console.error(
+        "DELETE POST ERROR:",
+        error
+      );
+
       alert(error.message);
     }
   };
 
-  const getPostTitle = (post) => {
+  const getPostTitle = (
+    post
+  ) => {
     return (
       post.title ||
       post.name ||
@@ -413,7 +678,9 @@ export default function AdminRooms() {
     );
   };
 
-  const getPostText = (post) => {
+  const getPostText = (
+    post
+  ) => {
     return (
       post.content ||
       post.description ||
@@ -423,7 +690,9 @@ export default function AdminRooms() {
     );
   };
 
-  const getPostImage = (post) => {
+  const getPostImage = (
+    post
+  ) => {
     return (
       post.image ||
       post.imageUrl ||
@@ -432,20 +701,40 @@ export default function AdminRooms() {
     );
   };
 
-  const getPostStatus = (post) => {
+  const getPostStatus = (
+    post
+  ) => {
     return post.status || "pending";
   };
 
-  /* =========================
-     RICH TEXT EDITOR
-  ========================= */
+  // =========================
+  // RICH TEXT EDITOR
+  // =========================
 
   const quillModules = {
     toolbar: [
-      [{ header: [1, 2, 3, 4, false] }],
-      ["bold", "italic", "underline", "strike"],
+      [
+        {
+          header: [
+            1,
+            2,
+            3,
+            4,
+            false,
+          ],
+        },
+      ],
+      [
+        "bold",
+        "italic",
+        "underline",
+        "strike",
+      ],
       [{ align: [] }],
-      [{ list: "ordered" }, { list: "bullet" }],
+      [
+        { list: "ordered" },
+        { list: "bullet" },
+      ],
       ["blockquote"],
       ["link"],
       ["clean"],
@@ -473,12 +762,17 @@ export default function AdminRooms() {
 
         <div className="admin-header">
           <div>
-            <span>BACKPACKER GATEWAYS</span>
+            <span>
+              BACKPACKER GATEWAYS
+            </span>
 
-            <h1>Admin Dashboard</h1>
+            <h1>
+              Admin Dashboard
+            </h1>
 
             <p>
-              Manage rooms, hotels and community posts.
+              Manage rooms, hotels and
+              community posts.
             </p>
           </div>
 
@@ -502,10 +796,14 @@ export default function AdminRooms() {
         <div className="admin-card">
 
           <h2>
-            {editingId ? "Edit Room" : "Add New Room"}
+            {editingId
+              ? "Edit Room"
+              : "Add New Room"}
           </h2>
 
-          <form onSubmit={handleSubmit}>
+          <form
+            onSubmit={handleSubmit}
+          >
 
             <div className="form-grid">
 
@@ -513,12 +811,16 @@ export default function AdminRooms() {
 
               <div className="field">
 
-                <label>Room / Hotel Name</label>
+                <label>
+                  Room / Hotel Name
+                </label>
 
                 <input
                   name="name"
                   value={form.name}
-                  onChange={handleChange}
+                  onChange={
+                    handleChange
+                  }
                   placeholder="Deluxe Mountain View Room"
                   required
                 />
@@ -529,28 +831,36 @@ export default function AdminRooms() {
 
               <div className="field">
 
-                <label>Destination</label>
+                <label>
+                  Destination
+                </label>
 
                 <input
                   name="destination"
-                  value={form.destination}
-                  onChange={handleChange}
+                  value={
+                    form.destination
+                  }
+                  onChange={
+                    handleChange
+                  }
                   placeholder="Kathmandu, Nepal"
                   required
                 />
 
               </div>
 
-              {/* =========================
-                  SEO SETTINGS
-              ========================= */}
+              {/* SEO */}
 
               <div className="field full seo-heading">
 
-                <strong>SEO SETTINGS</strong>
+                <strong>
+                  SEO SETTINGS
+                </strong>
 
                 <small>
-                  These fields help Google understand and display this room page.
+                  These fields help Google
+                  understand and display
+                  this room page.
                 </small>
 
               </div>
@@ -559,17 +869,25 @@ export default function AdminRooms() {
 
               <div className="field">
 
-                <label>SEO URL / Slug</label>
+                <label>
+                  SEO URL / Slug
+                </label>
 
                 <input
                   name="seoSlug"
-                  value={form.seoSlug}
-                  onChange={handleChange}
+                  value={
+                    form.seoSlug
+                  }
+                  onChange={
+                    handleChange
+                  }
                   placeholder="deluxe-mountain-view-room-kathmandu"
                 />
 
                 <small>
-                  Lowercase words separated by hyphens. Do not include https://
+                  Lowercase words separated
+                  by hyphens. Do not include
+                  https://
                 </small>
 
               </div>
@@ -578,17 +896,25 @@ export default function AdminRooms() {
 
               <div className="field">
 
-                <label>SEO Title</label>
+                <label>
+                  SEO Title
+                </label>
 
                 <input
                   name="seoTitle"
-                  value={form.seoTitle}
-                  onChange={handleChange}
+                  value={
+                    form.seoTitle
+                  }
+                  onChange={
+                    handleChange
+                  }
                   placeholder="Deluxe Mountain View Room in Kathmandu | Backpacker Gateways"
                 />
 
                 <small>
-                  Keep the title clear and preferably around 50–60 characters.
+                  Keep the title clear and
+                  preferably around 50–60
+                  characters.
                 </small>
 
               </div>
@@ -597,18 +923,26 @@ export default function AdminRooms() {
 
               <div className="field full">
 
-                <label>SEO Description</label>
+                <label>
+                  SEO Description
+                </label>
 
                 <textarea
                   name="seoDescription"
-                  value={form.seoDescription}
-                  onChange={handleChange}
+                  value={
+                    form.seoDescription
+                  }
+                  onChange={
+                    handleChange
+                  }
                   placeholder="Book a Deluxe Mountain View Room in Kathmandu with Backpacker Gateways. Comfortable accommodation near Thamel with modern amenities."
                   rows="4"
                 />
 
                 <small>
-                  Write a unique, natural description. Around 150–160 characters is a good target.
+                  Write a unique, natural
+                  description. Around 150–160
+                  characters is a good target.
                 </small>
 
               </div>
@@ -617,13 +951,17 @@ export default function AdminRooms() {
 
               <div className="field">
 
-                <label>Price Per Night (NPR)</label>
+                <label>
+                  Price Per Night (NPR)
+                </label>
 
                 <input
                   type="number"
                   name="price"
                   value={form.price}
-                  onChange={handleChange}
+                  onChange={
+                    handleChange
+                  }
                   placeholder="3200"
                   min="0"
                   required
@@ -635,13 +973,19 @@ export default function AdminRooms() {
 
               <div className="field">
 
-                <label>Guest Capacity</label>
+                <label>
+                  Guest Capacity
+                </label>
 
                 <input
                   type="number"
                   name="capacity"
-                  value={form.capacity}
-                  onChange={handleChange}
+                  value={
+                    form.capacity
+                  }
+                  onChange={
+                    handleChange
+                  }
                   placeholder="2"
                   min="1"
                   required
@@ -653,33 +997,198 @@ export default function AdminRooms() {
 
               <div className="field">
 
-                <label>Beds</label>
+                <label>
+                  Beds
+                </label>
 
                 <input
                   name="beds"
                   value={form.beds}
-                  onChange={handleChange}
+                  onChange={
+                    handleChange
+                  }
                   placeholder="1 Double Bed"
                 />
 
               </div>
 
-              {/* IMAGE */}
+              {/* =========================
+                  IMAGE UPLOAD
+              ========================= */}
 
-              <div className="field">
+              <div className="field full image-management">
 
-                <label>Image URL</label>
+                <label>
+                  Room Images
+                </label>
 
-                <input
-                  name="images"
-                  value={form.images}
-                  onChange={handleChange}
-                  placeholder="https://..."
-                />
+                <div className="upload-box">
 
-                <small>
-                  Add one or more image URLs separated by commas.
-                </small>
+                  <div className="upload-title">
+                    Upload images from your
+                    computer or phone
+                  </div>
+
+                  <div className="upload-help">
+                    JPG, JPEG, PNG or WebP.
+                    Images are automatically
+                    optimized and stored as WebP.
+                  </div>
+
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/jpg,image/png,image/webp"
+                    multiple
+                    onChange={
+                      handleImageUpload
+                    }
+                    disabled={
+                      uploadingImages
+                    }
+                  />
+
+                  {uploadingImages && (
+                    <div className="upload-status uploading">
+                      {uploadStatus ||
+                        "Uploading images..."}
+                    </div>
+                  )}
+
+                  {!uploadingImages &&
+                    uploadStatus && (
+                      <div className="upload-status success">
+                        {uploadStatus}
+                      </div>
+                    )}
+
+                </div>
+
+                {/* OLD URL OPTION */}
+
+                <div className="legacy-image-box">
+
+                  <label>
+                    Add Existing Image URL
+                  </label>
+
+                  <div className="url-add-row">
+
+                    <input
+                      type="url"
+                      value={
+                        imageUrlInput
+                      }
+                      onChange={(e) =>
+                        setImageUrlInput(
+                          e.target.value
+                        )
+                      }
+                      placeholder="https://example.com/image.jpg"
+                    />
+
+                    <button
+                      type="button"
+                      className="add-image-btn"
+                      onClick={
+                        addImageUrl
+                      }
+                    >
+                      Add URL
+                    </button>
+
+                  </div>
+
+                  <small>
+                    Existing external image
+                    URLs can still be used.
+                  </small>
+
+                </div>
+
+                {/* IMAGE PREVIEW */}
+
+                {form.images.length >
+                  0 && (
+                  <div className="image-preview-section">
+
+                    <div className="image-preview-heading">
+
+                      <strong>
+                        Selected Images
+                      </strong>
+
+                      <span>
+                        {form.images.length}{" "}
+                        image
+                        {form.images.length !==
+                        1
+                          ? "s"
+                          : ""}
+                      </span>
+
+                    </div>
+
+                    <div className="image-preview-grid">
+
+                      {form.images.map(
+                        (
+                          image,
+                          index
+                        ) => (
+
+                          <div
+                            className="image-preview-card"
+                            key={`${image}-${index}`}
+                          >
+
+                            <img
+                              src={image}
+                              alt={`Room image ${
+                                index + 1
+                              }`}
+                            />
+
+                            {index ===
+                              0 && (
+                              <span className="main-image-badge">
+                                MAIN IMAGE
+                              </span>
+                            )}
+
+                            <button
+                              type="button"
+                              className="remove-image-btn"
+                              onClick={() =>
+                                removeImage(
+                                  index
+                                )
+                              }
+                              disabled={
+                                uploadingImages
+                              }
+                            >
+                              ×
+                            </button>
+
+                            <div className="image-number">
+                              Image{" "}
+                              {index + 1}
+                            </div>
+
+                          </div>
+
+                        )
+                      )}
+
+                    </div>
+
+                    <small>
+                      The first image is used as
+                      the main room image.
+                    </small>
+
+                  </div>
+                )}
 
               </div>
 
@@ -687,12 +1196,18 @@ export default function AdminRooms() {
 
               <div className="field full">
 
-                <label>Description</label>
+                <label>
+                  Description
+                </label>
 
                 <textarea
                   name="description"
-                  value={form.description}
-                  onChange={handleChange}
+                  value={
+                    form.description
+                  }
+                  onChange={
+                    handleChange
+                  }
                   placeholder="Describe the hotel or room..."
                   rows="5"
                   required
@@ -704,17 +1219,24 @@ export default function AdminRooms() {
 
               <div className="field full">
 
-                <label>Amenities</label>
+                <label>
+                  Amenities
+                </label>
 
                 <input
                   name="amenities"
-                  value={form.amenities}
-                  onChange={handleChange}
+                  value={
+                    form.amenities
+                  }
+                  onChange={
+                    handleChange
+                  }
                   placeholder="Mountain View, WiFi, Restaurant, Hot Shower"
                 />
 
                 <small>
-                  Separate amenities using commas.
+                  Separate amenities using
+                  commas.
                 </small>
 
               </div>
@@ -728,8 +1250,12 @@ export default function AdminRooms() {
                   <input
                     type="checkbox"
                     name="available"
-                    checked={form.available}
-                    onChange={handleChange}
+                    checked={
+                      form.available
+                    }
+                    onChange={
+                      handleChange
+                    }
                   />
 
                   Room Available
@@ -745,8 +1271,16 @@ export default function AdminRooms() {
               <button
                 type="submit"
                 className="save-btn"
+                disabled={
+                  savingRoom ||
+                  uploadingImages
+                }
               >
-                {editingId
+                {savingRoom
+                  ? editingId
+                    ? "Updating Room..."
+                    : "Adding Room..."
+                  : editingId
                   ? "Update Room"
                   : "Add Room"}
               </button>
@@ -755,7 +1289,12 @@ export default function AdminRooms() {
                 <button
                   type="button"
                   className="cancel-btn"
-                  onClick={resetForm}
+                  onClick={
+                    resetForm
+                  }
+                  disabled={
+                    savingRoom
+                  }
                 >
                   Cancel Edit
                 </button>
@@ -773,7 +1312,9 @@ export default function AdminRooms() {
 
           <div className="rooms-title">
 
-            <h2>Existing Rooms</h2>
+            <h2>
+              Existing Rooms
+            </h2>
 
             <span>
               {rooms.length} rooms
@@ -787,7 +1328,8 @@ export default function AdminRooms() {
               Loading rooms...
             </div>
 
-          ) : rooms.length === 0 ? (
+          ) : rooms.length ===
+            0 ? (
 
             <div className="empty">
               No rooms found.
@@ -797,81 +1339,104 @@ export default function AdminRooms() {
 
             <div className="admin-rooms-grid">
 
-              {rooms.map((room) => (
+              {rooms.map(
+                (room) => (
 
-                <div
-                  className="admin-room-card"
-                  key={room._id}
-                >
+                  <div
+                    className="admin-room-card"
+                    key={room._id}
+                  >
 
-                  <img
-                    src={
-                      room.images?.[0] ||
-                      "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=1200&q=80"
-                    }
-                    alt={room.name}
-                  />
+                    <img
+                      src={
+                        room.images?.[0] ||
+                        "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=1200&q=80"
+                      }
+                      alt={
+                        room.name
+                      }
+                    />
 
-                  <div className="admin-room-content">
+                    <div className="admin-room-content">
 
-                    <h3>{room.name}</h3>
+                      <h3>
+                        {room.name}
+                      </h3>
 
-                    <p className="destination">
-                      {room.destination}
-                    </p>
-
-                    {room.seoSlug && (
-                      <p className="seo-url-display">
-                        /rooms/{room.seoSlug}
+                      <p className="destination">
+                        {
+                          room.destination
+                        }
                       </p>
-                    )}
 
-                    <p>
-                      {room.description}
-                    </p>
+                      {room.seoSlug && (
+                        <p className="seo-url-display">
+                          /rooms/
+                          {
+                            room.seoSlug
+                          }
+                        </p>
+                      )}
 
-                    <div className="room-meta">
-
-                      <strong>
-                        NPR{" "}
-                        {Number(
-                          room.price || 0
-                        ).toLocaleString("en-NP")}
-                      </strong>
-
-                      <span>
-                        {room.capacity} Guests
-                      </span>
-
-                    </div>
-
-                    <div className="admin-actions">
-
-                      <button
-                        onClick={() =>
-                          handleEdit(room)
+                      <p>
+                        {
+                          room.description
                         }
-                        className="edit-btn"
-                      >
-                        Edit
-                      </button>
+                      </p>
 
-                      <button
-                        onClick={() =>
-                          handleDelete(room._id)
-                        }
-                        className="delete-btn"
-                      >
-                        Delete
-                      </button>
+                      <div className="room-meta">
+
+                        <strong>
+                          NPR{" "}
+                          {Number(
+                            room.price ||
+                              0
+                          ).toLocaleString(
+                            "en-NP"
+                          )}
+                        </strong>
+
+                        <span>
+                          {
+                            room.capacity
+                          }{" "}
+                          Guests
+                        </span>
+
+                      </div>
+
+                      <div className="admin-actions">
+
+                        <button
+                          onClick={() =>
+                            handleEdit(
+                              room
+                            )
+                          }
+                          className="edit-btn"
+                        >
+                          Edit
+                        </button>
+
+                        <button
+                          onClick={() =>
+                            handleDelete(
+                              room._id
+                            )
+                          }
+                          className="delete-btn"
+                        >
+                          Delete
+                        </button>
+
+                      </div>
 
                     </div>
 
                   </div>
 
-                </div>
-
-              ))}
+                )
+              )}
 
             </div>
 
@@ -891,17 +1456,22 @@ export default function AdminRooms() {
                 COMMUNITY MANAGEMENT
               </div>
 
-              <h2>Community Posts</h2>
+              <h2>
+                Community Posts
+              </h2>
 
               <p>
-                Create, review and manage community posts.
+                Create, review and manage
+                community posts.
               </p>
 
             </div>
 
             <button
               className="refresh-community-btn"
-              onClick={loadPosts}
+              onClick={
+                loadPosts
+              }
             >
               Refresh Posts
             </button>
@@ -921,12 +1491,14 @@ export default function AdminRooms() {
                 </span>
 
                 <h3>
-                  Create New Community Post
+                  Create New Community
+                  Post
                 </h3>
 
                 <p>
-                  Publish a new story, travel update,
-                  guide or community announcement.
+                  Publish a new story,
+                  travel update, guide or
+                  community announcement.
                 </p>
 
               </div>
@@ -934,7 +1506,9 @@ export default function AdminRooms() {
             </div>
 
             <form
-              onSubmit={handleCreatePost}
+              onSubmit={
+                handleCreatePost
+              }
               className="community-form"
             >
 
@@ -942,12 +1516,18 @@ export default function AdminRooms() {
 
                 <div className="field">
 
-                  <label>Post Title</label>
+                  <label>
+                    Post Title
+                  </label>
 
                   <input
                     name="title"
-                    value={communityForm.title}
-                    onChange={handleCommunityChange}
+                    value={
+                      communityForm.title
+                    }
+                    onChange={
+                      handleCommunityChange
+                    }
                     placeholder="10 Things to Know Before Everest Base Camp"
                     required
                   />
@@ -956,12 +1536,18 @@ export default function AdminRooms() {
 
                 <div className="field">
 
-                  <label>Category</label>
+                  <label>
+                    Category
+                  </label>
 
                   <select
                     name="category"
-                    value={communityForm.category}
-                    onChange={handleCommunityChange}
+                    value={
+                      communityForm.category
+                    }
+                    onChange={
+                      handleCommunityChange
+                    }
                   >
 
                     <option value="Travel">
@@ -998,12 +1584,18 @@ export default function AdminRooms() {
 
                 <div className="field">
 
-                  <label>Author</label>
+                  <label>
+                    Author
+                  </label>
 
                   <input
                     name="author"
-                    value={communityForm.author}
-                    onChange={handleCommunityChange}
+                    value={
+                      communityForm.author
+                    }
+                    onChange={
+                      handleCommunityChange
+                    }
                     placeholder="Backpacker Gateways"
                   />
 
@@ -1011,12 +1603,18 @@ export default function AdminRooms() {
 
                 <div className="field">
 
-                  <label>Location</label>
+                  <label>
+                    Location
+                  </label>
 
                   <input
                     name="location"
-                    value={communityForm.location}
-                    onChange={handleCommunityChange}
+                    value={
+                      communityForm.location
+                    }
+                    onChange={
+                      handleCommunityChange
+                    }
                     placeholder="Nepal"
                   />
 
@@ -1024,42 +1622,60 @@ export default function AdminRooms() {
 
                 <div className="field full">
 
-                  <label>Image URL</label>
+                  <label>
+                    Image URL
+                  </label>
 
                   <input
                     name="image"
-                    value={communityForm.image}
-                    onChange={handleCommunityChange}
+                    value={
+                      communityForm.image
+                    }
+                    onChange={
+                      handleCommunityChange
+                    }
                     placeholder="https://..."
                   />
 
                   <small>
-                    Add a public image URL for the post.
+                    Add a public image URL
+                    for the post.
                   </small>
 
                 </div>
 
-                {/* ================= RICH TEXT EDITOR ================= */}
+                {/* RICH TEXT */}
 
                 <div className="field full">
 
-                  <label>Post Content</label>
+                  <label>
+                    Post Content
+                  </label>
 
                   <div className="rich-editor">
 
                     <ReactQuill
                       theme="snow"
-                      value={communityForm.content}
-                      onChange={handleContentChange}
-                      modules={quillModules}
-                      formats={quillFormats}
+                      value={
+                        communityForm.content
+                      }
+                      onChange={
+                        handleContentChange
+                      }
+                      modules={
+                        quillModules
+                      }
+                      formats={
+                        quillFormats
+                      }
                       placeholder="Write your community post here..."
                     />
 
                   </div>
 
                   <small className="editor-help">
-                    Use the toolbar to add headings, bold text,
+                    Use the toolbar to add
+                    headings, bold text,
                     lists and text alignment.
                   </small>
 
@@ -1072,8 +1688,12 @@ export default function AdminRooms() {
                     <input
                       type="checkbox"
                       name="featured"
-                      checked={communityForm.featured}
-                      onChange={handleCommunityChange}
+                      checked={
+                        communityForm.featured
+                      }
+                      onChange={
+                        handleCommunityChange
+                      }
                     />
 
                     Feature this post
@@ -1089,7 +1709,9 @@ export default function AdminRooms() {
                 <button
                   type="submit"
                   className="create-post-btn"
-                  disabled={creatingPost}
+                  disabled={
+                    creatingPost
+                  }
                 >
                   {creatingPost
                     ? "Creating Post..."
@@ -1099,8 +1721,12 @@ export default function AdminRooms() {
                 <button
                   type="button"
                   className="clear-post-btn"
-                  onClick={resetCommunityForm}
-                  disabled={creatingPost}
+                  onClick={
+                    resetCommunityForm
+                  }
+                  disabled={
+                    creatingPost
+                  }
                 >
                   Clear
                 </button>
@@ -1119,7 +1745,8 @@ export default function AdminRooms() {
               Loading community posts...
             </div>
 
-          ) : posts.length === 0 ? (
+          ) : posts.length ===
+            0 ? (
 
             <div className="empty">
               No community posts found.
@@ -1132,7 +1759,9 @@ export default function AdminRooms() {
               {posts.map((post) => {
 
                 const status =
-                  getPostStatus(post);
+                  getPostStatus(
+                    post
+                  );
 
                 return (
 
@@ -1142,8 +1771,12 @@ export default function AdminRooms() {
                   >
 
                     <img
-                      src={getPostImage(post)}
-                      alt={getPostTitle(post)}
+                      src={getPostImage(
+                        post
+                      )}
+                      alt={getPostTitle(
+                        post
+                      )}
                     />
 
                     <div className="community-content">
@@ -1163,18 +1796,23 @@ export default function AdminRooms() {
                       </div>
 
                       <h3>
-                        {getPostTitle(post)}
+                        {getPostTitle(
+                          post
+                        )}
                       </h3>
 
                       {post.author && (
                         <p className="post-author">
-                          By {post.author}
+                          By{" "}
+                          {post.author}
                         </p>
                       )}
 
                       {post.category && (
                         <p className="post-category">
-                          {post.category}
+                          {
+                            post.category
+                          }
                           {post.location
                             ? ` • ${post.location}`
                             : ""}
@@ -1184,7 +1822,10 @@ export default function AdminRooms() {
                       <div
                         className="post-text"
                         dangerouslySetInnerHTML={{
-                          __html: getPostText(post),
+                          __html:
+                            getPostText(
+                              post
+                            ),
                         }}
                       />
 
@@ -1217,7 +1858,9 @@ export default function AdminRooms() {
                         <button
                           className="delete-post-btn"
                           onClick={() =>
-                            deletePost(post._id)
+                            deletePost(
+                              post._id
+                            )
                           }
                         >
                           Delete
@@ -1423,10 +2066,181 @@ export default function AdminRooms() {
           color: white;
         }
 
+        .save-btn:disabled {
+          opacity: .6;
+          cursor: not-allowed;
+        }
+
         .cancel-btn {
           background: #e8ece8;
           color: #18231d;
         }
+
+        /* ================= IMAGE UPLOAD ================= */
+
+        .image-management {
+          padding: 20px;
+          background: #fafcfa;
+          border: 1px solid #e1e6e1;
+          border-radius: 14px;
+        }
+
+        .upload-box {
+          border: 2px dashed #cdd6cd;
+          border-radius: 12px;
+          padding: 25px;
+          background: white;
+        }
+
+        .upload-title {
+          font-size: 16px;
+          font-weight: 800;
+          margin-bottom: 6px;
+        }
+
+        .upload-help {
+          color: #68716b;
+          font-size: 13px;
+          margin-bottom: 15px;
+        }
+
+        .upload-box input[type="file"] {
+          padding: 10px;
+          background: #f7f9f7;
+          cursor: pointer;
+        }
+
+        .upload-status {
+          margin-top: 12px;
+          padding: 10px 12px;
+          border-radius: 8px;
+          font-size: 13px;
+          font-weight: 700;
+        }
+
+        .upload-status.uploading {
+          background: #f5eee0;
+          color: #8b6b3f;
+        }
+
+        .upload-status.success {
+          background: #e5f1e7;
+          color: #347044;
+        }
+
+        .legacy-image-box {
+          margin-top: 18px;
+          padding-top: 18px;
+          border-top: 1px solid #e1e6e1;
+        }
+
+        .legacy-image-box > label {
+          display: block;
+          margin-bottom: 8px;
+          font-size: 13px;
+          font-weight: 800;
+        }
+
+        .url-add-row {
+          display: flex;
+          gap: 10px;
+        }
+
+        .url-add-row input {
+          flex: 1;
+        }
+
+        .add-image-btn {
+          border: 0;
+          border-radius: 9px;
+          background: #18231d;
+          color: white;
+          padding: 0 18px;
+          font-weight: 800;
+          cursor: pointer;
+        }
+
+        .image-preview-section {
+          margin-top: 20px;
+        }
+
+        .image-preview-heading {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 12px;
+        }
+
+        .image-preview-heading strong {
+          font-size: 14px;
+        }
+
+        .image-preview-heading span {
+          color: #68716b;
+          font-size: 13px;
+        }
+
+        .image-preview-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 12px;
+        }
+
+        .image-preview-card {
+          position: relative;
+          overflow: hidden;
+          border-radius: 10px;
+          border: 1px solid #dce3dc;
+          background: white;
+        }
+
+        .image-preview-card img {
+          width: 100%;
+          height: 145px;
+          display: block;
+          object-fit: cover;
+        }
+
+        .main-image-badge {
+          position: absolute;
+          top: 8px;
+          left: 8px;
+          background: #18231d;
+          color: white;
+          padding: 5px 7px;
+          border-radius: 5px;
+          font-size: 9px;
+          font-weight: 800;
+        }
+
+        .remove-image-btn {
+          position: absolute;
+          top: 7px;
+          right: 7px;
+          width: 30px;
+          height: 30px;
+          border: 0;
+          border-radius: 50%;
+          background: rgba(163,61,50,.95);
+          color: white;
+          font-size: 20px;
+          line-height: 1;
+          cursor: pointer;
+        }
+
+        .remove-image-btn:disabled {
+          opacity: .5;
+          cursor: not-allowed;
+        }
+
+        .image-number {
+          padding: 8px;
+          font-size: 11px;
+          font-weight: 700;
+          color: #68716b;
+        }
+
+        /* ================= EXISTING ROOMS ================= */
 
         .rooms-title {
           display: flex;
@@ -1563,8 +2377,6 @@ export default function AdminRooms() {
           margin: 0;
           color: #68716b;
         }
-
-        /* ================= NEW POST ================= */
 
         .community-create-card {
           background: white;
@@ -1831,6 +2643,10 @@ export default function AdminRooms() {
             grid-template-columns: repeat(2, 1fr);
           }
 
+          .image-preview-grid {
+            grid-template-columns: repeat(3, 1fr);
+          }
+
         }
 
         @media (max-width: 650px) {
@@ -1861,6 +2677,18 @@ export default function AdminRooms() {
             grid-template-columns: 1fr;
           }
 
+          .image-preview-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+
+          .url-add-row {
+            flex-direction: column;
+          }
+
+          .add-image-btn {
+            min-height: 45px;
+          }
+
           .rich-editor .ql-toolbar {
             padding: 8px;
           }
@@ -1877,4 +2705,3 @@ export default function AdminRooms() {
     </div>
   );
 }
-
