@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { getRoomBySlug } from "../services/roomApi";
@@ -13,6 +14,10 @@ const RoomDetails = () => {
 
   const [activeImage, setActiveImage] = useState(0);
   const [showGallery, setShowGallery] = useState(false);
+
+  /* =========================================================
+     LOAD ROOM
+  ========================================================= */
 
   useEffect(() => {
     let cancelled = false;
@@ -37,6 +42,7 @@ const RoomDetails = () => {
         }
 
         setRoom(result.data);
+        setActiveImage(0);
       } catch (err) {
         if (cancelled) return;
 
@@ -250,6 +256,51 @@ const RoomDetails = () => {
   }, [room, slug]);
 
   /* =========================================================
+     GALLERY DATA
+  ========================================================= */
+
+  const images =
+    Array.isArray(room?.images)
+      ? room.images.filter(Boolean)
+      : [];
+
+  const totalImages = images.length;
+
+  /* =========================================================
+     GALLERY FUNCTIONS
+  ========================================================= */
+
+  const nextImage = () => {
+    if (totalImages <= 1) return;
+
+    setActiveImage(
+      (current) =>
+        (current + 1) % totalImages
+    );
+  };
+
+  const previousImage = () => {
+    if (totalImages <= 1) return;
+
+    setActiveImage(
+      (current) =>
+        (current - 1 + totalImages) %
+        totalImages
+    );
+  };
+
+  const openGallery = (index = 0) => {
+    if (!totalImages) return;
+
+    setActiveImage(index);
+    setShowGallery(true);
+  };
+
+  const closeGallery = () => {
+    setShowGallery(false);
+  };
+
+  /* =========================================================
      KEYBOARD GALLERY CONTROLS
   ========================================================= */
 
@@ -257,33 +308,19 @@ const RoomDetails = () => {
     if (!showGallery) return;
 
     const handleKeyDown = (event) => {
-      const galleryImages =
-        Array.isArray(room?.images)
-          ? room.images.filter(Boolean)
-          : [];
-
-      if (!galleryImages.length) return;
+      if (!totalImages) return;
 
       if (event.key === "Escape") {
-        setShowGallery(false);
+        closeGallery();
         return;
       }
 
       if (event.key === "ArrowRight") {
-        setActiveImage(
-          (current) =>
-            (current + 1) %
-            galleryImages.length
-        );
+        nextImage();
       }
 
       if (event.key === "ArrowLeft") {
-        setActiveImage(
-          (current) =>
-            (current - 1 +
-              galleryImages.length) %
-            galleryImages.length
-        );
+        previousImage();
       }
     };
 
@@ -302,7 +339,7 @@ const RoomDetails = () => {
 
       document.body.style.overflow = "";
     };
-  }, [showGallery, room]);
+  }, [showGallery, totalImages]);
 
   /* =========================================================
      BOOKING
@@ -369,13 +406,8 @@ const RoomDetails = () => {
   const roomName =
     room.name || "Himalayan Room";
 
-  const images =
-    Array.isArray(room.images)
-      ? room.images.filter(Boolean)
-      : [];
-
   const mainImage =
-    images.length > 0
+    totalImages > 0
       ? images[activeImage] || images[0]
       : "";
 
@@ -383,35 +415,7 @@ const RoomDetails = () => {
     images.slice(1, 5);
 
   const hiddenPhotos =
-    Math.max(images.length - 5, 0);
-
-  /* =========================================================
-     CAROUSEL FUNCTIONS
-  ========================================================= */
-
-  const nextImage = () => {
-    if (images.length <= 1) return;
-
-    setActiveImage(
-      (current) =>
-        (current + 1) % images.length
-    );
-  };
-
-  const previousImage = () => {
-    if (images.length <= 1) return;
-
-    setActiveImage(
-      (current) =>
-        (current - 1 + images.length) %
-        images.length
-    );
-  };
-
-  const openGallery = (index = 0) => {
-    setActiveImage(index);
-    setShowGallery(true);
-  };
+    Math.max(totalImages - 5, 0);
 
   /* =========================================================
      PAGE
@@ -426,20 +430,32 @@ const RoomDetails = () => {
 
       <div className="room-gallery-wrapper">
 
-        {images.length > 0 ? (
+        {totalImages > 0 ? (
 
           <section className="room-gallery">
 
             {/* =================================================
-                DESKTOP / TABLET MAIN PHOTO
+                MAIN PHOTO
+                Desktop = large image
+                Mobile = single image
             ================================================= */}
 
-            <button
-              type="button"
+            <div
               className="gallery-main"
               onClick={() =>
                 openGallery(activeImage)
               }
+              role="button"
+              tabIndex={0}
+              onKeyDown={(event) => {
+                if (
+                  event.key === "Enter" ||
+                  event.key === " "
+                ) {
+                  event.preventDefault();
+                  openGallery(activeImage);
+                }
+              }}
               aria-label="View room photo"
             >
 
@@ -452,11 +468,13 @@ const RoomDetails = () => {
                 decoding="async"
               />
 
+              {/* Room name */}
               <span className="gallery-main-label">
                 {roomName}
               </span>
 
-              {images.length > 1 && (
+              {/* Desktop view all */}
+              {totalImages > 1 && (
                 <span className="gallery-view-button">
                   📷 View all photos
                 </span>
@@ -466,7 +484,7 @@ const RoomDetails = () => {
                   MOBILE NEXT ARROW
               ================================================= */}
 
-              {images.length > 1 && (
+              {totalImages > 1 && (
                 <button
                   type="button"
                   className="mobile-gallery-next"
@@ -484,13 +502,13 @@ const RoomDetails = () => {
                   MOBILE PHOTO COUNTER
               ================================================= */}
 
-              {images.length > 1 && (
+              {totalImages > 1 && (
                 <span className="mobile-gallery-counter">
-                  {activeImage + 1} / {images.length}
+                  {activeImage + 1} / {totalImages}
                 </span>
               )}
 
-            </button>
+            </div>
 
             {/* =================================================
                 DESKTOP 4 SMALL PHOTOS
@@ -513,19 +531,9 @@ const RoomDetails = () => {
                       type="button"
                       key={`${image}-${actualIndex}`}
                       className="gallery-tile"
-                      onClick={() => {
-
-                        if (isLastTile) {
-                          openGallery(
-                            actualIndex
-                          );
-                          return;
-                        }
-
-                        openGallery(
-                          actualIndex
-                        );
-                      }}
+                      onClick={() =>
+                        openGallery(actualIndex)
+                      }
                       aria-label={
                         isLastTile
                           ? "View all room photos"
@@ -837,31 +845,31 @@ const RoomDetails = () => {
       ===================================================== */}
 
       {showGallery &&
-        images.length > 0 && (
+        totalImages > 0 && (
 
           <div
             className="gallery-modal"
             role="dialog"
             aria-modal="true"
             aria-label="Room photo gallery"
-            onClick={() =>
-              setShowGallery(false)
-            }
+            onClick={closeGallery}
           >
 
+            {/* Close */}
             <button
               type="button"
               className="gallery-close"
               onClick={(event) => {
                 event.stopPropagation();
-                setShowGallery(false);
+                closeGallery();
               }}
               aria-label="Close gallery"
             >
               ×
             </button>
 
-            {images.length > 1 && (
+            {/* Previous */}
+            {totalImages > 1 && (
               <button
                 type="button"
                 className="gallery-arrow gallery-arrow-left"
@@ -875,6 +883,7 @@ const RoomDetails = () => {
               </button>
             )}
 
+            {/* Image */}
             <img
               className="gallery-modal-image"
               src={images[activeImage]}
@@ -887,7 +896,8 @@ const RoomDetails = () => {
               decoding="async"
             />
 
-            {images.length > 1 && (
+            {/* Next */}
+            {totalImages > 1 && (
               <button
                 type="button"
                 className="gallery-arrow gallery-arrow-right"
@@ -901,9 +911,10 @@ const RoomDetails = () => {
               </button>
             )}
 
+            {/* Counter */}
             <div className="gallery-modal-counter">
               {activeImage + 1} /{" "}
-              {images.length}
+              {totalImages}
             </div>
 
           </div>
@@ -914,3 +925,4 @@ const RoomDetails = () => {
 };
 
 export default RoomDetails;
+
