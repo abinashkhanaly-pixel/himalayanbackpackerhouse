@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getRooms } from "../services/roomApi";
@@ -9,6 +10,12 @@ const PAGE_DESCRIPTION =
 
 const PAGE_CANONICAL =
   "https://www.backpackergateways.com/rooms";
+
+const HOTEL_HERO_IMAGE =
+  "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=2000&q=85";
+
+const HOTEL_FALLBACK_IMAGE =
+  "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80";
 
 export default function Rooms() {
   const [rooms, setRooms] = useState([]);
@@ -105,7 +112,7 @@ export default function Rooms() {
     setMeta(
       'meta[property="og:image"]',
       "content",
-      "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=1600&q=80"
+      HOTEL_HERO_IMAGE
     );
 
     setMeta(
@@ -205,19 +212,21 @@ export default function Rooms() {
 
           <div className="rooms-hero-content">
 
-            <span>LUXURY HOTELS IN NEPAL</span>
+            <span className="hero-eyebrow">
+              PREMIUM STAYS • NEPAL
+            </span>
 
             <h1>
-              Luxury Hotels
+              Stay in Style,
               <br />
-              in Nepal
+              <em>Discover Nepal</em>
             </h1>
 
             <p>
-              Discover luxury hotels and premium stays
-              across Nepal. From Kathmandu and Pokhara
-              to Chitwan and the Himalayas, find comfortable
-              rooms, excellent facilities and memorable stays.
+              Discover elegant hotels and memorable stays
+              across Kathmandu, Pokhara, Chitwan and beyond.
+              Comfort, character and Himalayan hospitality,
+              all in one place.
             </p>
 
           </div>
@@ -262,9 +271,7 @@ export default function Rooms() {
           {/* ROOMS */}
 
           {!loading && rooms.length > 0 && (
-
             <>
-
               <div className="rooms-count">
 
                 <strong>
@@ -290,7 +297,7 @@ export default function Rooms() {
                       <img
                         src={
                           room.images?.[0] ||
-                          "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=1200&q=80"
+                          HOTEL_FALLBACK_IMAGE
                         }
                         alt={`${room.name} in ${
                           room.destination || "Nepal"
@@ -299,7 +306,7 @@ export default function Rooms() {
                         decoding="async"
                         onError={(e) => {
                           e.currentTarget.src =
-                            "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=1200&q=80";
+                            HOTEL_FALLBACK_IMAGE;
                         }}
                       />
 
@@ -409,9 +416,7 @@ export default function Rooms() {
                 ))}
 
               </div>
-
             </>
-
           )}
 
           {/* NO ROOMS */}
@@ -492,21 +497,24 @@ export default function Rooms() {
             sans-serif;
         }
 
-        /* HERO */
+        /* =========================
+           HERO
+        ========================= */
 
         .rooms-hero {
+          position: relative;
           width: 100%;
-          min-height: 500px;
+          min-height: 520px;
 
           background-image:
-            url("https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=2000&q=85");
+            url("${HOTEL_HERO_IMAGE}");
 
           background-size: cover;
           background-position: center;
         }
 
         .rooms-hero-overlay {
-          min-height: 500px;
+          min-height: 520px;
           width: 100%;
 
           display: flex;
@@ -515,9 +523,9 @@ export default function Rooms() {
           background:
             linear-gradient(
               90deg,
-              rgba(10,20,15,.82),
-              rgba(10,20,15,.35),
-              rgba(10,20,15,.15)
+              rgba(8,18,13,.84) 0%,
+              rgba(8,18,13,.58) 42%,
+              rgba(8,18,13,.20) 100%
             );
         }
 
@@ -525,44 +533,126 @@ export default function Rooms() {
           width: 100%;
           max-width: 1280px;
           margin: 0 auto;
-          padding: 60px 6%;
+
+          padding: 70px 6%;
+
           color: white;
         }
 
-        .rooms-hero-content span {
-          display: block;
-          margin-bottom: 18px;
+        /* PREMIUM LABEL */
+
+        .hero-eyebrow {
+          display: inline-block;
+
+          margin-bottom: 22px;
+
+          padding:
+            8px 16px;
+
+          color:
+            rgba(255,255,255,.97);
+
+          background:
+            rgba(255,255,255,.10);
+
+          border:
+            1px solid
+            rgba(255,255,255,.32);
+
+          border-radius: 30px;
+
+          font-family:
+            Georgia,
+            "Times New Roman",
+            serif;
 
           font-size: 13px;
-          font-weight: 800;
-          letter-spacing: 3px;
+          font-style: italic;
+          font-weight: 500;
+
+          letter-spacing: 2.6px;
+
+          backdrop-filter:
+            blur(7px);
+
+          -webkit-backdrop-filter:
+            blur(7px);
+
+          box-shadow:
+            0 8px 25px
+            rgba(0,0,0,.12);
         }
+
+        /* HERO TITLE */
 
         .rooms-hero-content h1 {
-          margin: 0 0 20px;
+          margin:
+            0 0 22px;
+
+          max-width: 780px;
+
+          font-family:
+            Georgia,
+            "Times New Roman",
+            serif;
 
           font-size:
-            clamp(44px, 6vw, 76px);
+            clamp(48px, 6.5vw, 82px);
 
-          line-height: 1.05;
-          font-weight: 700;
+          line-height: 1.02;
+
+          font-weight: 500;
+
+          letter-spacing: -1.5px;
+
+          color: #ffffff;
+
+          text-shadow:
+            0 4px 25px
+            rgba(0,0,0,.28);
         }
+
+        .rooms-hero-content h1 em {
+          color: #f1d7a2;
+
+          font-style: italic;
+
+          font-weight: 400;
+        }
+
+        /* HERO DESCRIPTION */
 
         .rooms-hero-content p {
           max-width: 680px;
 
           margin: 0;
 
-          font-size: 18px;
-          line-height: 1.7;
+          color:
+            rgba(255,255,255,.91);
 
-          color: rgba(255,255,255,.9);
+          font-family:
+            Arial,
+            Helvetica,
+            sans-serif;
+
+          font-size: 17px;
+
+          line-height: 1.75;
+
+          font-weight: 400;
+
+          text-shadow:
+            0 2px 12px
+            rgba(0,0,0,.25);
         }
 
-        /* SECTION */
+        /* =========================
+           SECTION
+        ========================= */
 
         .rooms-section {
-          padding: 90px 6%;
+          padding:
+            90px 6%;
         }
 
         .rooms-container {
@@ -570,11 +660,16 @@ export default function Rooms() {
           margin: 0 auto;
         }
 
-        /* HEADING */
+        /* =========================
+           HEADING
+        ========================= */
 
         .section-heading {
           max-width: 800px;
-          margin: 0 auto 50px;
+
+          margin:
+            0 auto 50px;
+
           text-align: center;
         }
 
@@ -582,13 +677,15 @@ export default function Rooms() {
           color: #8b6b3f;
 
           font-size: 12px;
+
           font-weight: 800;
 
           letter-spacing: 2px;
         }
 
         .section-heading h2 {
-          margin: 12px 0 16px;
+          margin:
+            12px 0 16px;
 
           font-size:
             clamp(34px, 5vw, 54px);
@@ -602,10 +699,13 @@ export default function Rooms() {
           color: #68716b;
 
           font-size: 17px;
+
           line-height: 1.7;
         }
 
-        /* COUNT */
+        /* =========================
+           COUNT
+        ========================= */
 
         .rooms-count {
           margin-bottom: 20px;
@@ -619,7 +719,9 @@ export default function Rooms() {
           color: #18231d;
         }
 
-        /* GRID */
+        /* =========================
+           GRID
+        ========================= */
 
         .rooms-grid {
           display: grid;
@@ -630,14 +732,17 @@ export default function Rooms() {
           gap: 28px;
         }
 
-        /* CARD */
+        /* =========================
+           CARD
+        ========================= */
 
         .room-card {
           overflow: hidden;
 
           background: white;
 
-          border: 1px solid #e2e6e1;
+          border:
+            1px solid #e2e6e1;
 
           border-radius: 22px;
 
@@ -659,7 +764,9 @@ export default function Rooms() {
             rgba(24,35,29,.14);
         }
 
-        /* IMAGE */
+        /* =========================
+           IMAGE
+        ========================= */
 
         .room-image {
           position: relative;
@@ -706,10 +813,13 @@ export default function Rooms() {
           color: #28613b;
 
           font-size: 12px;
+
           font-weight: 800;
         }
 
-        /* CONTENT */
+        /* =========================
+           CONTENT
+        ========================= */
 
         .room-content {
           padding: 24px;
@@ -728,7 +838,8 @@ export default function Rooms() {
         }
 
         .room-top h3 {
-          margin: 0 0 8px;
+          margin:
+            0 0 8px;
 
           font-size: 22px;
 
@@ -768,7 +879,8 @@ export default function Rooms() {
         }
 
         .description {
-          margin: 18px 0;
+          margin:
+            18px 0;
 
           color: #68716b;
 
@@ -777,12 +889,17 @@ export default function Rooms() {
           line-height: 1.65;
 
           display: -webkit-box;
+
           -webkit-line-clamp: 4;
+
           -webkit-box-orient: vertical;
+
           overflow: hidden;
         }
 
-        /* INFO */
+        /* =========================
+           INFO
+        ========================= */
 
         .info {
           display: flex;
@@ -813,7 +930,9 @@ export default function Rooms() {
           font-weight: 600;
         }
 
-        /* AMENITIES */
+        /* =========================
+           AMENITIES
+        ========================= */
 
         .amenities {
           display: flex;
@@ -840,7 +959,9 @@ export default function Rooms() {
           color: #aaa;
         }
 
-        /* BUTTONS */
+        /* =========================
+           BUTTONS
+        ========================= */
 
         .buttons {
           display: flex;
@@ -878,26 +999,31 @@ export default function Rooms() {
         }
 
         .details:hover {
-          background: #f3f5f2;
+          background:
+            #f3f5f2;
         }
 
         .book {
           color: white;
 
-          background: #18231d;
+          background:
+            #18231d;
 
           border:
             1px solid #18231d;
         }
 
         .book:hover {
-          background: #8b6b3f;
+          background:
+            #8b6b3f;
 
           border-color:
             #8b6b3f;
         }
 
-        /* SEO CONTENT */
+        /* =========================
+           SEO CONTENT
+        ========================= */
 
         .rooms-seo-section {
           padding:
@@ -906,6 +1032,7 @@ export default function Rooms() {
 
         .rooms-seo-container {
           max-width: 950px;
+
           margin: 0 auto;
 
           padding: 45px;
@@ -943,10 +1070,13 @@ export default function Rooms() {
           margin-bottom: 0;
         }
 
-        /* LOADING */
+        /* =========================
+           LOADING
+        ========================= */
 
         .loading {
-          padding: 100px 20px;
+          padding:
+            100px 20px;
 
           text-align: center;
 
@@ -955,10 +1085,13 @@ export default function Rooms() {
           font-size: 18px;
         }
 
-        /* NO ROOMS */
+        /* =========================
+           NO ROOMS
+        ========================= */
 
         .no-rooms {
-          padding: 80px 20px;
+          padding:
+            80px 20px;
 
           background: white;
 
@@ -975,7 +1108,9 @@ export default function Rooms() {
           color: #68716b;
         }
 
-        /* RESPONSIVE */
+        /* =========================
+           RESPONSIVE
+        ========================= */
 
         @media (max-width: 1000px) {
 
@@ -989,25 +1124,55 @@ export default function Rooms() {
         @media (max-width: 650px) {
 
           .rooms-hero {
-            min-height: 430px;
+            min-height: 450px;
+
+            background-position:
+              center center;
           }
 
           .rooms-hero-overlay {
-            min-height: 430px;
+            min-height: 450px;
+
+            background:
+              linear-gradient(
+                90deg,
+                rgba(8,18,13,.84),
+                rgba(8,18,13,.42)
+              );
           }
 
           .rooms-hero-content {
             padding:
-              50px 20px;
+              55px 20px;
+          }
+
+          .hero-eyebrow {
+            margin-bottom: 16px;
+
+            padding:
+              6px 11px;
+
+            font-size: 10px;
+
+            letter-spacing: 1.8px;
           }
 
           .rooms-hero-content h1 {
             font-size:
               clamp(42px, 12vw, 58px);
+
+            line-height: 1.04;
+
+            letter-spacing:
+              -0.8px;
           }
 
           .rooms-hero-content p {
-            font-size: 16px;
+            max-width: 100%;
+
+            font-size: 15px;
+
+            line-height: 1.65;
           }
 
           .rooms-section {
@@ -1020,7 +1185,8 @@ export default function Rooms() {
           }
 
           .room-top {
-            flex-direction: column;
+            flex-direction:
+              column;
           }
 
           .price {
@@ -1028,7 +1194,8 @@ export default function Rooms() {
           }
 
           .buttons {
-            flex-direction: column;
+            flex-direction:
+              column;
           }
 
           .rooms-seo-section {
@@ -1037,7 +1204,8 @@ export default function Rooms() {
           }
 
           .rooms-seo-container {
-            padding: 28px 22px;
+            padding:
+              28px 22px;
           }
 
         }
@@ -1047,3 +1215,4 @@ export default function Rooms() {
     </div>
   );
 }
+
