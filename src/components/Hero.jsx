@@ -609,6 +609,7 @@ export default function Hero() {
         {locationLoading && (
           <div className="location-search-message">
             <span>⌖</span>
+
             <div>
               <strong>Searching locations...</strong>
               <small>Finding places worldwide</small>
@@ -1322,6 +1323,7 @@ function MapPin({ className = "", color = "blue" }) {
     </span>
   );
 }
+
 
 
 
