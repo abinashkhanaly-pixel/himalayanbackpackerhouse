@@ -1,4 +1,4 @@
-/* =========================================================
+﻿/* =========================================================
    HERO.CSS
    Backpacker Gateways - Full Homepage
 ========================================================= */
@@ -60,11 +60,12 @@
 
 .hero {
   position: relative;
+  z-index: 2;
   min-height: 780px;
   height: 92vh;
   max-height: 920px;
   color: #fff;
-  overflow: hidden;
+  overflow: visible;
   isolation: isolate;
 }
 
@@ -72,6 +73,7 @@
   position: absolute;
   inset: 0;
   z-index: -3;
+  overflow: hidden;
 }
 
 .hero-background {
@@ -95,6 +97,7 @@
   position: absolute;
   inset: 0;
   z-index: -2;
+  overflow: hidden;
   background:
     linear-gradient(
       180deg,
@@ -388,49 +391,48 @@
   position: relative;
   width: 100%;
   display: grid;
-  grid-template-columns:
-    1.25fr
-    1px
-    1.1fr
-    1px
-    0.78fr
-    auto;
+  grid-template-columns: minmax(220px, 1.25fr) 1.05fr 0.78fr auto;
   align-items: center;
-  min-height: 88px;
+  gap: 10px;
+  min-height: 82px;
   padding: 10px;
-  background: rgba(255, 255, 255, 0.97);
-  border-radius: 0 13px 13px 13px;
-  box-shadow:
-    0 25px 60px rgba(0, 0, 0, 0.18);
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 24px;
+  box-shadow: 0 22px 55px rgba(18, 35, 27, 0.18);
   color: var(--text);
 }
 
 .search-field {
   position: relative;
-  min-height: 65px;
+  min-height: 58px;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 9px 17px;
-  border-radius: 9px;
+  gap: 11px;
+  padding: 7px 16px;
+  border: 1px solid #e5e9e5;
+  border-radius: 999px;
+  background: #f8faf8;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .search-field:hover,
 .search-field.active {
-  background: #f5f5f1;
+  background: #ffffff;
+  border-color: #cdd9d0;
+  box-shadow: 0 5px 18px rgba(18, 35, 27, 0.08);
 }
 
 .search-icon {
-  width: 34px;
-  height: 34px;
+  width: 38px;
+  height: 38px;
   flex-shrink: 0;
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: #edf2ee;
-  color: var(--green);
+  background: #e8f3ec;
+  color: #176b3a;
   font-size: 18px;
 }
 
@@ -438,14 +440,11 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 2px;
 }
 
 .search-field-content small {
-  font-size: 8px;
-  font-weight: 700;
-  letter-spacing: 1.15px;
-  color: #8a918c;
+  display: none;
 }
 
 .search-field-content strong {
@@ -454,50 +453,47 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   max-width: 220px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   color: #29312d;
 }
 
 .field-chevron {
   margin-left: auto;
-  color: #8d9690;
-  font-size: 15px;
+  color: #7b857e;
+  font-size: 14px;
 }
 
 .search-divider {
-  width: 1px;
-  height: 43px;
-  background: #e4e6e2;
+  display: none;
 }
 
 .search-button {
-  height: 62px;
-  min-width: 132px;
+  height: 58px;
+  min-width: 122px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   border: 0;
-  border-radius: 9px;
+  border-radius: 999px;
   background: var(--orange);
   color: #fff;
   font-size: 12px;
   font-weight: 800;
-  transition:
-    transform 0.2s ease,
-    background 0.2s ease;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .search-button:hover {
   background: #d96631;
   transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(217, 102, 49, 0.25);
 }
 
 .search-button span {
-  font-size: 18px;
+  font-size: 17px;
 }
-
 /* =========================================================
    DROPDOWNS
 ========================================================= */
@@ -508,7 +504,9 @@
   top: calc(100% + 10px);
   z-index: 100;
   width: 430px;
-  padding: 23px;
+  width: 430px;
+  max-height: 280px;
+  padding: 16px;
   background: #fff;
   border: 1px solid #e4e7e2;
   border-radius: 14px;
@@ -533,8 +531,8 @@
 .dropdown-heading {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  margin-bottom: 17px;
+  gap: 3px;
+  margin-bottom: 10px;
 }
 
 .dropdown-heading span {
@@ -546,7 +544,7 @@
 
 .dropdown-heading strong {
   font-family: "Manrope", sans-serif;
-  font-size: 20px;
+  font-size: 15px;
   font-weight: 800;
 }
 
@@ -557,16 +555,16 @@
 .destination-options {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 1px;
 }
 
 .destination-options button {
   width: 100%;
   display: grid;
-  grid-template-columns: 48px 1fr auto;
+  grid-template-columns: 40px 1fr auto;
   align-items: center;
-  gap: 12px;
-  padding: 8px;
+  gap: 9px;
+  padding: 5px;
   background: transparent;
   border: 0;
   border-radius: 9px;
@@ -579,8 +577,8 @@
 }
 
 .destination-options img {
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   object-fit: cover;
   border-radius: 8px;
 }
@@ -588,21 +586,21 @@
 .destination-options button span {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
 }
 
 .destination-options button strong {
-  font-size: 12px;
+  font-size: 10px;
   font-weight: 700;
 }
 
 .destination-options button small {
-  font-size: 10px;
+  font-size: 8px;
   color: var(--muted);
 }
 
 .destination-options button b {
-  font-size: 16px;
+  font-size: 13px;
   color: var(--green);
 }
 
@@ -831,6 +829,8 @@
 ========================================================= */
 
 .category-section {
+  position: relative;
+  z-index: 1;
   padding: 0;
   background: #fff;
   border-bottom: 1px solid var(--border);
@@ -1677,7 +1677,6 @@
   transform: translateY(-3px);
   box-shadow: 0 12px 25px rgba(233, 120, 63, 0.3);
 }
-
 
 /* =========================================================
    CTA
@@ -2557,3 +2556,105 @@
     transition: none;
   }
 }
+
+
+/* LOCATION INPUT — MODERN PILL */
+.where-field {
+  overflow: hidden;
+}
+
+.where-field .search-field-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.where-field input {
+  width: 100%;
+  min-width: 0;
+  height: 34px;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+  color: #29312d;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.where-field input::placeholder {
+  color: #29312d;
+  opacity: 1;
+}
+
+.where-field input:focus {
+  border: 0;
+  outline: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+/* COMPACT GUEST DROPDOWN */
+.guest-dropdown {
+  width: 320px;
+  padding: 14px;
+}
+
+.guest-dropdown .dropdown-heading {
+  margin-bottom: 10px;
+}
+
+.guest-dropdown .dropdown-heading span {
+  font-size: 9px;
+  letter-spacing: 1px;
+}
+
+.guest-dropdown .dropdown-heading strong {
+  font-size: 15px;
+}
+
+.guest-row {
+  min-height: 52px;
+  padding: 8px 4px;
+}
+
+.guest-information {
+  gap: 2px;
+}
+
+.guest-information strong {
+  font-size: 13px;
+}
+
+.guest-information small {
+  font-size: 10px;
+}
+
+.guest-counter {
+  gap: 8px;
+}
+
+.guest-counter button {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  border-radius: 50%;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.guest-counter strong {
+  min-width: 18px;
+  text-align: center;
+  font-size: 13px;
+}
+
+.guest-dropdown .done-button {
+  height: 38px;
+  margin-top: 8px;
+  font-size: 12px;
+}
+
