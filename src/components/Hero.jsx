@@ -861,39 +861,18 @@ export default function Hero() {
           ))}
         </div>
       </section>
+{/* FLIGHT CTA */}
+<section className="hero-flight-section">
+  <Link
+    to="/flights"
+    className="hero-flight-search"
+  >
+    <span>Search Flights</span>
+    <span className="hero-flight-arrow">→</span>
+  </Link>
+</section>
 
-      {/* TRENDING DESTINATIONS */}
-      <section className="content-section trending-section">
-        <div className="section-top">
-          <div>
-            <span className="section-label">EXPLORE NEPAL</span>
-            <h2>Trending Destinations</h2>
-          </div>
-
-          <Link to="/experiences">See All â†’</Link>
-        </div>
-
-        <div className="destination-grid-modern">
-          {destinations.map((item) => (
-            <Link
-              to="/experiences"
-              className="trending-card"
-              key={item.name}
-            >
-              <img src={item.image} alt={item.name} loading="lazy" />
-
-              <div className="trending-card-overlay" />
-
-              <div className="trending-card-content">
-                <h3>{item.name}</h3>
-                <span>{item.price}</span>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* HOTELS */}
+            {/* HOTELS */}
       <section className="content-section hotel-section">
         <div className="section-top">
           <div>
