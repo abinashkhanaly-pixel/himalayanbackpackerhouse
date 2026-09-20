@@ -2,6 +2,7 @@ import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import ProtectedRoute from "./components/ProtectedRoute";
+import ScrollToTop from "./components/ScrollToTop";
 
 // Public pages
 const Home = lazy(() => import("./pages/Home"));
@@ -64,6 +65,10 @@ function PageLoader() {
 function App() {
   return (
     <BrowserRouter>
+
+      {/* Always scroll to top when changing pages */}
+      <ScrollToTop />
+
       <Suspense fallback={<PageLoader />}>
         <Routes>
 
@@ -72,6 +77,7 @@ function App() {
 
           {/* ROOMS */}
           <Route path="/rooms" element={<Rooms />} />
+
           <Route
             path="/rooms/:slug"
             element={<RoomDetails />}
