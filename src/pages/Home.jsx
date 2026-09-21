@@ -1,9 +1,9 @@
-import Hero from "../components/Hero";
+import LuxuryHero from "../components/LuxuryHero";
 
 export default function Home() {
   return (
     <>
-      <Hero />
+      <LuxuryHero />
     </>
   );
 }
