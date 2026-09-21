@@ -1438,3 +1438,97 @@
   margin-left: 0 !important;
   margin-right: 0 !important;
 }
+/* =========================================
+   FINAL LUXURY HERO + SEARCH LAYOUT
+   ========================================= */
+
+.luxury-hero {
+  position: relative;
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  overflow: visible;
+  background: #fff;
+}
+
+/* HERO IMAGE */
+.luxury-hero-bg {
+  height: 430px;
+}
+
+.luxury-hero-overlay {
+  height: 430px;
+}
+
+/* HERO AREA EXACTLY SAME HEIGHT AS IMAGE */
+.luxury-hero-container {
+  position: relative;
+  width: 100%;
+  height: 430px;
+  min-height: 430px;
+  box-sizing: border-box;
+}
+
+/* SEARCH BELOW HERO IMAGE */
+.luxury-search-section {
+  position: relative;
+  width: 100%;
+  height: auto;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: #fff;
+  z-index: 20;
+}
+
+/* SEARCH BOX — ATTACHED TO PAGE LEFT */
+.luxury-search-wrap {
+  position: relative;
+  width: min(1120px, 100%);
+  max-width: 100%;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  left: 0 !important;
+  right: auto !important;
+  transform: none !important;
+
+  box-sizing: border-box;
+  z-index: 30;
+}
+
+.luxury-search {
+  position: relative;
+  width: 100%;
+  margin: 0 !important;
+  transform: none !important;
+  box-sizing: border-box;
+}
+
+
+/* =========================================
+   MOBILE
+   ========================================= */
+
+@media (max-width: 700px) {
+
+  .luxury-hero-bg,
+  .luxury-hero-overlay {
+    height: 360px;
+  }
+
+  .luxury-hero-container {
+    height: 360px;
+    min-height: 360px;
+  }
+
+  .luxury-search-wrap {
+    width: 100%;
+    margin: 0 !important;
+  }
+
+  .luxury-search {
+    width: 100%;
+    border-radius: 0;
+  }
+}
