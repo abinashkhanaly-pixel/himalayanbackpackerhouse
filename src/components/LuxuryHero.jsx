@@ -125,7 +125,7 @@ if (activeTab === "packages") {
 }
 
 navigate("/explore");
-
+ 
 
 };
 
@@ -466,63 +466,6 @@ return ( <section className="luxury-hero">
           <span>Search</span>
 
         </button>
-
-      </div>
-
-    </div>
-
-  </div>
-
-  {/* SERVICES */}
-
-  <div className="luxury-services-section">
-
-    <div className="luxury-services">
-
-      <div className="luxury-service">
-
-        <svg viewBox="0 0 24 24">
-          <path d="M3 21V8l9-5 9 5v13" />
-          <path d="M7 21v-6h10v6" />
-          <path d="M7 11h2M15 11h2" />
-        </svg>
-
-        <span>Luxury Stays</span>
-
-      </div>
-
-      <div className="luxury-service">
-
-        <svg viewBox="0 0 24 24">
-          <path d="M3 20l7-11 4 5 3-4 4 10" />
-          <path d="M3 20h18" />
-        </svg>
-
-        <span>Himalayan Journeys</span>
-
-      </div>
-
-      <div className="luxury-service">
-
-        <svg viewBox="0 0 24 24">
-          <path d="M5 17h14l-1-6H6z" />
-          <path d="M8 11l1.5-4h5L16 11" />
-          <circle cx="8" cy="17" r="1.5" />
-          <circle cx="16" cy="17" r="1.5" />
-        </svg>
-
-        <span>Private Vehicles</span>
-
-      </div>
-
-      <div className="luxury-service">
-
-        <svg viewBox="0 0 24 24">
-          <path d="M3 20l7-10 4 5 2-3 5 8" />
-          <path d="M3 20h18" />
-        </svg>
-
-        <span>Luxury Treks</span>
 
       </div>
 
