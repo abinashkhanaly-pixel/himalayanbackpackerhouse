@@ -167,17 +167,14 @@ return ( <section className="luxury-hero">
 
       <div className="luxury-eyebrow">
         <span className="eyebrow-line" />
-        <span>EXPLORE NEPAL IN STYLE</span>
+        <span>EXPLORE NEPAL WITH LUXURIOUS EXPERIENCES</span>
+
         <span className="eyebrow-line" />
       </div>
 
-      <h1>Stay Luxury</h1>
+      <h1>Stay Luxury in Nepal </h1>
 
-      <p className="luxury-subtitle">
-        Discover extraordinary stays, journeys and experiences across Nepal.
-      </p>
-
-      {/* TABS */}
+            {/* TABS */}
 
       <div className="luxury-tabs">
         {tabs.map((tab) => (
