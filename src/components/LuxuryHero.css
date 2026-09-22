@@ -1,6 +1,6 @@
+
 /* =========================================================
    LUXURY HERO
-   Backpacker Gateways
    ========================================================= */
 
 .luxury-hero {
@@ -17,7 +17,7 @@
 
 
 /* =========================================================
-   BACKGROUND SLIDER
+   HERO BACKGROUND
    ========================================================= */
 
 .luxury-hero-bg {
@@ -25,10 +25,8 @@
   top: 0;
   left: 0;
   right: 0;
-
   width: 100%;
   height: 430px;
-
   z-index: -3;
   overflow: hidden;
   background: #111;
@@ -37,21 +35,14 @@
 .luxury-hero-bg img {
   position: absolute;
   inset: 0;
-
   width: 100%;
   height: 100%;
-
   display: block;
-
   object-fit: cover;
   object-position: center 45%;
-
   opacity: 0;
-
   transform: scale(1.05);
-
   transition: opacity 1.4s ease-in-out;
-
   will-change: opacity, transform;
 }
 
@@ -72,34 +63,31 @@
 
 
 /* =========================================================
-   CINEMATIC OVERLAY
+   HERO OVERLAY
    ========================================================= */
 
 .luxury-hero-overlay {
   position: absolute;
-
   top: 0;
   left: 0;
   right: 0;
-
   width: 100%;
   height: 430px;
-
   z-index: -2;
 
   background:
     linear-gradient(
       180deg,
-      rgba(0, 0, 0, 0.62) 0%,
-      rgba(0, 0, 0, 0.32) 30%,
-      rgba(0, 0, 0, 0.36) 58%,
-      rgba(0, 0, 0, 0.72) 100%
+      rgba(0, 0, 0, .62) 0%,
+      rgba(0, 0, 0, .32) 30%,
+      rgba(0, 0, 0, .36) 58%,
+      rgba(0, 0, 0, .72) 100%
     ),
     linear-gradient(
       90deg,
-      rgba(0, 0, 0, 0.55) 0%,
-      rgba(0, 0, 0, 0.10) 55%,
-      rgba(0, 0, 0, 0.35) 100%
+      rgba(0, 0, 0, .55) 0%,
+      rgba(0, 0, 0, .10) 55%,
+      rgba(0, 0, 0, .35) 100%
     );
 }
 
@@ -110,23 +98,15 @@
 
 .luxury-hero-glow {
   position: absolute;
-
   width: 620px;
   height: 620px;
-
   top: -260px;
   left: 50%;
-
   transform: translateX(-50%);
-
   z-index: -1;
-
   border-radius: 50%;
-
-  background: rgba(255, 255, 255, 0.08);
-
+  background: rgba(255, 255, 255, .08);
   filter: blur(100px);
-
   pointer-events: none;
 }
 
@@ -137,30 +117,21 @@
 
 .luxury-hero-container {
   position: relative;
-
   width: 100%;
   max-width: 1400px;
-
   height: 430px;
   min-height: 430px;
-
   margin: 0 auto;
-
   padding: 28px 32px 0;
-
   box-sizing: border-box;
-
   z-index: 5;
 }
 
 .luxury-hero-content {
   width: 100%;
-
   display: flex;
   flex-direction: column;
-
   align-items: center;
-
   text-align: center;
 }
 
@@ -171,175 +142,144 @@
 
 .luxury-eyebrow {
   display: flex;
-
   align-items: center;
   justify-content: center;
-
   gap: 12px;
-
   margin-bottom: 10px;
 
   font-size: 11px;
   font-weight: 700;
-
   letter-spacing: 3px;
   text-transform: uppercase;
-
-  color: rgba(255, 255, 255, 0.82);
+  color: rgba(255, 255, 255, .82);
 }
 
 .eyebrow-line {
   width: 32px;
   height: 1px;
-
   flex: 0 0 auto;
-
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, .6);
 }
 
 
 /* =========================================================
-   HEADING
+   HERO TITLE
    ========================================================= */
 
 .luxury-hero h1 {
   margin: 0;
 
   font-family: Georgia, "Times New Roman", serif;
-
   font-size: clamp(48px, 6vw, 78px);
-
-  line-height: 0.95;
-
+  line-height: .95;
   font-weight: 500;
-
   letter-spacing: -2px;
 
   color: #fff;
-
-  text-shadow:
-    0 4px 25px rgba(0, 0, 0, 0.35);
+  text-shadow: 0 4px 25px rgba(0, 0, 0, .35);
 }
 
 
 /* =========================================================
    SUBTITLE
-   Kept for compatibility if JSX still contains it.
-   If removed from JSX, it has no effect.
    ========================================================= */
 
 .luxury-subtitle {
   max-width: 620px;
-
   margin: 12px 0 20px;
 
   font-size: 15px;
-
   line-height: 1.5;
-
   font-weight: 400;
 
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, .9);
 }
 
 
 /* =========================================================
-   TABS
+   LUXURY NAVIGATION
    ========================================================= */
 
 .luxury-tabs {
   display: flex;
-
   align-items: center;
   justify-content: center;
 
   gap: 5px;
-
   padding: 6px;
 
-  /*
-    IMPORTANT:
-    This creates the visible space between
-    "Stay Luxury in Nepal"
-    and the navigation tabs.
-  */
   margin-top: 50px !important;
   margin-bottom: 0;
 
-  border: 1px solid rgba(255, 255, 255, 0.22);
-
+  border: 1px solid rgba(255, 255, 255, .22);
   border-radius: 17px;
 
-  background: rgba(20, 20, 20, 0.38);
+  background: rgba(20, 20, 20, .38);
 
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
 
   box-shadow:
-    0 15px 45px rgba(0, 0, 0, 0.20),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    0 15px 45px rgba(0, 0, 0, .20),
+    inset 0 1px 0 rgba(255, 255, 255, .12);
 
   box-sizing: border-box;
 }
 
 
 /* =========================================================
-   TAB
+   NAVIGATION TAB
    ========================================================= */
 
 .luxury-tab {
   display: flex;
-
   align-items: center;
   justify-content: center;
 
-  gap: 8px;
+  gap: 9px;
 
-  min-height: 44px;
-
-  padding: 0 18px;
+  min-height: 48px;
+  padding: 0 22px;
 
   border: 0;
-
-  border-radius: 12px;
+  border-radius: 13px;
 
   background: transparent;
 
-  color: rgba(255, 255, 255, 0.86);
+  color: rgba(255, 255, 255, .88);
 
   font-family: inherit;
-
-  font-size: 13px;
-
+  font-size: 15px;
   font-weight: 600;
 
   cursor: pointer;
-
   white-space: nowrap;
 
   transition:
-    background 0.25s ease,
-    color 0.25s ease,
-    transform 0.25s ease,
-    box-shadow 0.25s ease;
+    background .25s ease,
+    color .25s ease,
+    transform .25s ease,
+    box-shadow .25s ease,
+    font-size .25s ease;
 }
 
 .luxury-tab:hover {
-  background: rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, .16);
   color: #fff;
 }
 
 .luxury-tab.active {
-  color: #161616;
-
+  color: #111;
   background: #fff;
 
-  box-shadow:
-    0 6px 20px rgba(0, 0, 0, 0.18);
+  font-size: 16px;
+  font-weight: 700;
+
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .24);
 }
 
 .luxury-tab:active {
-  transform: scale(0.97);
+  transform: scale(.96);
 }
 
 
@@ -352,7 +292,6 @@
   height: 18px;
 
   display: inline-flex;
-
   align-items: center;
   justify-content: center;
 
@@ -364,11 +303,8 @@
   height: 18px;
 
   fill: none;
-
   stroke: currentColor;
-
   stroke-width: 1.7;
-
   stroke-linecap: round;
   stroke-linejoin: round;
 }
@@ -380,55 +316,50 @@
 
 .luxury-hero-dots {
   display: flex;
-
   align-items: center;
   justify-content: center;
 
   gap: 7px;
-
-  margin-top: 14px;
+  margin-top: 12px;
 }
 
-.luxury-hero-dots button {
-  width: 7px;
-  height: 7px;
+.luxury-hero-dot {
+  width: 6px;
+  height: 6px;
 
   padding: 0;
-
   border: 0;
+  border-radius: 50%;
 
-  border-radius: 999px;
-
-  background: rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, .45);
 
   cursor: pointer;
 
   transition:
-    width 0.25s ease,
-    background 0.25s ease,
-    transform 0.25s ease;
+    width .25s ease,
+    background .25s ease,
+    transform .25s ease;
 }
 
-.luxury-hero-dots button:hover {
-  background: rgba(255, 255, 255, 0.80);
-}
-
-.luxury-hero-dots button.active {
-  width: 22px;
+.luxury-hero-dot.active {
+  width: 20px;
+  border-radius: 10px;
   background: #fff;
+}
+
+.luxury-hero-dot:hover {
+  transform: scale(1.2);
 }
 
 
 /* =========================================================
    SEARCH SECTION
-   Search starts exactly after hero image.
    ========================================================= */
 
 .luxury-search-section {
   position: relative;
 
   width: 100%;
-
   height: auto;
 
   margin: 0 !important;
@@ -442,7 +373,6 @@
 
 /* =========================================================
    SEARCH WRAPPER
-   ZERO LEFT GAP
    ========================================================= */
 
 .luxury-search-wrap {
@@ -451,14 +381,8 @@
   width: min(1120px, 100%);
   max-width: 100%;
 
-  margin: 0 !important;
-
+  margin: 0 auto !important;
   padding: 0 !important;
-
-  left: 0 !important;
-  right: auto !important;
-
-  transform: none !important;
 
   box-sizing: border-box;
 
@@ -467,7 +391,7 @@
 
 
 /* =========================================================
-   SEARCH BOX
+   MAIN SEARCH BOX
    ========================================================= */
 
 .luxury-search {
@@ -476,31 +400,23 @@
   width: 100%;
 
   display: flex;
-
   align-items: stretch;
 
   min-height: 82px;
 
   margin: 0 !important;
-
   padding: 8px;
 
-  border: 1px solid rgba(255, 255, 255, 0.55);
-
+  border: 1px solid rgba(0, 0, 0, .06);
   border-radius: 19px;
 
-  background: rgba(255, 255, 255, 0.98);
+  background: #fff;
 
   box-shadow:
-    0 24px 70px rgba(0, 0, 0, 0.30),
-    0 8px 25px rgba(0, 0, 0, 0.15);
+    0 24px 70px rgba(0, 0, 0, .30),
+    0 8px 25px rgba(0, 0, 0, .15);
 
   color: #151515;
-
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-
-  transform: none !important;
 
   box-sizing: border-box;
 
@@ -513,143 +429,29 @@
    ========================================================= */
 
 .search-field {
-  display: flex;
+  position: relative;
 
+  display: flex;
   align-items: center;
 
+  flex: 1 1 0;
   min-width: 0;
 
-  padding: 10px 16px;
+  padding: 0 18px;
 
-  text-align: left;
+  box-sizing: border-box;
 }
 
 .destination-field {
-  flex: 1.35;
+  flex: 1.35 1 0;
 }
 
 .dates-field {
-  flex: 1.10;
+  flex: 1.35 1 0;
 }
 
 .travelers-field {
-  position: relative;
-
-  flex: 0.85;
-}
-
-
-/* =========================================================
-   SEARCH ICON
-   ========================================================= */
-
-.search-icon {
-  width: 24px;
-  height: 24px;
-
-  flex: 0 0 24px;
-
-  margin-right: 12px;
-
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
-  color: #333;
-}
-
-.search-icon svg {
-  width: 21px;
-  height: 21px;
-
-  fill: none;
-
-  stroke: currentColor;
-
-  stroke-width: 1.7;
-
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-
-/* =========================================================
-   SEARCH CONTENT
-   ========================================================= */
-
-.search-field-content {
-  min-width: 0;
-  flex: 1;
-}
-
-.search-field-content label {
-  display: block;
-
-  margin-bottom: 5px;
-
-  font-size: 11px;
-
-  line-height: 1;
-
-  font-weight: 700;
-
-  color: #222;
-}
-
-.search-field-content input {
-  width: 100%;
-
-  min-width: 0;
-
-  padding: 0;
-
-  border: 0;
-  outline: 0;
-
-  background: transparent;
-
-  font-family: inherit;
-
-  font-size: 14px;
-
-  font-weight: 500;
-
-  color: #202020;
-}
-
-.search-field-content input::placeholder {
-  color: #777;
-}
-
-.search-field-content input:focus {
-  outline: none;
-}
-
-
-/* =========================================================
-   DATE INPUTS
-   ========================================================= */
-
-.date-inputs {
-  display: flex;
-
-  align-items: center;
-
-  gap: 7px;
-
-  width: 100%;
-}
-
-.date-inputs input {
-  width: 100%;
-  min-width: 0;
-}
-
-.date-inputs span {
-  color: #888;
-
-  font-size: 13px;
+  flex: 1.2 1 0;
 }
 
 
@@ -659,58 +461,262 @@
 
 .search-divider {
   width: 1px;
-  height: 46px;
+  height: 48px;
 
+  flex: 0 0 1px;
   align-self: center;
 
-  background: #e2e2e2;
+  background: #e5e5e5;
 }
 
 
 /* =========================================================
-   TRAVELERS
+   SEARCH ICON
    ========================================================= */
 
-.traveler-trigger {
-  width: 100%;
-
-  padding: 0;
-
-  border: 0;
-
-  background: transparent;
-
+.search-icon {
   display: flex;
+  align-items: center;
+  justify-content: center;
 
-  flex-direction: column;
+  width: 22px;
+  height: 22px;
 
-  align-items: flex-start;
+  min-width: 22px;
+  min-height: 22px;
 
-  cursor: pointer;
+  margin-right: 12px;
 
-  text-align: left;
+  flex: 0 0 22px;
+
+  color: #555;
+
+  box-sizing: border-box;
 }
 
-.traveler-label {
-  margin-bottom: 5px;
+.search-icon svg {
+  display: block;
 
-  font-size: 11px;
+  width: 19px;
+  height: 19px;
 
-  line-height: 1;
+  fill: none;
 
-  font-weight: 700;
+  stroke: currentColor;
+  stroke-width: 1.8;
 
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.search-field:hover .search-icon {
   color: #222;
 }
 
+
+/* =========================================================
+   SEARCH FIELD CONTENT
+   ========================================================= */
+
+.search-field-content {
+  display: flex;
+  flex-direction: column;
+
+  justify-content: center;
+
+  min-width: 0;
+  width: 100%;
+
+  flex: 1;
+}
+
+
+/* =========================================================
+   LABEL
+   ========================================================= */
+
+.search-field-content label {
+  display: block;
+
+  margin: 0 0 5px;
+
+  font-size: 10px;
+  line-height: 1.1;
+
+  font-weight: 700;
+  letter-spacing: 1.2px;
+
+  text-transform: uppercase;
+
+  color: #777;
+}
+
+
+/* =========================================================
+   DESTINATION INPUT
+   ========================================================= */
+
+.destination-field input {
+  width: 100%;
+  min-width: 0;
+
+  padding: 0;
+  margin: 0;
+
+  border: 0;
+  outline: 0;
+
+  background: transparent;
+
+  color: #222;
+
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+
+  line-height: 1.3;
+
+  box-sizing: border-box;
+}
+
+.destination-field input::placeholder {
+  color: #999;
+  opacity: 1;
+}
+
+.destination-field input:focus {
+  outline: none;
+}
+
+
+/* =========================================================
+   DATES
+   ========================================================= */
+
+.date-inputs {
+  display: flex;
+  align-items: center;
+
+  width: 100%;
+  min-width: 0;
+
+  gap: 10px;
+}
+
+.date-inputs input {
+  width: 100%;
+  min-width: 0;
+
+  padding: 0;
+  margin: 0;
+
+  border: 0;
+  outline: 0;
+
+  background: transparent;
+
+  color: #222;
+
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+
+  line-height: 1.3;
+}
+
+.date-inputs input:focus {
+  outline: none;
+}
+
+.date-inputs span {
+  flex: 0 0 auto;
+
+  font-size: 17px;
+  font-weight: 400;
+
+  color: #888;
+}
+
+
+/* =========================================================
+   TRAVELER BUTTON
+   ========================================================= */
+
+.traveler-trigger {
+  position: relative;
+
+  width: 100%;
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+
+  padding: 0;
+  margin: 0;
+
+  border: 0;
+  outline: 0;
+
+  background: transparent;
+
+  color: #222;
+
+  font-family: inherit;
+
+  text-align: left;
+
+  cursor: pointer;
+}
+
+.traveler-trigger:focus {
+  outline: none;
+}
+
+
+/* =========================================================
+   TRAVELER LABEL
+   ========================================================= */
+
+.traveler-label {
+  display: block;
+
+  margin-bottom: 5px;
+
+  font-size: 10px;
+  line-height: 1.1;
+
+  font-weight: 700;
+  letter-spacing: 1.2px;
+
+  text-transform: uppercase;
+
+  color: #777;
+}
+
+
+/* =========================================================
+   TRAVELER SUMMARY
+   ========================================================= */
+
 .traveler-summary {
-  font-size: 14px;
+  display: block;
 
-  font-weight: 500;
+  width: 100%;
+  min-width: 0;
 
-  color: #202020;
+  overflow: hidden;
+
+  font-size: 15px;
+  line-height: 1.3;
+
+  font-weight: 600;
+
+  color: #222;
 
   white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 
@@ -721,60 +727,79 @@
 .traveler-popup {
   position: absolute;
 
-  top: calc(100% + 14px);
+  top: calc(100% + 12px);
   right: 0;
 
-  z-index: 50;
+  width: 350px;
+  max-width: calc(100vw - 30px);
 
-  width: 310px;
+  padding: 16px;
 
-  padding: 18px;
-
-  border: 1px solid #e5e5e5;
-
+  border: 1px solid rgba(0, 0, 0, .08);
   border-radius: 16px;
 
   background: #fff;
 
+  color: #222;
+
   box-shadow:
-    0 22px 60px rgba(0, 0, 0, 0.22);
+    0 20px 55px rgba(0, 0, 0, .20);
 
-  color: #161616;
+  z-index: 1000;
 
-  text-align: left;
+  box-sizing: border-box;
 }
+
+
+/* =========================================================
+   TRAVELER ROW
+   ========================================================= */
 
 .traveler-row {
   display: flex;
-
   align-items: center;
   justify-content: space-between;
 
-  padding: 12px 0;
+  width: 100%;
 
-  border-bottom: 1px solid #ededed;
+  padding: 14px 4px;
+
+  border-bottom: 1px solid #eeeeee;
+
+  box-sizing: border-box;
 }
 
 .traveler-row:last-of-type {
   border-bottom: 0;
 }
 
+.traveler-row > div:first-child {
+  display: flex;
+  flex-direction: column;
+
+  min-width: 0;
+}
+
 .traveler-row strong {
   display: block;
 
-  margin-bottom: 3px;
-
   font-size: 14px;
+  line-height: 1.3;
 
   font-weight: 700;
+
+  color: #222;
 }
 
 .traveler-row small {
   display: block;
 
-  font-size: 11px;
+  margin-top: 4px;
 
-  color: #777;
+  font-size: 11px;
+  line-height: 1.2;
+
+  color: #888;
 }
 
 
@@ -784,86 +809,103 @@
 
 .counter {
   display: flex;
-
   align-items: center;
 
   gap: 12px;
+
+  flex: 0 0 auto;
 }
 
 .counter button {
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
 
-  border: 1px solid #d6d6d6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
+  padding: 0;
+
+  border: 1px solid #d7d7d7;
   border-radius: 50%;
 
   background: #fff;
 
   color: #222;
 
+  font-family: inherit;
   font-size: 18px;
-
   line-height: 1;
 
   cursor: pointer;
 
   transition:
-    background 0.2s ease,
-    border-color 0.2s ease;
+    background .2s ease,
+    border-color .2s ease,
+    transform .2s ease;
 }
 
 .counter button:hover:not(:disabled) {
-  background: #f4f4f4;
-  border-color: #999;
+  background: #f5f5f5;
+  border-color: #aaa;
+}
+
+.counter button:active:not(:disabled) {
+  transform: scale(.94);
 }
 
 .counter button:disabled {
-  opacity: 0.35;
+  opacity: .35;
   cursor: not-allowed;
 }
 
 .counter span {
-  width: 18px;
+  min-width: 22px;
 
   text-align: center;
 
   font-size: 14px;
-
   font-weight: 700;
+
+  color: #222;
 }
 
 
 /* =========================================================
-   TRAVELER DONE
+   DONE BUTTON
    ========================================================= */
 
 .traveler-done {
   width: 100%;
 
-  margin-top: 14px;
+  min-height: 44px;
 
-  padding: 11px 16px;
+  margin-top: 14px;
+  padding: 0 18px;
 
   border: 0;
-
   border-radius: 10px;
 
-  background: #171717;
-
+  background: #111;
   color: #fff;
 
-  font-size: 13px;
-
+  font-family: inherit;
+  font-size: 14px;
   font-weight: 700;
 
   cursor: pointer;
 
-  transition: background 0.2s ease;
+  transition:
+    background .2s ease,
+    transform .2s ease;
 }
 
 .traveler-done:hover {
-  background: #333;
+  background: #222;
+}
+
+.traveler-done:active {
+  transform: scale(.98);
 }
 
 
@@ -872,65 +914,60 @@
    ========================================================= */
 
 .luxury-search-button {
-  flex: 0 0 auto;
-
-  min-width: 126px;
-
-  margin-left: 7px;
-
-  padding: 0 22px;
-
-  border: 0;
-
-  border-radius: 14px;
-
   display: flex;
-
   align-items: center;
   justify-content: center;
 
-  gap: 8px;
+  gap: 9px;
 
-  background: #171717;
+  flex: 0 0 auto;
 
+  min-width: 145px;
+  min-height: 64px;
+
+  margin: 0;
+
+  padding: 0 24px;
+
+  border: 0;
+  border-radius: 14px;
+
+  background: #111;
   color: #fff;
 
   font-family: inherit;
-
   font-size: 14px;
-
   font-weight: 700;
 
   cursor: pointer;
 
   transition:
-    background 0.25s ease,
-    transform 0.25s ease,
-    box-shadow 0.25s ease;
+    background .25s ease,
+    transform .25s ease,
+    box-shadow .25s ease;
 }
 
 .luxury-search-button:hover {
-  background: #303030;
-
-  transform: translateY(-1px);
+  background: #222;
 
   box-shadow:
-    0 8px 20px rgba(0, 0, 0, 0.22);
+    0 8px 22px rgba(0, 0, 0, .18);
 }
 
 .luxury-search-button:active {
-  transform: translateY(0);
+  transform: scale(.97);
 }
 
 .luxury-search-button svg {
   width: 18px;
   height: 18px;
 
+  flex: 0 0 auto;
+
   fill: none;
 
   stroke: currentColor;
-
-  stroke-width: 2;
+  stroke-width: 1.8;
 
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -965,7 +1002,7 @@
 
     scrollbar-width: none;
 
-    margin-top: 35px !important;
+    margin-top: 50px !important;
   }
 
   .luxury-tabs::-webkit-scrollbar {
@@ -976,28 +1013,66 @@
     flex: 0 0 auto;
   }
 
-  .luxury-search {
-    flex-wrap: wrap;
 
-    padding: 9px;
+  /* Search */
+
+  .luxury-search {
+    border-radius: 16px;
   }
 
-  .destination-field,
-  .dates-field,
-  .travelers-field {
-    flex: 1 1 30%;
+  .search-field {
+    padding-left: 11px;
+    padding-right: 11px;
+  }
+
+  .search-icon {
+    width: 20px;
+    height: 20px;
+
+    min-width: 20px;
+
+    flex-basis: 20px;
+
+    margin-right: 8px;
+  }
+
+  .search-icon svg {
+    width: 17px;
+    height: 17px;
   }
 
   .search-divider {
-    display: none;
+    height: 42px;
+  }
+
+  .destination-field {
+    flex: 1.2 1 0;
+  }
+
+  .dates-field {
+    flex: 1.3 1 0;
+  }
+
+  .travelers-field {
+    flex: 1.15 1 0;
+  }
+
+  .destination-field input,
+  .traveler-summary {
+    font-size: 13px;
+  }
+
+  .date-inputs {
+    gap: 6px;
+  }
+
+  .date-inputs input {
+    font-size: 12px;
   }
 
   .luxury-search-button {
-    min-height: 58px;
-
-    flex: 1 1 100%;
-
-    margin: 6px 0 0;
+    min-width: 120px;
+    padding: 0 16px;
   }
 }
 
@@ -1030,11 +1105,12 @@
     padding: 35px 16px 0;
   }
 
+
+  /* Eyebrow */
+
   .luxury-eyebrow {
     font-size: 9px;
-
     letter-spacing: 2px;
-
     gap: 8px;
   }
 
@@ -1042,15 +1118,17 @@
     width: 20px;
   }
 
+
+  /* Title */
+
   .luxury-hero h1 {
     font-size: 48px;
-
     letter-spacing: -1.5px;
   }
 
-  /*
-    Keep the heading-to-tabs spacing on mobile.
-  */
+
+  /* Navigation */
+
   .luxury-tabs {
     width: 100%;
 
@@ -1072,12 +1150,19 @@
   }
 
   .luxury-tab {
-    min-height: 42px;
+    min-height: 44px;
 
-    padding: 0 14px;
+    padding: 0 16px;
 
-    font-size: 12px;
+    font-size: 14px;
   }
+
+  .luxury-tab.active {
+    font-size: 15px;
+  }
+
+
+  /* Navigation icons */
 
   .luxury-tab-icon {
     width: 16px;
@@ -1090,76 +1175,89 @@
   }
 
 
-  /* =======================================================
-     SEARCH BELOW IMAGE
-     ======================================================= */
+  /* Dots */
 
-  .luxury-search-wrap {
-    width: 100%;
-    max-width: 100%;
-
-    margin: 0 !important;
+  .luxury-hero-dots {
+    margin-top: 12px;
   }
 
+
+  /* =====================================================
+     MOBILE SEARCH
+     ===================================================== */
+
   .luxury-search {
-    display: block;
+    flex-direction: column;
 
-    width: 100%;
+    min-height: 0;
 
-    padding: 10px;
+    padding: 8px;
 
-    border-radius: 0;
+    border-radius: 16px;
   }
 
   .search-field {
-    min-height: 62px;
+    width: 100%;
 
-    padding: 10px 8px;
+    min-height: 65px;
+
+    padding: 0 14px;
+  }
+
+  .search-divider {
+    display: none;
   }
 
   .destination-field,
   .dates-field,
   .travelers-field {
-    width: 100%;
+    flex: none;
   }
 
-  .search-divider {
-    display: block;
 
-    width: calc(100% - 16px);
+  .search-icon {
+    width: 20px;
+    height: 20px;
 
-    height: 1px;
+    min-width: 20px;
 
-    margin: 0 auto;
+    flex-basis: 20px;
   }
+
+  .search-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+
 
   .date-inputs {
-    gap: 5px;
+    gap: 8px;
   }
 
   .date-inputs input {
     font-size: 13px;
   }
 
+
+  /* Traveler popup on mobile */
+
+  .traveler-popup {
+    top: calc(100% + 8px);
+    right: 0;
+
+    width: 320px;
+    max-width: calc(100vw - 32px);
+  }
+
+
+  /* Search button */
+
   .luxury-search-button {
     width: 100%;
 
-    min-height: 55px;
+    min-height: 56px;
 
-    margin: 6px 0 0;
-  }
-
-  .traveler-popup {
-    position: absolute;
-
-    left: 0;
-    right: 0;
-
-    width: 100%;
-  }
-
-  .luxury-hero-dots {
-    margin-top: 12px;
+    margin-top: 4px;
   }
 }
 
@@ -1184,12 +1282,55 @@
   }
 
   .luxury-tab span:last-child {
-    font-size: 11px;
+    font-size: 13px;
+  }
+
+  .luxury-tab.active span:last-child {
+    font-size: 14px;
+    font-weight: 700;
   }
 
   .luxury-search-wrap {
     width: 100%;
-    max-width: 100%;
+  }
+
+  .luxury-search {
+    border-radius: 14px;
+  }
+
+  .search-field {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .search-icon {
+    width: 20px;
+    height: 20px;
+
+    min-width: 20px;
+
+    flex-basis: 20px;
+  }
+
+  .search-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .destination-field input,
+  .traveler-summary {
+    font-size: 14px;
+  }
+
+  .traveler-popup {
+    width: 300px;
+    max-width: calc(100vw - 24px);
+
+    padding: 14px;
+  }
+
+  .traveler-row {
+    padding: 12px 2px;
   }
 }
 
@@ -1201,16 +1342,153 @@
 @media (prefers-reduced-motion: reduce) {
 
   .luxury-hero-bg img {
-    animation: none;
-
-    transform: scale(1.04);
-
     transition: none;
+    animation: none !important;
   }
 
   .luxury-tab,
   .luxury-search-button,
-  .luxury-hero-dots button {
+  .luxury-hero-dot,
+  .counter button,
+  .traveler-done {
     transition: none;
   }
 }
+/* =========================================
+   MODERN LUXURY SEARCH BAR BACKGROUND
+========================================= */
+
+.luxury-search {
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.98),
+      rgba(248, 246, 241, 0.96)
+    );
+
+  border: 1px solid rgba(255, 255, 255, 0.75);
+
+  box-shadow:
+    0 18px 50px rgba(0, 0, 0, 0.18),
+    0 4px 18px rgba(0, 0, 0, 0.08);
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+
+/* =========================================
+   COLORED SEARCH ICONS
+========================================= */
+
+/* Location / Map icon */
+.destination-field .search-icon {
+  color: #c58b3a;
+}
+
+.destination-field .search-icon svg {
+  stroke: #c58b3a;
+}
+
+
+/* Calendar icon */
+.dates-field .search-icon {
+  color: #8b6f47;
+}
+
+.dates-field .search-icon svg {
+  stroke: #8b6f47;
+}
+
+
+/* Travelers icon */
+.travelers-field .search-icon {
+  color: #667a63;
+}
+
+.travelers-field .search-icon svg {
+  stroke: #667a63;
+}
+
+
+/* Slight premium icon treatment */
+.search-icon svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke-width: 1.8;
+}
+
+
+/* =========================================
+   MODERN CINEMATIC HERO SLIDER
+========================================= */
+
+.luxury-hero-bg {
+  background: #111;
+}
+
+.luxury-hero-bg img {
+  opacity: 0;
+  transform: scale(1.04);
+
+  transition:
+    opacity 1.8s ease-in-out,
+    transform 8s ease-out;
+
+  filter: saturate(0.92) contrast(1.03);
+}
+
+.luxury-hero-bg img.active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+
+/* =========================================
+   MODERN FADING OVERLAY
+========================================= */
+
+.luxury-hero-overlay {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(8, 12, 18, 0.22) 0%,
+      rgba(8, 12, 18, 0.08) 35%,
+      rgba(8, 12, 18, 0.38) 72%,
+      rgba(8, 12, 18, 0.78) 100%
+    );
+}
+
+
+/* Soft cinematic side fade */
+.luxury-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.28),
+      transparent 28%,
+      transparent 72%,
+      rgba(0, 0, 0, 0.18)
+    );
+
+  z-index: 1;
+}
+
+
+/* Keep hero content above the cinematic overlay */
+.luxury-hero-container {
+  position: relative;
+  z-index: 3;
+}
+
+.luxury-search-section {
+  position: relative;
+  z-index: 10;
+}
+
