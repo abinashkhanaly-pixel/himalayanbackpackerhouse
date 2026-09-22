@@ -1,42 +1,41 @@
+/* =========================================================
+   LUXURY HERO
+   Backpacker Gateways
+   ========================================================= */
+
 .luxury-hero {
   position: relative;
   width: 100%;
-
   min-height: 0;
   height: auto;
-
   overflow: visible;
   isolation: isolate;
-
   display: block;
-
   color: #fff;
   background: #fff;
 }
 
-/* =========================
+
+/* =========================================================
    BACKGROUND SLIDER
-========================= */
+   ========================================================= */
 
 .luxury-hero-bg {
   position: absolute;
-
   top: 0;
   left: 0;
   right: 0;
 
+  width: 100%;
   height: 430px;
 
   z-index: -3;
-
   overflow: hidden;
-
   background: #111;
 }
 
 .luxury-hero-bg img {
   position: absolute;
-
   inset: 0;
 
   width: 100%;
@@ -58,7 +57,6 @@
 
 .luxury-hero-bg img.active {
   opacity: 1;
-
   animation: luxuryHeroZoom 7s ease-in-out forwards;
 }
 
@@ -72,9 +70,10 @@
   }
 }
 
-/* =========================
+
+/* =========================================================
    CINEMATIC OVERLAY
-========================= */
+   ========================================================= */
 
 .luxury-hero-overlay {
   position: absolute;
@@ -83,6 +82,7 @@
   left: 0;
   right: 0;
 
+  width: 100%;
   height: 430px;
 
   z-index: -2;
@@ -98,10 +98,15 @@
     linear-gradient(
       90deg,
       rgba(0, 0, 0, 0.55) 0%,
-      rgba(0, 0, 0, 0.1) 55%,
+      rgba(0, 0, 0, 0.10) 55%,
       rgba(0, 0, 0, 0.35) 100%
     );
 }
+
+
+/* =========================================================
+   HERO GLOW
+   ========================================================= */
 
 .luxury-hero-glow {
   position: absolute;
@@ -125,9 +130,10 @@
   pointer-events: none;
 }
 
-/* =========================
-   CONTAINER
-========================= */
+
+/* =========================================================
+   HERO CONTAINER
+   ========================================================= */
 
 .luxury-hero-container {
   position: relative;
@@ -135,18 +141,22 @@
   width: 100%;
   max-width: 1400px;
 
+  height: 430px;
+  min-height: 430px;
+
   margin: 0 auto;
 
   padding: 28px 32px 0;
 
   box-sizing: border-box;
+
+  z-index: 5;
 }
 
 .luxury-hero-content {
   width: 100%;
 
   display: flex;
-
   flex-direction: column;
 
   align-items: center;
@@ -154,9 +164,10 @@
   text-align: center;
 }
 
-/* =========================
+
+/* =========================================================
    EYEBROW
-========================= */
+   ========================================================= */
 
 .luxury-eyebrow {
   display: flex;
@@ -169,11 +180,9 @@
   margin-bottom: 10px;
 
   font-size: 11px;
-
   font-weight: 700;
 
   letter-spacing: 3px;
-
   text-transform: uppercase;
 
   color: rgba(255, 255, 255, 0.82);
@@ -183,12 +192,15 @@
   width: 32px;
   height: 1px;
 
+  flex: 0 0 auto;
+
   background: rgba(255, 255, 255, 0.6);
 }
 
-/* =========================
+
+/* =========================================================
    HEADING
-========================= */
+   ========================================================= */
 
 .luxury-hero h1 {
   margin: 0;
@@ -209,6 +221,13 @@
     0 4px 25px rgba(0, 0, 0, 0.35);
 }
 
+
+/* =========================================================
+   SUBTITLE
+   Kept for compatibility if JSX still contains it.
+   If removed from JSX, it has no effect.
+   ========================================================= */
+
 .luxury-subtitle {
   max-width: 620px;
 
@@ -223,9 +242,10 @@
   color: rgba(255, 255, 255, 0.9);
 }
 
-/* =========================
+
+/* =========================================================
    TABS
-========================= */
+   ========================================================= */
 
 .luxury-tabs {
   display: flex;
@@ -237,6 +257,13 @@
 
   padding: 6px;
 
+  /*
+    IMPORTANT:
+    This creates the visible space between
+    "Stay Luxury in Nepal"
+    and the navigation tabs.
+  */
+  margin-top: 50px !important;
   margin-bottom: 0;
 
   border: 1px solid rgba(255, 255, 255, 0.22);
@@ -246,13 +273,19 @@
   background: rgba(20, 20, 20, 0.38);
 
   backdrop-filter: blur(18px);
-
   -webkit-backdrop-filter: blur(18px);
 
   box-shadow:
-    0 15px 45px rgba(0, 0, 0, 0.2),
+    0 15px 45px rgba(0, 0, 0, 0.20),
     inset 0 1px 0 rgba(255, 255, 255, 0.12);
+
+  box-sizing: border-box;
 }
+
+
+/* =========================================================
+   TAB
+   ========================================================= */
 
 .luxury-tab {
   display: flex;
@@ -292,8 +325,7 @@
 }
 
 .luxury-tab:hover {
-  background: rgba(255, 255, 255, 0.1);
-
+  background: rgba(255, 255, 255, 0.10);
   color: #fff;
 }
 
@@ -310,6 +342,11 @@
   transform: scale(0.97);
 }
 
+
+/* =========================================================
+   TAB ICON
+   ========================================================= */
+
 .luxury-tab-icon {
   width: 18px;
   height: 18px;
@@ -318,6 +355,8 @@
 
   align-items: center;
   justify-content: center;
+
+  flex: 0 0 auto;
 }
 
 .luxury-tab-icon svg {
@@ -331,39 +370,118 @@
   stroke-width: 1.7;
 
   stroke-linecap: round;
-
   stroke-linejoin: round;
 }
 
-/* =========================
+
+/* =========================================================
+   HERO IMAGE DOTS
+   ========================================================= */
+
+.luxury-hero-dots {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  margin-top: 14px;
+}
+
+.luxury-hero-dots button {
+  width: 7px;
+  height: 7px;
+
+  padding: 0;
+
+  border: 0;
+
+  border-radius: 999px;
+
+  background: rgba(255, 255, 255, 0.45);
+
+  cursor: pointer;
+
+  transition:
+    width 0.25s ease,
+    background 0.25s ease,
+    transform 0.25s ease;
+}
+
+.luxury-hero-dots button:hover {
+  background: rgba(255, 255, 255, 0.80);
+}
+
+.luxury-hero-dots button.active {
+  width: 22px;
+  background: #fff;
+}
+
+
+/* =========================================================
+   SEARCH SECTION
+   Search starts exactly after hero image.
+   ========================================================= */
+
+.luxury-search-section {
+  position: relative;
+
+  width: 100%;
+
+  height: auto;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  background: #fff;
+
+  z-index: 20;
+}
+
+
+/* =========================================================
    SEARCH WRAPPER
-   NOW BELOW IMAGE
-========================= */
+   ZERO LEFT GAP
+   ========================================================= */
 
 .luxury-search-wrap {
   position: relative;
 
-  z-index: 20;
+  width: min(1120px, 100%);
+  max-width: 100%;
 
-  width: min(1120px, calc(100% - 64px));
+  margin: 0 !important;
 
-  margin: 20px auto 0;
+  padding: 0 !important;
+
+  left: 0 !important;
+  right: auto !important;
+
+  transform: none !important;
 
   box-sizing: border-box;
+
+  z-index: 30;
 }
 
-/* =========================
+
+/* =========================================================
    SEARCH BOX
-========================= */
+   ========================================================= */
 
 .luxury-search {
   position: relative;
+
+  width: 100%;
 
   display: flex;
 
   align-items: stretch;
 
   min-height: 82px;
+
+  margin: 0 !important;
 
   padding: 8px;
 
@@ -374,21 +492,25 @@
   background: rgba(255, 255, 255, 0.98);
 
   box-shadow:
-    0 24px 70px rgba(0, 0, 0, 0.3),
+    0 24px 70px rgba(0, 0, 0, 0.30),
     0 8px 25px rgba(0, 0, 0, 0.15);
 
   color: #151515;
 
   backdrop-filter: blur(20px);
-
   -webkit-backdrop-filter: blur(20px);
 
+  transform: none !important;
+
   box-sizing: border-box;
+
+  z-index: 30;
 }
 
-/* =========================
+
+/* =========================================================
    SEARCH FIELD
-========================= */
+   ========================================================= */
 
 .search-field {
   display: flex;
@@ -407,7 +529,7 @@
 }
 
 .dates-field {
-  flex: 1.1;
+  flex: 1.10;
 }
 
 .travelers-field {
@@ -415,6 +537,11 @@
 
   flex: 0.85;
 }
+
+
+/* =========================================================
+   SEARCH ICON
+   ========================================================= */
 
 .search-icon {
   width: 24px;
@@ -443,13 +570,16 @@
   stroke-width: 1.7;
 
   stroke-linecap: round;
-
   stroke-linejoin: round;
 }
 
+
+/* =========================================================
+   SEARCH CONTENT
+   ========================================================= */
+
 .search-field-content {
   min-width: 0;
-
   flex: 1;
 }
 
@@ -475,7 +605,6 @@
   padding: 0;
 
   border: 0;
-
   outline: 0;
 
   background: transparent;
@@ -497,9 +626,10 @@
   outline: none;
 }
 
-/* =========================
+
+/* =========================================================
    DATE INPUTS
-========================= */
+   ========================================================= */
 
 .date-inputs {
   display: flex;
@@ -513,7 +643,6 @@
 
 .date-inputs input {
   width: 100%;
-
   min-width: 0;
 }
 
@@ -523,13 +652,13 @@
   font-size: 13px;
 }
 
-/* =========================
-   DIVIDER
-========================= */
+
+/* =========================================================
+   SEARCH DIVIDER
+   ========================================================= */
 
 .search-divider {
   width: 1px;
-
   height: 46px;
 
   align-self: center;
@@ -537,9 +666,10 @@
   background: #e2e2e2;
 }
 
-/* =========================
+
+/* =========================================================
    TRAVELERS
-========================= */
+   ========================================================= */
 
 .traveler-trigger {
   width: 100%;
@@ -583,15 +713,15 @@
   white-space: nowrap;
 }
 
-/* =========================
+
+/* =========================================================
    TRAVELER POPUP
-========================= */
+   ========================================================= */
 
 .traveler-popup {
   position: absolute;
 
   top: calc(100% + 14px);
-
   right: 0;
 
   z-index: 50;
@@ -618,7 +748,6 @@
   display: flex;
 
   align-items: center;
-
   justify-content: space-between;
 
   padding: 12px 0;
@@ -647,6 +776,11 @@
 
   color: #777;
 }
+
+
+/* =========================================================
+   COUNTER
+   ========================================================= */
 
 .counter {
   display: flex;
@@ -681,13 +815,11 @@
 
 .counter button:hover:not(:disabled) {
   background: #f4f4f4;
-
   border-color: #999;
 }
 
 .counter button:disabled {
   opacity: 0.35;
-
   cursor: not-allowed;
 }
 
@@ -700,6 +832,11 @@
 
   font-weight: 700;
 }
+
+
+/* =========================================================
+   TRAVELER DONE
+   ========================================================= */
 
 .traveler-done {
   width: 100%;
@@ -729,9 +866,10 @@
   background: #333;
 }
 
-/* =========================
+
+/* =========================================================
    SEARCH BUTTON
-========================= */
+   ========================================================= */
 
 .luxury-search-button {
   flex: 0 0 auto;
@@ -749,7 +887,6 @@
   display: flex;
 
   align-items: center;
-
   justify-content: center;
 
   gap: 8px;
@@ -796,110 +933,13 @@
   stroke-width: 2;
 
   stroke-linecap: round;
-
   stroke-linejoin: round;
 }
 
-/* =========================
-   SERVICES
-========================= */
 
-.luxury-services {
-  display: flex;
-
-  align-items: center;
-
-  justify-content: center;
-
-  gap: 52px;
-
-  margin-top: 27px;
-
-  color: #333;
-}
-
-.luxury-service {
-  display: flex;
-
-  align-items: center;
-
-  gap: 9px;
-
-  color: #555;
-
-  font-size: 12px;
-
-  font-weight: 600;
-
-  letter-spacing: 0.2px;
-
-  text-shadow: none;
-}
-
-.luxury-service svg {
-  width: 19px;
-  height: 19px;
-
-  fill: none;
-
-  stroke: currentColor;
-
-  stroke-width: 1.5;
-
-  stroke-linecap: round;
-
-  stroke-linejoin: round;
-}
-
-/* =========================
-   HERO IMAGE DOTS
-========================= */
-
-.luxury-hero-dots {
-  display: flex;
-
-  align-items: center;
-
-  justify-content: center;
-
-  gap: 7px;
-
-  margin-top: 14px;
-}
-
-.luxury-hero-dots button {
-  width: 7px;
-  height: 7px;
-
-  padding: 0;
-
-  border: 0;
-
-  border-radius: 999px;
-
-  background: rgba(255, 255, 255, 0.45);
-
-  cursor: pointer;
-
-  transition:
-    width 0.25s ease,
-    background 0.25s ease,
-    transform 0.25s ease;
-}
-
-.luxury-hero-dots button:hover {
-  background: rgba(255, 255, 255, 0.8);
-}
-
-.luxury-hero-dots button.active {
-  width: 22px;
-
-  background: #fff;
-}
-
-/* =========================
+/* =========================================================
    TABLET
-========================= */
+   ========================================================= */
 
 @media (max-width: 1050px) {
 
@@ -909,10 +949,14 @@
   }
 
   .luxury-hero-container {
+    height: 430px;
+    min-height: 430px;
+
     padding: 30px 24px 0;
   }
 
   .luxury-tabs {
+    width: 100%;
     max-width: 100%;
 
     overflow-x: auto;
@@ -920,6 +964,8 @@
     justify-content: flex-start;
 
     scrollbar-width: none;
+
+    margin-top: 35px !important;
   }
 
   .luxury-tabs::-webkit-scrollbar {
@@ -928,12 +974,6 @@
 
   .luxury-tab {
     flex: 0 0 auto;
-  }
-
-  .luxury-search-wrap {
-    width: min(1120px, calc(100% - 48px));
-
-    margin-top: 20px;
   }
 
   .luxury-search {
@@ -959,32 +999,22 @@
 
     margin: 6px 0 0;
   }
-
-  .luxury-services {
-    gap: 30px;
-
-    flex-wrap: wrap;
-  }
 }
 
-/* =========================
+
+/* =========================================================
    MOBILE
-========================= */
+   ========================================================= */
 
 @media (max-width: 700px) {
 
   .luxury-hero {
     height: auto;
-
     min-height: 0;
-
     overflow: visible;
   }
 
-  .luxury-hero-bg {
-    height: 360px;
-  }
-
+  .luxury-hero-bg,
   .luxury-hero-overlay {
     height: 360px;
   }
@@ -994,6 +1024,9 @@
   }
 
   .luxury-hero-container {
+    height: 360px;
+    min-height: 360px;
+
     padding: 35px 16px 0;
   }
 
@@ -1015,22 +1048,27 @@
     letter-spacing: -1.5px;
   }
 
-  .luxury-subtitle {
-    margin-top: 13px;
-
-    margin-bottom: 21px;
-
-    font-size: 13px;
-
-    line-height: 1.5;
-  }
-
+  /*
+    Keep the heading-to-tabs spacing on mobile.
+  */
   .luxury-tabs {
     width: 100%;
+
+    margin-top: 50px !important;
 
     border-radius: 14px;
 
     padding: 5px;
+
+    overflow-x: auto;
+
+    justify-content: flex-start;
+
+    scrollbar-width: none;
+  }
+
+  .luxury-tabs::-webkit-scrollbar {
+    display: none;
   }
 
   .luxury-tab {
@@ -1051,22 +1089,26 @@
     height: 16px;
   }
 
-  /* =========================
+
+  /* =======================================================
      SEARCH BELOW IMAGE
-  ========================= */
+     ======================================================= */
 
   .luxury-search-wrap {
-    width: calc(100% - 32px);
+    width: 100%;
+    max-width: 100%;
 
-    margin: 20px auto 0;
+    margin: 0 !important;
   }
 
   .luxury-search {
     display: block;
 
+    width: 100%;
+
     padding: 10px;
 
-    border-radius: 17px;
+    border-radius: 0;
   }
 
   .search-field {
@@ -1116,38 +1158,20 @@
     width: 100%;
   }
 
-  .luxury-services {
-    width: 100%;
-
-    display: grid;
-
-    grid-template-columns: 1fr 1fr;
-
-    gap: 16px 10px;
-
-    margin-top: 22px;
-  }
-
-  .luxury-service {
-    justify-content: center;
-
-    font-size: 11px;
-  }
-
   .luxury-hero-dots {
     margin-top: 12px;
   }
 }
 
-/* =========================
+
+/* =========================================================
    SMALL MOBILE
-========================= */
+   ========================================================= */
 
 @media (max-width: 420px) {
 
   .luxury-hero-container {
     padding-left: 12px;
-
     padding-right: 12px;
   }
 
@@ -1163,18 +1187,16 @@
     font-size: 11px;
   }
 
-  .luxury-services {
-    gap: 14px 5px;
-  }
-
   .luxury-search-wrap {
-    width: calc(100% - 24px);
+    width: 100%;
+    max-width: 100%;
   }
 }
 
-/* =========================
+
+/* =========================================================
    REDUCED MOTION
-========================= */
+   ========================================================= */
 
 @media (prefers-reduced-motion: reduce) {
 
@@ -1190,345 +1212,5 @@
   .luxury-search-button,
   .luxury-hero-dots button {
     transition: none;
-  }
-}
-/* =========================================
-   SEARCH BOX DIRECTLY BELOW HERO IMAGE
-   ========================================= */
-
-.luxury-hero {
-  position: relative;
-  width: 100%;
-  overflow: visible;
-  background: #fff;
-}
-
-/* Hero image ends here */
-.luxury-hero-bg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 430px;
-  overflow: hidden;
-  z-index: 0;
-}
-
-/* Keep overlay exactly the same height as image */
-.luxury-hero-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 430px;
-  z-index: 1;
-}
-
-/* Hero content */
-.luxury-hero-container {
-  position: relative;
-  z-index: 5;
-  min-height: 430px;
-}
-
-/* SEARCH STARTS EXACTLY AFTER IMAGE */
-.luxury-search-section {
-  position: relative;
-  z-index: 20;
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  background: #fff;
-}
-
-/* Search box itself */
-.luxury-search-wrap {
-  position: relative;
-  z-index: 25;
-  width: min(1120px, calc(100% - 64px));
-  margin: 0 auto;
-  padding: 0;
-}
-
-/* Remove any previous upward movement */
-.luxury-search {
-  position: relative;
-  transform: none;
-  margin-top: 0;
-}
-
-/* =========================================
-   MOBILE
-   ========================================= */
-
-@media (max-width: 768px) {
-  .luxury-hero-bg {
-    height: 430px;
-  }
-
-  .luxury-hero-overlay {
-    height: 430px;
-  }
-
-  .luxury-hero-container {
-    min-height: 430px;
-  }
-
-  .luxury-search-wrap {
-    width: calc(100% - 32px);
-    margin: 0 auto;
-  }
-}
-/* SEARCH BOX - LEFT SIDE ALIGN */
-.luxury-search-wrap {
-  width: min(1120px, calc(100% - 64px));
-  margin-left: 32px;
-  margin-right: auto;
-  padding: 0;
-}
-
-@media (max-width: 768px) {
-  .luxury-search-wrap {
-    width: calc(100% - 32px);
-    margin-left: 16px;
-    margin-right: auto;
-  }
-}
-/* FORCE SEARCH BOX TO MAIN PAGE LEFT */
-.luxury-search-section {
-  width: 100% !important;
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-.luxury-search-wrap {
-  width: min(1120px, calc(100% - 64px)) !important;
-  margin-left: 32px !important;
-  margin-right: auto !important;
-  margin-top: 0 !important;
-  padding: 0 !important;
-  transform: none !important;
-  position: relative !important;
-  left: 0 !important;
-}
-
-.luxury-search {
-  margin-left: 0 !important;
-  margin-right: auto !important;
-  transform: none !important;
-}
-
-@media (max-width: 768px) {
-  .luxury-search-wrap {
-    width: calc(100% - 32px) !important;
-    margin-left: 16px !important;
-    margin-right: auto !important;
-  }
-}
-/* =========================================
-   FINAL SEARCH POSITION
-   HERO IMAGE ENDS -> SEARCH BELOW IT
-   ========================================= */
-
-.luxury-hero {
-  position: relative;
-  width: 100%;
-  min-height: 0;
-  height: auto;
-  overflow: visible;
-  display: block;
-  background: #fff;
-}
-
-/* HERO IMAGE = 430px */
-.luxury-hero-bg,
-.luxury-hero-overlay {
-  height: 430px;
-}
-
-/* HERO CONTENT AREA = EXACTLY IMAGE HEIGHT */
-.luxury-hero-container {
-  position: relative;
-  width: 100%;
-  min-height: 430px;
-  height: 430px;
-  box-sizing: border-box;
-}
-
-/* SEARCH IS OUTSIDE / BELOW HERO */
-.luxury-search-section {
-  position: relative;
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  background: #fff;
-  z-index: 20;
-}
-
-/* SEARCH BOX */
-.luxury-search-wrap {
-  position: relative;
-  width: min(1120px, calc(100% - 64px));
-
-  /* MAIN PAGE LEFT */
-  margin-left: 32px;
-  margin-right: auto;
-
-  margin-top: 0;
-  padding: 0;
-
-  box-sizing: border-box;
-  z-index: 30;
-}
-
-.luxury-search {
-  position: relative;
-  margin: 0;
-  transform: none;
-}
-
-/* =========================================
-   MOBILE
-   ========================================= */
-
-@media (max-width: 700px) {
-
-  .luxury-hero-bg,
-  .luxury-hero-overlay {
-    height: 360px;
-  }
-
-  .luxury-hero-container {
-    min-height: 360px;
-    height: 360px;
-  }
-
-  .luxury-search-wrap {
-    width: calc(100% - 32px);
-    margin-left: 16px;
-    margin-right: auto;
-  }
-}
-/* SEARCH BOX - ZERO LEFT GAP */
-
-.luxury-search-section {
-  width: 100% !important;
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-.luxury-search-wrap {
-  width: 1120px !important;
-  max-width: 100% !important;
-
-  margin-left: 0 !important;
-  margin-right: auto !important;
-
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-
-  left: 0 !important;
-  right: auto !important;
-  transform: none !important;
-
-  box-sizing: border-box !important;
-}
-
-.luxury-search {
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-}
-/* =========================================
-   FINAL LUXURY HERO + SEARCH LAYOUT
-   ========================================= */
-
-.luxury-hero {
-  position: relative;
-  width: 100%;
-  height: auto;
-  min-height: 0;
-  overflow: visible;
-  background: #fff;
-}
-
-/* HERO IMAGE */
-.luxury-hero-bg {
-  height: 430px;
-}
-
-.luxury-hero-overlay {
-  height: 430px;
-}
-
-/* HERO AREA EXACTLY SAME HEIGHT AS IMAGE */
-.luxury-hero-container {
-  position: relative;
-  width: 100%;
-  height: 430px;
-  min-height: 430px;
-  box-sizing: border-box;
-}
-
-/* SEARCH BELOW HERO IMAGE */
-.luxury-search-section {
-  position: relative;
-  width: 100%;
-  height: auto;
-  margin: 0 !important;
-  padding: 0 !important;
-  background: #fff;
-  z-index: 20;
-}
-
-/* SEARCH BOX — ATTACHED TO PAGE LEFT */
-.luxury-search-wrap {
-  position: relative;
-  width: min(1120px, 100%);
-  max-width: 100%;
-
-  margin: 0 !important;
-  padding: 0 !important;
-
-  left: 0 !important;
-  right: auto !important;
-  transform: none !important;
-
-  box-sizing: border-box;
-  z-index: 30;
-}
-
-.luxury-search {
-  position: relative;
-  width: 100%;
-  margin: 0 !important;
-  transform: none !important;
-  box-sizing: border-box;
-}
-
-
-/* =========================================
-   MOBILE
-   ========================================= */
-
-@media (max-width: 700px) {
-
-  .luxury-hero-bg,
-  .luxury-hero-overlay {
-    height: 360px;
-  }
-
-  .luxury-hero-container {
-    height: 360px;
-    min-height: 360px;
-  }
-
-  .luxury-search-wrap {
-    width: 100%;
-    margin: 0 !important;
-  }
-
-  .luxury-search {
-    width: 100%;
-    border-radius: 0;
   }
 }
