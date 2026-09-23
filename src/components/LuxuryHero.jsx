@@ -2,478 +2,714 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./LuxuryHero.css";
 
+/* =========================================================
+   HOTEL HERO SLIDES
+   ========================================================= */
+
 const heroImages = [
-{
-src: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=2200&q=90",
-alt: "Luxury hotel swimming pool",
-},
-{
-src: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=2200&q=90",
-alt: "Luxury hotel exterior",
-},
-{
-src: "https://images.unsplash.com/photo-1564501049412-61c2a3083791?auto=format&fit=crop&w=2200&q=90",
-alt: "Luxury hotel and rooftop experience",
-},
-{
-src: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=2200&q=90",
-alt: "Luxury hotel interior",
-},
+  {
+    src: "/287619497 (1).jpg",
+    alt: "Luxury hotel in Nepal",
+    name: "Luxury Stay in Kathmandu",
+    location: "Kathmandu, Nepal",
+  },
+  {
+    src: "/689323318.jpg",
+    alt: "Luxury hotel exterior in Nepal",
+    name: "Premium Hotel Experience",
+    location: "Kathmandu, Nepal",
+  },
+  {
+    src: "/859352371.jpg",
+    alt: "Luxury hotel building in Nepal",
+    name: "Elegant Stay in Nepal",
+    location: "Kathmandu, Nepal",
+  },
+  {
+    src: "/Dwarikas-Hotel-Kathmandu-Nepal_Feat-1400x933.jpg",
+    alt: "Dwarika's Hotel Kathmandu",
+    name: "Dwarika's Hotel",
+    location: "Battisputali, Kathmandu",
+  },
 ];
+
+/* =========================================================
+   TABS
+   ========================================================= */
 
 const tabs = [
-{
-id: "hotel",
-label: "Luxury Hotel",
-icon: ( <svg viewBox="0 0 24 24" aria-hidden="true"> <path d="M3 21V8l9-5 9 5v13" /> <path d="M7 21v-6h10v6" /> <path d="M7 11h2M15 11h2M7 7h2M15 7h2" /> </svg>
-),
-},
-{
-id: "packages",
-label: "Luxury Packages",
-icon: ( <svg viewBox="0 0 24 24" aria-hidden="true"> <path d="M4 7h16v13H4z" /> <path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /> <path d="M4 11h16" /> <path d="M10 11v3h4v-3" /> </svg>
-),
-},
-{
-id: "vehicle",
-label: "Luxury Vehicle",
-icon: ( <svg viewBox="0 0 24 24" aria-hidden="true"> <path d="M5 17h14l-1-6H6z" /> <path d="M8 11l1.5-4h5L16 11" /> <circle cx="8" cy="17" r="1.5" /> <circle cx="16" cy="17" r="1.5" /> </svg>
-),
-},
-{
-id: "trek",
-label: "Luxury Trek",
-icon: ( <svg viewBox="0 0 24 24" aria-hidden="true"> <path d="M3 20l7-10 4 5 2-3 5 8" /> <path d="M14 7l2-3 2 3" /> <path d="M3 20h18" /> </svg>
-),
-},
-{
-id: "more",
-label: "More",
-icon: ( <svg viewBox="0 0 24 24" aria-hidden="true"> <circle cx="5" cy="12" r="1.5" /> <circle cx="12" cy="12" r="1.5" /> <circle cx="19" cy="12" r="1.5" /> </svg>
-),
-},
+  {
+    id: "hotel",
+    label: "Luxury Hotel",
+    icon: (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M3 21V8l9-5 9 5v13" />
+        <path d="M7 21v-6h10v6" />
+        <path d="M7 11h2M15 11h2M7 7h2M15 7h2" />
+      </svg>
+    ),
+  },
+  {
+    id: "packages",
+    label: "Luxury Packages",
+    icon: (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 7h16v13H4z" />
+        <path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+        <path d="M4 11h16" />
+        <path d="M10 11v3h4v-3" />
+      </svg>
+    ),
+  },
+  {
+    id: "vehicle",
+    label: "Luxury Vehicle",
+    icon: (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M5 17h14l-1-6H6z" />
+        <path d="M8 11l1.5-4h5L16 11" />
+        <circle cx="8" cy="17" r="1.5" />
+        <circle cx="16" cy="17" r="1.5" />
+      </svg>
+    ),
+  },
+  {
+    id: "trek",
+    label: "Luxury Trek",
+    icon: (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M3 20l7-10 4 5 2-3 5 8" />
+        <path d="M14 7l2-3 2 3" />
+        <path d="M3 20h18" />
+      </svg>
+    ),
+  },
 ];
 
+/* =========================================================
+   COMPONENT
+   ========================================================= */
+
 function LuxuryHero() {
-const navigate = useNavigate();
+  const navigate = useNavigate();
 
-const [activeTab, setActiveTab] = useState("hotel");
-const [destination, setDestination] = useState("");
-const [checkIn, setCheckIn] = useState("");
-const [checkOut, setCheckOut] = useState("");
+  const [activeTab, setActiveTab] = useState("hotel");
 
-const [adults, setAdults] = useState(2);
-const [children, setChildren] = useState(0);
-const [rooms, setRooms] = useState(1);
+  const [destination, setDestination] = useState("");
+  const [checkIn, setCheckIn] = useState("");
+  const [checkOut, setCheckOut] = useState("");
 
-const [travelerOpen, setTravelerOpen] = useState(false);
-const [activeImage, setActiveImage] = useState(0);
+  const [adults, setAdults] = useState(2);
+  const [children, setChildren] = useState(0);
+  const [rooms, setRooms] = useState(1);
 
-const totalTravelers = adults + children;
+  const [travelerOpen, setTravelerOpen] = useState(false);
 
-useEffect(() => {
-const timer = setInterval(() => {
-setActiveImage((current) => (current + 1) % heroImages.length);
-}, 6000);
+  /* CURRENT HERO SLIDE */
+  const [activeImage, setActiveImage] = useState(0);
 
+  const totalTravelers = adults + children;
 
-return () => clearInterval(timer);
+  const currentHotel = heroImages[activeImage];
 
+  /* =========================================================
+     AUTOMATIC CINEMATIC SLIDER
+     ========================================================= */
 
-}, []);
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveImage((current) => {
+        return (current + 1) % heroImages.length;
+      });
+    }, 6000);
 
-const handleSearch = () => {
-if (activeTab === "hotel") {
-const params = new URLSearchParams();
+    return () => clearInterval(timer);
+  }, []);
 
+  /* =========================================================
+     SEARCH
+     ========================================================= */
 
-  if (destination.trim()) {
-    params.set("destination", destination.trim());
-  }
+  const handleSearch = () => {
+    if (activeTab === "hotel") {
+      const params = new URLSearchParams();
 
-  if (checkIn) {
-    params.set("checkIn", checkIn);
-  }
+      if (destination.trim()) {
+        params.set("destination", destination.trim());
+      }
 
-  if (checkOut) {
-    params.set("checkOut", checkOut);
-  }
+      if (checkIn) {
+        params.set("checkIn", checkIn);
+      }
 
-  params.set("adults", String(adults));
-  params.set("children", String(children));
-  params.set("rooms", String(rooms));
+      if (checkOut) {
+        params.set("checkOut", checkOut);
+      }
 
-  const queryString = params.toString();
+      params.set("adults", String(adults));
+      params.set("children", String(children));
+      params.set("rooms", String(rooms));
 
-  navigate("/rooms?" + queryString);
-  return;
-}
+      const queryString = params.toString();
 
-if (activeTab === "trek") {
-  navigate("/trekking");
-  return;
-}
+      navigate("/rooms?" + queryString);
 
-if (activeTab === "vehicle") {
-  navigate("/vehicles");
-  return;
-}
+      return;
+    }
 
-if (activeTab === "packages") {
-  navigate("/packages");
-  return;
-}
+    if (activeTab === "trek") {
+      navigate("/trekking");
+      return;
+    }
 
-navigate("/explore");
- 
+    if (activeTab === "vehicle") {
+      navigate("/vehicles");
+      return;
+    }
 
-};
+    if (activeTab === "packages") {
+      navigate("/packages");
+      return;
+    }
 
-const changeAdults = (amount) => {
-setAdults((current) => Math.max(1, current + amount));
-};
+    navigate("/explore");
+  };
 
-const changeChildren = (amount) => {
-setChildren((current) => Math.max(0, current + amount));
-};
+  /* =========================================================
+     TRAVELER CONTROLS
+     ========================================================= */
 
-const changeRooms = (amount) => {
-setRooms((current) => Math.max(1, current + amount));
-};
+  const changeAdults = (amount) => {
+    setAdults((current) => Math.max(1, current + amount));
+  };
 
-return ( <section className="luxury-hero">
+  const changeChildren = (amount) => {
+    setChildren((current) => Math.max(0, current + amount));
+  };
 
+  const changeRooms = (amount) => {
+    setRooms((current) => Math.max(1, current + amount));
+  };
 
-  {/* CINEMATIC BACKGROUND */}
+  /* =========================================================
+     JSX
+     ========================================================= */
 
-  <div className="luxury-hero-bg">
-    {heroImages.map((image, index) => (
-      <img
-        key={image.src}
-        src={image.src}
-        alt={image.alt}
-        className={index === activeImage ? "active" : ""}
-      />
-    ))}
-  </div>
+  return (
+    <section className="luxury-hero">
 
-  <div className="luxury-hero-overlay" />
-  <div className="luxury-hero-glow" />
+      {/* =====================================================
+          CINEMATIC BACKGROUND SLIDER
+      ===================================================== */}
 
-  {/* HERO CONTENT */}
-
-  <div className="luxury-hero-container">
-    <div className="luxury-hero-content">
-
-      <div className="luxury-eyebrow">
-        <span className="eyebrow-line" />
-        <span>EXPLORE NEPAL WITH LUXURIOUS EXPERIENCES</span>
-
-        <span className="eyebrow-line" />
-      </div>
-
-      <h1>Stay Luxury in Nepal </h1>
-
-            {/* TABS */}
-
-      <div className="luxury-tabs">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            className={`luxury-tab ${
-              activeTab === tab.id ? "active" : ""
-            }`}
-            onClick={() => {
-              setActiveTab(tab.id);
-              setTravelerOpen(false);
-            }}
-          >
-            <span className="luxury-tab-icon">
-              {tab.icon}
-            </span>
-
-            <span>{tab.label}</span>
-          </button>
-        ))}
-      </div>
-
-      {/* IMAGE DOTS */}
-
-      <div className="luxury-hero-dots">
-        {heroImages.map((_, index) => (
-          <button
-            key={index}
-            type="button"
+      <div className="luxury-hero-bg">
+        {heroImages.map((image, index) => (
+          <img
+            key={image.src}
+            src={image.src}
+            alt={image.alt}
             className={index === activeImage ? "active" : ""}
-            onClick={() => setActiveImage(index)}
-            aria-label={`Show hero image ${index + 1}`}
           />
         ))}
       </div>
 
-    </div>
-  </div>
+      {/* DARK PREMIUM OVERLAY */}
 
-  {/* SEARCH SECTION - OUTSIDE HERO IMAGE */}
+      <div className="luxury-hero-overlay" />
 
-  <div className="luxury-search-section">
+      <div className="luxury-hero-glow" />
 
-    <div className="luxury-search-wrap">
+      {/* =====================================================
+          HOTEL INFORMATION OVER IMAGE
+      ===================================================== */}
 
-      <div className="luxury-search">
+      <div
+        key={activeImage}
+        className="luxury-hotel-info active"
+      >
+        <span className="luxury-hotel-eyebrow">
+          LUXURY STAYS IN NEPAL
+        </span>
 
-        {/* WHERE */}
+        <h2 className="luxury-hotel-name">
+          {currentHotel.name}
+        </h2>
 
-        <div className="search-field destination-field">
+        <span className="luxury-hotel-location">
+          {currentHotel.location}
+        </span>
 
-          <div className="search-icon">
-            <svg viewBox="0 0 24 24">
-              <path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z" />
-              <circle cx="12" cy="10" r="2.5" />
-            </svg>
+        <span className="luxury-hotel-line" />
+      </div>
+
+      {/* =====================================================
+          SLIDE COUNTER
+      ===================================================== */}
+
+      <div className="luxury-hotel-counter">
+        <strong>
+          {String(activeImage + 1).padStart(2, "0")}
+        </strong>
+
+        <span>/</span>
+
+        <span>
+          {String(heroImages.length).padStart(2, "0")}
+        </span>
+      </div>
+
+      {/* =====================================================
+          SLIDE PROGRESS
+      ===================================================== */}
+
+      <div className="luxury-hotel-progress">
+        <span
+          className="luxury-hotel-progress-active"
+          style={{
+            width: `${
+              ((activeImage + 1) / heroImages.length) * 100
+            }%`,
+          }}
+        />
+      </div>
+
+      {/* =====================================================
+          HERO CONTENT
+      ===================================================== */}
+
+      <div className="luxury-hero-container">
+
+        <div className="luxury-hero-content">
+
+          <div className="luxury-eyebrow">
+            <span className="eyebrow-line" />
+
+            <span>
+              EXPLORE NEPAL WITH LUXURIOUS EXPERIENCES
+            </span>
+
+            <span className="eyebrow-line" />
           </div>
 
-          <div className="search-field-content">
+          <h1>
+            Stay Luxury in Nepal
+          </h1>
 
-            <label htmlFor="luxury-destination">
-              Where are you going?
-            </label>
+          {/* =================================================
+              TABS
+          ================================================= */}
 
-            <input
-              id="luxury-destination"
-              type="text"
-              value={destination}
-              onChange={(e) => setDestination(e.target.value)}
-              placeholder="Kathmandu, Pokhara, Everest..."
-              autoComplete="off"
-            />
+          <div className="luxury-tabs">
+
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                className={`luxury-tab ${
+                  activeTab === tab.id ? "active" : ""
+                }`}
+                onClick={() => {
+                  setActiveTab(tab.id);
+                  setTravelerOpen(false);
+                }}
+              >
+                <span className="luxury-tab-icon">
+                  {tab.icon}
+                </span>
+
+                <span>
+                  {tab.label}
+                </span>
+              </button>
+            ))}
+
+          </div>
+
+          {/* =================================================
+              IMAGE DOTS
+          ================================================= */}
+
+          <div className="luxury-hero-dots">
+
+            {heroImages.map((_, index) => (
+              <button
+                key={index}
+                type="button"
+                className={
+                  index === activeImage ? "active" : ""
+                }
+                onClick={() => setActiveImage(index)}
+                aria-label={`Show hero image ${index + 1}`}
+              />
+            ))}
 
           </div>
 
         </div>
+      </div>
 
-        <div className="search-divider" />
+      {/* =====================================================
+          SEARCH SECTION
+      ===================================================== */}
 
-        {/* DATES */}
+      <div className="luxury-search-section">
 
-        <div className="search-field dates-field">
+        <div className="luxury-search-wrap">
 
-          <div className="search-icon">
-            <svg viewBox="0 0 24 24">
-              <rect
-                x="3"
-                y="5"
-                width="18"
-                height="16"
-                rx="2"
-              />
-              <path d="M16 3v4M8 3v4M3 10h18" />
-            </svg>
-          </div>
+          <div className="luxury-search">
 
-          <div className="search-field-content">
+            {/* =================================================
+                WHERE
+            ================================================= */}
 
-            <label>Dates</label>
+            <div className="search-field destination-field">
 
-            <div className="date-inputs">
+              <div className="search-icon">
 
-              <input
-                type="date"
-                value={checkIn}
-                onChange={(e) => setCheckIn(e.target.value)}
-                aria-label="Check in"
-              />
+                <svg viewBox="0 0 24 24">
 
-              <span>→</span>
+                  <path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z" />
 
-              <input
-                type="date"
-                value={checkOut}
-                onChange={(e) => setCheckOut(e.target.value)}
-                aria-label="Check out"
-              />
+                  <circle
+                    cx="12"
+                    cy="10"
+                    r="2.5"
+                  />
+
+                </svg>
+
+              </div>
+
+              <div className="search-field-content">
+
+                <label htmlFor="luxury-destination">
+                  Where are you going?
+                </label>
+
+                <input
+                  id="luxury-destination"
+                  type="text"
+                  value={destination}
+                  onChange={(e) =>
+                    setDestination(e.target.value)
+                  }
+                  placeholder="Kathmandu, Pokhara, Everest..."
+                  autoComplete="off"
+                />
+
+              </div>
 
             </div>
 
-          </div>
+            <div className="search-divider" />
 
-        </div>
+            {/* =================================================
+                DATES
+            ================================================= */}
 
-        <div className="search-divider" />
+            <div className="search-field dates-field">
 
-        {/* TRAVELERS */}
+              <div className="search-icon">
 
-        <div className="search-field travelers-field">
+                <svg viewBox="0 0 24 24">
 
-          <div className="search-icon">
-            <svg viewBox="0 0 24 24">
-              <circle cx="9" cy="8" r="3" />
-              <path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6" />
-              <path d="M16 11a3 3 0 1 0 0-6" />
-              <path d="M18 14c2 .7 3 2.5 3 5" />
-            </svg>
-          </div>
+                  <rect
+                    x="3"
+                    y="5"
+                    width="18"
+                    height="16"
+                    rx="2"
+                  />
 
-          <button
-            type="button"
-            className="traveler-trigger"
-            onClick={() =>
-              setTravelerOpen((current) => !current)
-            }
-          >
+                  <path d="M16 3v4M8 3v4M3 10h18" />
 
-            <span className="traveler-label">
-              Travelers
-            </span>
+                </svg>
 
-            <span className="traveler-summary">
-              {rooms} room{rooms !== 1 ? "s" : ""},{" "}
-              {totalTravelers} traveler
-              {totalTravelers !== 1 ? "s" : ""}
-            </span>
+              </div>
 
-          </button>
+              <div className="search-field-content">
 
-          {travelerOpen && (
-            <div className="traveler-popup">
+                <label>
+                  Dates
+                </label>
 
-              {/* ADULTS */}
+                <div className="date-inputs">
 
-              <div className="traveler-row">
+                  <input
+                    type="date"
+                    value={checkIn}
+                    onChange={(e) =>
+                      setCheckIn(e.target.value)
+                    }
+                    aria-label="Check in"
+                  />
 
-                <div>
-                  <strong>Adults</strong>
-                  <small>Age 13+</small>
-                </div>
+                  <span>
+                    →
+                  </span>
 
-                <div className="counter">
-
-                  <button
-                    type="button"
-                    onClick={() => changeAdults(-1)}
-                    disabled={adults <= 1}
-                  >
-                    −
-                  </button>
-
-                  <span>{adults}</span>
-
-                  <button
-                    type="button"
-                    onClick={() => changeAdults(1)}
-                  >
-                    +
-                  </button>
+                  <input
+                    type="date"
+                    value={checkOut}
+                    onChange={(e) =>
+                      setCheckOut(e.target.value)
+                    }
+                    aria-label="Check out"
+                  />
 
                 </div>
 
               </div>
 
-              {/* CHILDREN */}
+            </div>
 
-              <div className="traveler-row">
+            <div className="search-divider" />
 
-                <div>
-                  <strong>Children</strong>
-                  <small>Age 0–12</small>
-                </div>
+            {/* =================================================
+                TRAVELERS
+            ================================================= */}
 
-                <div className="counter">
+            <div className="search-field travelers-field">
 
-                  <button
-                    type="button"
-                    onClick={() => changeChildren(-1)}
-                    disabled={children <= 0}
-                  >
-                    −
-                  </button>
+              <div className="search-icon">
 
-                  <span>{children}</span>
+                <svg viewBox="0 0 24 24">
 
-                  <button
-                    type="button"
-                    onClick={() => changeChildren(1)}
-                  >
-                    +
-                  </button>
+                  <circle
+                    cx="9"
+                    cy="8"
+                    r="3"
+                  />
 
-                </div>
+                  <path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6" />
 
-              </div>
+                  <path d="M16 11a3 3 0 1 0 0-6" />
 
-              {/* ROOMS */}
+                  <path d="M18 14c2 .7 3 2.5 3 5" />
 
-              <div className="traveler-row">
-
-                <div>
-                  <strong>Rooms</strong>
-                  <small>Number of rooms</small>
-                </div>
-
-                <div className="counter">
-
-                  <button
-                    type="button"
-                    onClick={() => changeRooms(-1)}
-                    disabled={rooms <= 1}
-                  >
-                    −
-                  </button>
-
-                  <span>{rooms}</span>
-
-                  <button
-                    type="button"
-                    onClick={() => changeRooms(1)}
-                  >
-                    +
-                  </button>
-
-                </div>
+                </svg>
 
               </div>
 
               <button
                 type="button"
-                className="traveler-done"
-                onClick={() => setTravelerOpen(false)}
+                className="traveler-trigger"
+                onClick={() =>
+                  setTravelerOpen((current) => !current)
+                }
               >
-                Done
+
+                <span className="traveler-label">
+                  Travelers
+                </span>
+
+                <span className="traveler-summary">
+
+                  {rooms} room
+                  {rooms !== 1 ? "s" : ""},{" "}
+
+                  {totalTravelers} traveler
+                  {totalTravelers !== 1 ? "s" : ""}
+
+                </span>
+
               </button>
 
+              {/* =================================================
+                  TRAVELER POPUP
+              ================================================= */}
+
+              {travelerOpen && (
+
+                <div className="traveler-popup">
+
+                  {/* ADULTS */}
+
+                  <div className="traveler-row">
+
+                    <div>
+
+                      <strong>
+                        Adults
+                      </strong>
+
+                      <small>
+                        Age 13+
+                      </small>
+
+                    </div>
+
+                    <div className="counter">
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          changeAdults(-1)
+                        }
+                        disabled={adults <= 1}
+                      >
+                        −
+                      </button>
+
+                      <span>
+                        {adults}
+                      </span>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          changeAdults(1)
+                        }
+                      >
+                        +
+                      </button>
+
+                    </div>
+
+                  </div>
+
+                  {/* CHILDREN */}
+
+                  <div className="traveler-row">
+
+                    <div>
+
+                      <strong>
+                        Children
+                      </strong>
+
+                      <small>
+                        Age 0–12
+                      </small>
+
+                    </div>
+
+                    <div className="counter">
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          changeChildren(-1)
+                        }
+                        disabled={children <= 0}
+                      >
+                        −
+                      </button>
+
+                      <span>
+                        {children}
+                      </span>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          changeChildren(1)
+                        }
+                      >
+                        +
+                      </button>
+
+                    </div>
+
+                  </div>
+
+                  {/* ROOMS */}
+
+                  <div className="traveler-row">
+
+                    <div>
+
+                      <strong>
+                        Rooms
+                      </strong>
+
+                      <small>
+                        Number of rooms
+                      </small>
+
+                    </div>
+
+                    <div className="counter">
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          changeRooms(-1)
+                        }
+                        disabled={rooms <= 1}
+                      >
+                        −
+                      </button>
+
+                      <span>
+                        {rooms}
+                      </span>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          changeRooms(1)
+                        }
+                      >
+                        +
+                      </button>
+
+                    </div>
+
+                  </div>
+
+                  <button
+                    type="button"
+                    className="traveler-done"
+                    onClick={() =>
+                      setTravelerOpen(false)
+                    }
+                  >
+                    Done
+                  </button>
+
+                </div>
+
+              )}
+
             </div>
-          )}
+
+            {/* =================================================
+                SEARCH BUTTON
+            ================================================= */}
+
+            <button
+              type="button"
+              className="luxury-search-button"
+              onClick={handleSearch}
+            >
+
+              <svg viewBox="0 0 24 24">
+
+                <circle
+                  cx="11"
+                  cy="11"
+                  r="7"
+                />
+
+                <path d="m20 20-4-4" />
+
+              </svg>
+
+              <span>
+                Search
+              </span>
+
+            </button>
+
+          </div>
 
         </div>
 
-        {/* SEARCH BUTTON */}
-
-        <button
-          type="button"
-          className="luxury-search-button"
-          onClick={handleSearch}
-        >
-
-          <svg viewBox="0 0 24 24">
-            <circle cx="11" cy="11" r="7" />
-            <path d="m20 20-4-4" />
-          </svg>
-
-          <span>Search</span>
-
-        </button>
-
       </div>
 
-    </div>
-
-  </div>
-
-</section>
-
-
-);
+    </section>
+  );
 }
 
 export default LuxuryHero;
