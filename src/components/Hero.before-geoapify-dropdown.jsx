@@ -3,11 +3,11 @@ import { Link } from "react-router-dom";
 import "./Hero.css";
 
 const heroImages = [
-  "/images/hero/dwarikas-kathmandu.webp",
-  "/images/hero/hyatt-regency-kathmandu.webp",
-  "/images/hero/kathmandu-marriott.webp",
-  "/images/hero/soaltee-kathmandu.webp",
+  "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=1600&q=70",
+  "https://images.unsplash.com/photo-1528360983277-13d401cdc186?auto=format&fit=crop&w=1600&q=70",
+  "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?auto=format&fit=crop&w=1600&q=70",
 ];
+
 const destinations = [
   {
     name: "Kathmandu",
@@ -48,55 +48,61 @@ const destinations = [
 
 const categories = [
   {
-    icon: "🏨",
+    icon: "â™™",
     title: "Backpacker Stays",
     subtitle: "Comfortable stays",
   },
   {
-    icon: "🛏️",
+    icon: "â–¥",
     title: "Budget Hostel",
     subtitle: "From $5",
   },
   {
-    icon: "🏠",
+    icon: "â™œ",
     title: "Mid-Range",
     subtitle: "From $20",
   },
   {
-    icon: "🏢",
+    icon: "â–¦",
     title: "Deluxe",
     subtitle: "From $50",
   },
   {
-    icon: "✨",
+    icon: "â™›",
     title: "Luxury",
     subtitle: "From $100+",
   },
   {
-    icon: "🏔️",
+    icon: "âŒ‚",
     title: "Trekking Lodges",
     subtitle: "Mountain stays",
   },
   {
-    icon: "⛺",
+    icon: "âŒ",
     title: "Camping",
     subtitle: "Wild escapes",
   },
   {
-    icon: "🏡",
+    icon: "âŒ˜",
     title: "Homestay",
     subtitle: "Live local",
   },
   {
-    icon: "🎒",
+    icon: "â—‡",
     title: "Gear Rental",
     subtitle: "Trek essentials",
   },
   {
-    icon: "🥾",
+    icon: "â™Ÿ",
     title: "Hiking Trails",
     subtitle: "Find your trail",
   },
+  {
+  icon: "ðŸš",
+  title: "Tourist Vehicle Rental",
+  subtitle: "Travel Nepal Comfortably",
+  link: "/vehicles",
+}
 ];
 
 const hotels = [
@@ -148,7 +154,7 @@ const gear = [
   },
   {
     name: "Down Jacket",
-    detail: "-20°C",
+    detail: "-20Â°C",
     price: "$6",
     image:
       "https://images.unsplash.com/photo-1544966503-7cc5ac882d5f?auto=format&fit=crop&w=700&q=85",
@@ -162,7 +168,7 @@ const gear = [
   },
   {
     name: "Sleeping Bag",
-    detail: "-10°C",
+    detail: "-10Â°C",
     price: "$4",
     image:
       "https://images.unsplash.com/photo-1504851149312-7a075b496cc7?auto=format&fit=crop&w=700&q=85",
@@ -232,32 +238,32 @@ const hotelFilters = [
 
 const whyUs = [
   {
-    icon: "🏔️",
+    icon: "â–£",
     title: "Verified Hotels",
     text: "& Hostels",
   },
   {
-    icon: "📍",
+    icon: "âŒ–",
     title: "Real Google Map",
     text: "Integration",
   },
   {
-    icon: "🏨",
+    icon: "â™™",
     title: "Local Guides",
     text: "& Support",
   },
   {
-    icon: "🗺️",
+    icon: "â–¢",
     title: "Secure Booking",
     text: "& Payment",
   },
   {
-    icon: "◇",
+    icon: "â—‡",
     title: "Gear Rental",
     text: "& Delivery",
   },
   {
-    icon: "☀️",
+    icon: "â™§",
     title: "Community of",
     text: "Travellers",
   },
@@ -368,34 +374,39 @@ export default function Hero() {
   return (
     <main className="home-page">
       {/* HERO */}
-<section className="hero">
-  <div className="hero-backgrounds">
-    {heroImages.map((image, index) => (
-      <div
-        key={image}
-        className={`hero-background ${
-          currentImage === index ? "active" : ""
-        }`}
-        style={{
-          backgroundImage: `url("${image}")`,
-        }}
-      />
-    ))}
-  </div>
+      <section className="hero">
+        <div className="hero-backgrounds">
+          {heroImages.map((image, index) => (
+            <div
+              key={image}
+              className={`hero-background ${
+                currentImage === index ? "active" : ""
+              }`}
+              style={
+                currentImage === index
+                  ? {
+                      backgroundImage: `url("${image}")`,
+                    }
+                  : undefined
+              }
+            />
+          ))}
+        </div>
+
         <div className="hero-overlay" />
 
         {/* NAVBAR */}
         <header className="hero-navbar">
           <Link to="/" className="brand">
             <div className="brand-mark">
-              <span>⌂</span>
-              <span>⌂</span>
-              <span>⌂</span>
+              <span>âŒƒ</span>
+              <span>âŒƒ</span>
+              <span>âŒƒ</span>
             </div>
 
             <div className="brand-text">
               <strong>Backpacker Gateways</strong>
-              <small>Explore · Stay · Trek · Connect</small>
+              <small>Explore Â· Stay Â· Trek Â· Connect</small>
             </div>
           </Link>
 
@@ -414,11 +425,11 @@ export default function Hero() {
 
           <div className="navbar-actions">
             <button type="button" className="currency-button">
-              USD <span>⌄</span>
+              USD <span>âŒ„</span>
             </button>
 
             <button type="button" className="language-button">
-              EN <span>⌄</span>
+              EN <span>âŒ„</span>
             </button>
 
             <Link to="/login" className="login-button">
@@ -446,8 +457,8 @@ export default function Hero() {
             </h1>
 
             <p className="hero-description">
-              Discover places&nbsp; · &nbsp;Book stays&nbsp; · &nbsp;Get
-              trekking gear&nbsp; · &nbsp;Explore like a local
+              Discover places&nbsp; Â· &nbsp;Book stays&nbsp; Â· &nbsp;Get
+              trekking gear&nbsp; Â· &nbsp;Explore like a local
             </p>
 
             <div className="hero-tagline">Travel Light, Live Fully.</div>
@@ -465,22 +476,22 @@ export default function Hero() {
       className="search-tab active"
       onClick={closeDropdowns}
     >
-      <span>▣</span>
+      <span>â–£</span>
       Hotels &amp; Hostels
     </button>
 
     <Link to="/trekking" className="search-tab">
-      <span>⌂</span>
+      <span>âŒ</span>
       Trekking Packages
     </Link>
 
     <Link to="/gear" className="search-tab">
-      <span>◇</span>
+      <span>â—‡</span>
       Gear Shop
     </Link>
 
     <Link to="/experiences" className="search-tab">
-      <span>⌖</span>
+      <span>âŒ–</span>
       Places
     </Link>
   </div>
@@ -498,7 +509,7 @@ export default function Hero() {
         setGuestOpen(false);
       }}
     >
-      <span className="search-icon">⌖</span>
+      <span className="search-icon">âŒ–</span>
 
       <div className="search-field-content">
         <small>WHERE ARE YOU GOING?</small>
@@ -521,7 +532,7 @@ export default function Hero() {
         />
       </div>
 
-      <span className="field-chevron">⌄</span>
+      <span className="field-chevron">âŒ„</span>
     </div>
 
     <div className="search-divider" />
@@ -537,13 +548,13 @@ export default function Hero() {
         setGuestOpen(false);
       }}
     >
-      <span className="search-icon">◷</span>
+      <span className="search-icon">â—·</span>
 
       <div className="search-field-content">
-        <small>CHECK IN – CHECK OUT</small>
+        <small>CHECK IN â€“ CHECK OUT</small>
 </div>
 
-      <span className="field-chevron">⌄</span>
+      <span className="field-chevron">âŒ„</span>
     </div>
 
     <div className="search-divider" />
@@ -560,7 +571,7 @@ export default function Hero() {
         setDateOpen(false);
       }}
     >
-      <span className="search-icon">♙</span>
+      <span className="search-icon">â™™</span>
 
       <span className="search-field-content">
         <small>GUESTS</small>
@@ -572,7 +583,7 @@ export default function Hero() {
         </strong>
       </span>
 
-      <span className="field-chevron">⌄</span>
+      <span className="field-chevron">âŒ„</span>
     </button>
 
     {/* SEARCH BUTTON */}
@@ -584,7 +595,7 @@ export default function Hero() {
         handleSearch();
       }}
     >
-      <span>⌕</span>
+      <span>âŒ•</span>
       Search
     </button>
   </div>
@@ -601,75 +612,64 @@ export default function Hero() {
       </div>
 
       <div className="destination-options">
-        {locationLoading && (
-          <div className="location-search-message">
-            <span>⌖</span>
+        {destinations
+          .filter((item) => {
+            const search = destination.trim().toLowerCase();
+
+            if (!search) return true;
+
+            return (
+              item.name.toLowerCase().includes(search) ||
+              item.location.toLowerCase().includes(search)
+            );
+          })
+          .map((item) => (
+            <button
+              type="button"
+              key={item.name}
+              onClick={() => selectDestination(item.name)}
+            >
+              <span className="destination-map-icon">
+                âŒ–
+              </span>
+
+              <img
+                src={item.image}
+                alt={item.name}
+              />
+
+              <span>
+                <strong>{item.name}</strong>
+                <small>{item.location}</small>
+              </span>
+
+              <b>â†’</b>
+            </button>
+          ))}
+
+        {destinations.filter((item) => {
+          const search = destination.trim().toLowerCase();
+
+          if (!search) return true;
+
+          return (
+            item.name.toLowerCase().includes(search) ||
+            item.location.toLowerCase().includes(search)
+          );
+        }).length === 0 && (
+          <div className="no-location-result">
+            <span>âŒ–</span>
 
             <div>
-              <strong>Searching locations...</strong>
-              <small>Finding places worldwide</small>
+              <strong>{destination}</strong>
+              <small>Search this destination</small>
             </div>
           </div>
         )}
-
-        {!locationLoading &&
-          locationSuggestions.map((feature) => {
-            const properties = feature.properties || {};
-
-            const name =
-              properties.name ||
-              properties.city ||
-              properties.town ||
-              properties.village ||
-              properties.country ||
-              properties.formatted ||
-              "";
-
-            const formatted =
-              properties.formatted ||
-              properties.country ||
-              "";
-
-            return (
-              <button
-                type="button"
-                key={
-                  properties.place_id ||
-                  `${name}-${properties.lat}-${properties.lon}`
-                }
-                onClick={() =>
-                  selectDestination(formatted || name)
-                }
-              >
-                <span className="destination-map-icon">
-                  ⌖
-                </span>
-
-                <span>
-                  <strong>{name}</strong>
-                  <small>{formatted}</small>
-                </span>
-
-                <b>→</b>
-              </button>
-            );
-          })}
-
-        {!locationLoading &&
-          destination.trim() &&
-          locationSuggestions.length === 0 && (
-            <div className="no-location-result">
-              <span>⌖</span>
-
-              <div>
-                <strong>{destination}</strong>
-                <small>No matching location found</small>
-              </div>
-            </div>
-          )}
       </div>
     </div>
   )}
+
   {/* DATE DROPDOWN */}
   {dateOpen && (
     <div
@@ -765,7 +765,7 @@ export default function Hero() {
 
       <GuestRow
         title="Children"
-        subtitle="Age 2–12"
+        subtitle="Age 2â€“12"
         value={children}
         decrease={() =>
           setChildren(Math.max(0, children - 1))
@@ -792,7 +792,7 @@ export default function Hero() {
 
           {/* TRUST */}
           <div className="hero-trust">
-            <span className="trust-check">✓</span>
+            <span className="trust-check">âœ“</span>
 
             <strong>Trusted by travellers from 50+ countries</strong>
 
@@ -833,7 +833,7 @@ export default function Hero() {
           </div>
 
           <Link to="/experiences" className="hero-explore-link">
-            Explore Nepal <span>↗</span>
+            Explore Nepal <span>â†—</span>
           </Link>
         </div>
       </section>
@@ -856,18 +856,39 @@ export default function Hero() {
           ))}
         </div>
       </section>
-{/* FLIGHT CTA */}
-<section className="hero-flight-section">
-  <Link
-    to="/flights"
-    className="hero-flight-search"
-  >
-    <span>Search Flights</span>
-    <span className="hero-flight-arrow">→</span>
-  </Link>
-</section>
 
-            {/* HOTELS */}
+      {/* TRENDING DESTINATIONS */}
+      <section className="content-section trending-section">
+        <div className="section-top">
+          <div>
+            <span className="section-label">EXPLORE NEPAL</span>
+            <h2>Trending Destinations</h2>
+          </div>
+
+          <Link to="/experiences">See All â†’</Link>
+        </div>
+
+        <div className="destination-grid-modern">
+          {destinations.map((item) => (
+            <Link
+              to="/experiences"
+              className="trending-card"
+              key={item.name}
+            >
+              <img src={item.image} alt={item.name} loading="lazy" />
+
+              <div className="trending-card-overlay" />
+
+              <div className="trending-card-content">
+                <h3>{item.name}</h3>
+                <span>{item.price}</span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* HOTELS */}
       <section className="content-section hotel-section">
         <div className="section-top">
           <div>
@@ -933,7 +954,7 @@ export default function Hero() {
 
                   <div className="hotel-bottom">
                     <span className="hotel-badge">
-                      ✓ {hotel.badge}
+                      âœ“ {hotel.badge}
                     </span>
 
                     <div className="hotel-price">
@@ -1271,7 +1292,7 @@ function GuestRow({
           }}
           aria-label={`Decrease ${title}`}
         >
-          -
+          âˆ’
         </button>
 
         <strong>{value}</strong>
@@ -1290,6 +1311,7 @@ function GuestRow({
     </div>
   );
 }
+
 function MapPin({ className = "", color = "blue" }) {
   return (
     <span className={`${className} map-pin-${color}`}>
@@ -1297,10 +1319,6 @@ function MapPin({ className = "", color = "blue" }) {
     </span>
   );
 }
-
-
-
-
 
 
 

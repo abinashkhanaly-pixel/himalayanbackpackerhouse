@@ -1,4 +1,3 @@
-
 import { useEffect, useMemo, useState } from "react";
 import { jsPDF } from "jspdf";
 import "./VisaChecker.css";
@@ -83,14 +82,96 @@ export default function VisaChecker() {
       "Nepal Visa Requirements & Entry Guide | Backpacker Gateways";
 
     const pageDescription =
-      "Check general Nepal visa and entry information based on nationality, travel purpose, planned stay and passport type.";
+      "Check general Nepal visa requirements, Visa on Arrival information and entry guidance based on nationality, travel purpose, planned stay and passport type.";
 
     const pageUrl =
       "https://www.backpackergateways.com/visa-checker";
 
-    document.title = pageTitle;
+    /*
+     * Save the current document metadata.
+     * This is important because Backpacker Gateways is a React SPA.
+     * Without restoring these values, the Visa Checker title can
+     * remain visible after navigating to another page.
+     */
+    const previousTitle = document.title;
 
-    const setMeta = (attribute, value, content) => {
+    const existingDescription =
+      document.head.querySelector('meta[name="description"]');
+
+    const existingKeywords =
+      document.head.querySelector('meta[name="keywords"]');
+
+    const existingAuthor =
+      document.head.querySelector('meta[name="author"]');
+
+    const existingRobots =
+      document.head.querySelector('meta[name="robots"]');
+
+    const existingCanonical =
+      document.head.querySelector('link[rel="canonical"]');
+
+    const existingOgTitle =
+      document.head.querySelector('meta[property="og:title"]');
+
+    const existingOgDescription =
+      document.head.querySelector(
+        'meta[property="og:description"]'
+      );
+
+    const existingOgType =
+      document.head.querySelector('meta[property="og:type"]');
+
+    const existingOgUrl =
+      document.head.querySelector('meta[property="og:url"]');
+
+    const existingOgSiteName =
+      document.head.querySelector(
+        'meta[property="og:site_name"]'
+      );
+
+    const existingTwitterCard =
+      document.head.querySelector('meta[name="twitter:card"]');
+
+    const existingTwitterTitle =
+      document.head.querySelector(
+        'meta[name="twitter:title"]'
+      );
+
+    const existingTwitterDescription =
+      document.head.querySelector(
+        'meta[name="twitter:description"]'
+      );
+
+    const saveMetaContent = (element) =>
+      element
+        ? element.getAttribute("content")
+        : null;
+
+    const previousMeta = {
+      description: saveMetaContent(existingDescription),
+      keywords: saveMetaContent(existingKeywords),
+      author: saveMetaContent(existingAuthor),
+      robots: saveMetaContent(existingRobots),
+      ogTitle: saveMetaContent(existingOgTitle),
+      ogDescription: saveMetaContent(existingOgDescription),
+      ogType: saveMetaContent(existingOgType),
+      ogUrl: saveMetaContent(existingOgUrl),
+      ogSiteName: saveMetaContent(existingOgSiteName),
+      twitterCard: saveMetaContent(existingTwitterCard),
+      twitterTitle: saveMetaContent(existingTwitterTitle),
+      twitterDescription: saveMetaContent(
+        existingTwitterDescription
+      ),
+      canonical: existingCanonical
+        ? existingCanonical.getAttribute("href")
+        : null,
+    };
+
+    const setMeta = (
+      attribute,
+      value,
+      content
+    ) => {
       if (!content) return;
 
       let element = document.head.querySelector(
@@ -103,7 +184,10 @@ export default function VisaChecker() {
         document.head.appendChild(element);
       }
 
-      element.setAttribute("content", content);
+      element.setAttribute(
+        "content",
+        content
+      );
     };
 
     const setLink = (rel, href) => {
@@ -120,7 +204,11 @@ export default function VisaChecker() {
       element.setAttribute("href", href);
     };
 
-    // Basic SEO
+    /*
+     * Set Visa Checker SEO
+     */
+    document.title = pageTitle;
+
     setMeta(
       "name",
       "description",
@@ -130,7 +218,7 @@ export default function VisaChecker() {
     setMeta(
       "name",
       "keywords",
-      "Nepal visa, Nepal visa requirements, Nepal visa checker, Nepal entry requirements, Nepal travel visa, Nepal immigration"
+      "Nepal visa, Nepal visa requirements, Nepal visa checker, Nepal entry requirements, Nepal travel visa, Nepal immigration, Nepal Visa on Arrival"
     );
 
     setMeta(
@@ -145,13 +233,14 @@ export default function VisaChecker() {
       "index, follow"
     );
 
-    // Canonical
     setLink(
       "canonical",
       pageUrl
     );
 
-    // Open Graph
+    /*
+     * Open Graph
+     */
     setMeta(
       "property",
       "og:title",
@@ -182,7 +271,9 @@ export default function VisaChecker() {
       "Backpacker Gateways"
     );
 
-    // Twitter / X
+    /*
+     * Twitter / X
+     */
     setMeta(
       "name",
       "twitter:card",
@@ -201,28 +292,30 @@ export default function VisaChecker() {
       pageDescription
     );
 
-    // JSON-LD Structured Data
+    /*
+     * JSON-LD
+     */
     const structuredData = {
       "@context": "https://schema.org",
       "@type": "WebPage",
-      "name": "Nepal Visa Requirements & Entry Guide",
-      "description": pageDescription,
-      "url": pageUrl,
-      "inLanguage": "en",
-      "isPartOf": {
+      name: "Nepal Visa Requirements & Entry Guide",
+      description: pageDescription,
+      url: pageUrl,
+      inLanguage: "en",
+      isPartOf: {
         "@type": "WebSite",
-        "name": "Backpacker Gateways",
-        "url": "https://www.backpackergateways.com/"
+        name: "Backpacker Gateways",
+        url: "https://www.backpackergateways.com/",
       },
-      "about": {
+      about: {
         "@type": "Thing",
-        "name": "Nepal Visa Requirements"
+        name: "Nepal Visa Requirements",
       },
-      "publisher": {
+      publisher: {
         "@type": "Organization",
-        "name": "Backpacker Gateways",
-        "url": "https://www.backpackergateways.com/"
-      }
+        name: "Backpacker Gateways",
+        url: "https://www.backpackergateways.com/",
+      },
     };
 
     let script = document.getElementById(
@@ -239,6 +332,23 @@ export default function VisaChecker() {
     script.textContent =
       JSON.stringify(structuredData);
 
+    /*
+     * ---------------------------------------------------------
+     * CLEANUP
+     * ---------------------------------------------------------
+     *
+     * Restore the metadata that existed before entering
+     * the Visa Checker.
+     *
+     * This prevents:
+     *
+     * /rooms
+     * /community
+     * /about
+     * /contact
+     *
+     * from incorrectly keeping the Visa Checker title.
+     */
     return () => {
       const existingScript =
         document.getElementById(
@@ -248,41 +358,174 @@ export default function VisaChecker() {
       if (existingScript) {
         existingScript.remove();
       }
+
+      document.title = previousTitle;
+
+      const restoreMeta = (
+        attribute,
+        value,
+        previousValue
+      ) => {
+        const element =
+          document.head.querySelector(
+            `meta[${attribute}="${value}"]`
+          );
+
+        if (!element) return;
+
+        if (
+          previousValue === null ||
+          previousValue === undefined
+        ) {
+          element.remove();
+        } else {
+          element.setAttribute(
+            "content",
+            previousValue
+          );
+        }
+      };
+
+      restoreMeta(
+        "name",
+        "description",
+        previousMeta.description
+      );
+
+      restoreMeta(
+        "name",
+        "keywords",
+        previousMeta.keywords
+      );
+
+      restoreMeta(
+        "name",
+        "author",
+        previousMeta.author
+      );
+
+      restoreMeta(
+        "name",
+        "robots",
+        previousMeta.robots
+      );
+
+      restoreMeta(
+        "property",
+        "og:title",
+        previousMeta.ogTitle
+      );
+
+      restoreMeta(
+        "property",
+        "og:description",
+        previousMeta.ogDescription
+      );
+
+      restoreMeta(
+        "property",
+        "og:type",
+        previousMeta.ogType
+      );
+
+      restoreMeta(
+        "property",
+        "og:url",
+        previousMeta.ogUrl
+      );
+
+      restoreMeta(
+        "property",
+        "og:site_name",
+        previousMeta.ogSiteName
+      );
+
+      restoreMeta(
+        "name",
+        "twitter:card",
+        previousMeta.twitterCard
+      );
+
+      restoreMeta(
+        "name",
+        "twitter:title",
+        previousMeta.twitterTitle
+      );
+
+      restoreMeta(
+        "name",
+        "twitter:description",
+        previousMeta.twitterDescription
+      );
+
+      const canonical =
+        document.head.querySelector(
+          'link[rel="canonical"]'
+        );
+
+      if (canonical) {
+        if (
+          previousMeta.canonical === null ||
+          previousMeta.canonical === undefined
+        ) {
+          canonical.remove();
+        } else {
+          canonical.setAttribute(
+            "href",
+            previousMeta.canonical
+          );
+        }
+      }
     };
   }, []);
 
   const [country, setCountry] = useState("");
   const [search, setSearch] = useState("");
-  const [purpose, setPurpose] = useState("Tourism");
-  const [stay, setStay] = useState("Up to 15 days");
+  const [purpose, setPurpose] =
+    useState("Tourism");
+
+  const [stay, setStay] =
+    useState("Up to 15 days");
+
   const [passportType, setPassportType] =
     useState("Ordinary passport");
 
-  const [result, setResult] = useState(null);
+  const [result, setResult] =
+    useState(null);
 
   const filteredCountries = useMemo(() => {
-    const query = search.trim().toLowerCase();
+    const query =
+      search.trim().toLowerCase();
 
     if (!query) return countries;
 
     return countries.filter((item) =>
-      item.name.toLowerCase().includes(query)
+      item.name
+        .toLowerCase()
+        .includes(query)
     );
   }, [search]);
 
-  const selectedCountry = countries.find(
-    (item) => item.code === country
-  );
+  const selectedCountry =
+    countries.find(
+      (item) => item.code === country
+    );
 
-  const selectedRule = country
-    ? visaRules[country]
-    : null;
+  const selectedRule =
+    country
+      ? visaRules[country]
+      : null;
 
   const checkRequirements = (e) => {
     e.preventDefault();
 
-    if (!country || !selectedCountry) {
-      alert("Please select your passport country.");
+    if (
+      !country ||
+      !selectedCountry
+    ) {
+      alert(
+        "Please select your passport country."
+      );
       return;
     }
 
@@ -309,7 +552,9 @@ export default function VisaChecker() {
     setSearch("");
     setPurpose("Tourism");
     setStay("Up to 15 days");
-    setPassportType("Ordinary passport");
+    setPassportType(
+      "Ordinary passport"
+    );
     setResult(null);
 
     window.scrollTo({
@@ -335,7 +580,8 @@ export default function VisaChecker() {
     const pageWidth = 210;
     const pageHeight = 297;
     const margin = 17;
-    const contentWidth = pageWidth - margin * 2;
+    const contentWidth =
+      pageWidth - margin * 2;
 
     const colors = {
       green: [18, 72, 55],
@@ -354,7 +600,9 @@ export default function VisaChecker() {
 
     let y = 20;
 
-    const addPageIfNeeded = (height = 10) => {
+    const addPageIfNeeded = (
+      height = 10
+    ) => {
       if (y + height > 272) {
         addFooter();
         doc.addPage();
@@ -364,12 +612,28 @@ export default function VisaChecker() {
     };
 
     const addHeader = () => {
-      doc.setFillColor(...colors.green);
-      doc.rect(0, 0, pageWidth, 11, "F");
+      doc.setFillColor(
+        ...colors.green
+      );
 
-      doc.setFont("helvetica", "bold");
+      doc.rect(
+        0,
+        0,
+        pageWidth,
+        11,
+        "F"
+      );
+
+      doc.setFont(
+        "helvetica",
+        "bold"
+      );
+
       doc.setFontSize(8);
-      doc.setTextColor(...colors.white);
+
+      doc.setTextColor(
+        ...colors.white
+      );
 
       doc.text(
         "BACKPACKER GATEWAYS",
@@ -377,21 +641,32 @@ export default function VisaChecker() {
         7
       );
 
-      doc.setFont("helvetica", "normal");
+      doc.setFont(
+        "helvetica",
+        "normal"
+      );
 
       doc.text(
         "NEPAL TRAVEL GUIDE",
         pageWidth - margin,
         7,
-        { align: "right" }
+        {
+          align: "right",
+        }
       );
     };
 
     const addFooter = () => {
       const pageNumber =
-        doc.internal.getCurrentPageInfo().pageNumber;
+        doc.internal.getCurrentPageInfo()
+          .pageNumber;
 
-      doc.setDrawColor(225, 225, 225);
+      doc.setDrawColor(
+        225,
+        225,
+        225
+      );
+
       doc.line(
         margin,
         282,
@@ -399,9 +674,16 @@ export default function VisaChecker() {
         282
       );
 
-      doc.setFont("helvetica", "normal");
+      doc.setFont(
+        "helvetica",
+        "normal"
+      );
+
       doc.setFontSize(7);
-      doc.setTextColor(...colors.gray);
+
+      doc.setTextColor(
+        ...colors.gray
+      );
 
       doc.text(
         "General travel information • Verify current requirements before travel",
@@ -413,7 +695,9 @@ export default function VisaChecker() {
         `Page ${pageNumber}`,
         pageWidth - margin,
         288,
-        { align: "right" }
+        {
+          align: "right",
+        }
       );
     };
 
@@ -425,6 +709,7 @@ export default function VisaChecker() {
       addPageIfNeeded(18);
 
       doc.setFillColor(...color);
+
       doc.roundedRect(
         margin,
         y,
@@ -435,19 +720,34 @@ export default function VisaChecker() {
         "F"
       );
 
-      doc.setFont("helvetica", "bold");
+      doc.setFont(
+        "helvetica",
+        "bold"
+      );
+
       doc.setFontSize(8);
-      doc.setTextColor(...colors.white);
+
+      doc.setTextColor(
+        ...colors.white
+      );
 
       doc.text(
-        String(number).padStart(2, "0"),
+        String(number).padStart(
+          2,
+          "0"
+        ),
         margin + 5,
         y + 6.7,
-        { align: "center" }
+        {
+          align: "center",
+        }
       );
 
       doc.setFontSize(13);
-      doc.setTextColor(...colors.darkGreen);
+
+      doc.setTextColor(
+        ...colors.darkGreen
+      );
 
       doc.text(
         title,
@@ -459,32 +759,46 @@ export default function VisaChecker() {
     };
 
     const addParagraph = (text) => {
-      const lines = doc.splitTextToSize(
-        text,
-        contentWidth
-      );
+      const lines =
+        doc.splitTextToSize(
+          text,
+          contentWidth
+        );
 
       addPageIfNeeded(
         lines.length * 4.8 + 7
       );
 
-      doc.setFont("helvetica", "normal");
+      doc.setFont(
+        "helvetica",
+        "normal"
+      );
+
       doc.setFontSize(9.5);
-      doc.setTextColor(...colors.dark);
 
-      doc.text(lines, margin, y);
+      doc.setTextColor(
+        ...colors.dark
+      );
 
-      y += lines.length * 4.8 + 6;
+      doc.text(
+        lines,
+        margin,
+        y
+      );
+
+      y +=
+        lines.length * 4.8 + 6;
     };
 
     const addBullet = (
       text,
       color = colors.green
     ) => {
-      const lines = doc.splitTextToSize(
-        text,
-        contentWidth - 8
-      );
+      const lines =
+        doc.splitTextToSize(
+          text,
+          contentWidth - 8
+        );
 
       addPageIfNeeded(
         lines.length * 4.8 + 5
@@ -499,9 +813,16 @@ export default function VisaChecker() {
         "F"
       );
 
-      doc.setFont("helvetica", "normal");
+      doc.setFont(
+        "helvetica",
+        "normal"
+      );
+
       doc.setFontSize(9.2);
-      doc.setTextColor(...colors.dark);
+
+      doc.setTextColor(
+        ...colors.dark
+      );
 
       doc.text(
         lines,
@@ -509,7 +830,8 @@ export default function VisaChecker() {
         y
       );
 
-      y += lines.length * 4.8 + 4;
+      y +=
+        lines.length * 4.8 + 4;
     };
 
     const addInfoBox = (
@@ -518,10 +840,11 @@ export default function VisaChecker() {
       background,
       accent
     ) => {
-      const valueLines = doc.splitTextToSize(
-        value,
-        contentWidth - 45
-      );
+      const valueLines =
+        doc.splitTextToSize(
+          value,
+          contentWidth - 45
+        );
 
       const boxHeight =
         Math.max(
@@ -533,7 +856,9 @@ export default function VisaChecker() {
         boxHeight + 4
       );
 
-      doc.setFillColor(...background);
+      doc.setFillColor(
+        ...background
+      );
 
       doc.roundedRect(
         margin,
@@ -545,7 +870,9 @@ export default function VisaChecker() {
         "F"
       );
 
-      doc.setFillColor(...accent);
+      doc.setFillColor(
+        ...accent
+      );
 
       doc.roundedRect(
         margin,
@@ -557,9 +884,16 @@ export default function VisaChecker() {
         "F"
       );
 
-      doc.setFont("helvetica", "bold");
+      doc.setFont(
+        "helvetica",
+        "bold"
+      );
+
       doc.setFontSize(7.5);
-      doc.setTextColor(...colors.gray);
+
+      doc.setTextColor(
+        ...colors.gray
+      );
 
       doc.text(
         title.toUpperCase(),
@@ -567,9 +901,16 @@ export default function VisaChecker() {
         y + 7
       );
 
-      doc.setFont("helvetica", "bold");
+      doc.setFont(
+        "helvetica",
+        "bold"
+      );
+
       doc.setFontSize(9.5);
-      doc.setTextColor(...colors.darkGreen);
+
+      doc.setTextColor(
+        ...colors.darkGreen
+      );
 
       doc.text(
         valueLines,
@@ -587,7 +928,10 @@ export default function VisaChecker() {
 
     y = 25;
 
-    doc.setFillColor(...colors.red);
+    doc.setFillColor(
+      ...colors.red
+    );
+
     doc.rect(
       0,
       11,
@@ -596,7 +940,10 @@ export default function VisaChecker() {
       "F"
     );
 
-    doc.setFillColor(...colors.green);
+    doc.setFillColor(
+      ...colors.green
+    );
+
     doc.roundedRect(
       margin,
       y,
@@ -607,7 +954,10 @@ export default function VisaChecker() {
       "F"
     );
 
-    doc.setFillColor(...colors.gold);
+    doc.setFillColor(
+      ...colors.gold
+    );
+
     doc.circle(
       pageWidth - 35,
       y + 28,
@@ -615,9 +965,16 @@ export default function VisaChecker() {
       "F"
     );
 
-    doc.setFont("helvetica", "bold");
+    doc.setFont(
+      "helvetica",
+      "bold"
+    );
+
     doc.setFontSize(9);
-    doc.setTextColor(...colors.gold);
+
+    doc.setTextColor(
+      ...colors.gold
+    );
 
     doc.text(
       "NEPAL TRAVEL INFORMATION",
@@ -626,7 +983,10 @@ export default function VisaChecker() {
     );
 
     doc.setFontSize(22);
-    doc.setTextColor(...colors.white);
+
+    doc.setTextColor(
+      ...colors.white
+    );
 
     doc.text(
       "Nepal Visa &",
@@ -640,7 +1000,11 @@ export default function VisaChecker() {
       y + 39
     );
 
-    doc.setFont("helvetica", "normal");
+    doc.setFont(
+      "helvetica",
+      "normal"
+    );
+
     doc.setFontSize(8.5);
 
     doc.text(
@@ -729,7 +1093,9 @@ export default function VisaChecker() {
     );
 
     if (result.rule?.notes) {
-      addParagraph(result.rule.notes);
+      addParagraph(
+        result.rule.notes
+      );
     }
 
     /*
@@ -816,7 +1182,8 @@ export default function VisaChecker() {
         "For tourism, travellers should prepare their passport, applicable visa or entry permission, accommodation and travel details, and confirm the current tourist-entry process."
       );
     } else if (
-      result.purpose === "Trekking / Adventure"
+      result.purpose ===
+      "Trekking / Adventure"
     ) {
       addParagraph(
         "For trekking and adventure travel, visa requirements are only one part of preparation. Check route-specific permits, conservation or national-park requirements, insurance coverage, weather and emergency arrangements."
@@ -854,7 +1221,9 @@ export default function VisaChecker() {
       colors.green
     );
 
-    doc.setFillColor(...colors.lightGreen);
+    doc.setFillColor(
+      ...colors.lightGreen
+    );
 
     const officialBoxHeight = 45;
 
@@ -872,7 +1241,9 @@ export default function VisaChecker() {
       "F"
     );
 
-    doc.setFillColor(...colors.green);
+    doc.setFillColor(
+      ...colors.green
+    );
 
     doc.circle(
       margin + 12,
@@ -881,19 +1252,31 @@ export default function VisaChecker() {
       "F"
     );
 
-    doc.setFont("helvetica", "bold");
+    doc.setFont(
+      "helvetica",
+      "bold"
+    );
+
     doc.setFontSize(8);
-    doc.setTextColor(...colors.white);
+
+    doc.setTextColor(
+      ...colors.white
+    );
 
     doc.text(
       "✓",
       margin + 12,
       y + 15.5,
-      { align: "center" }
+      {
+        align: "center",
+      }
     );
 
     doc.setFontSize(11);
-    doc.setTextColor(...colors.darkGreen);
+
+    doc.setTextColor(
+      ...colors.darkGreen
+    );
 
     doc.text(
       "Nepal Department of Immigration",
@@ -901,9 +1284,16 @@ export default function VisaChecker() {
       y + 12
     );
 
-    doc.setFont("helvetica", "normal");
+    doc.setFont(
+      "helvetica",
+      "normal"
+    );
+
     doc.setFontSize(8.5);
-    doc.setTextColor(...colors.dark);
+
+    doc.setTextColor(
+      ...colors.dark
+    );
 
     const officialLines =
       doc.splitTextToSize(
@@ -917,9 +1307,16 @@ export default function VisaChecker() {
       y + 21
     );
 
-    doc.setFont("helvetica", "bold");
+    doc.setFont(
+      "helvetica",
+      "bold"
+    );
+
     doc.setFontSize(8);
-    doc.setTextColor(...colors.blue);
+
+    doc.setTextColor(
+      ...colors.blue
+    );
 
     doc.text(
       "www.immigration.gov.np",
@@ -927,7 +1324,8 @@ export default function VisaChecker() {
       y + 38
     );
 
-    y += officialBoxHeight + 8;
+    y +=
+      officialBoxHeight + 8;
 
     /*
      * DISCLAIMER
@@ -938,7 +1336,9 @@ export default function VisaChecker() {
       colors.red
     );
 
-    doc.setFillColor(...colors.lightRed);
+    doc.setFillColor(
+      ...colors.lightRed
+    );
 
     const disclaimer =
       "This document is a general travel-information guide prepared by Backpacker Gateways. It is not an official government document, visa approval, immigration decision, visa application or legal advice. Visa rules, fees, eligibility, procedures and entry requirements may change.";
@@ -950,7 +1350,8 @@ export default function VisaChecker() {
       );
 
     const disclaimerHeight =
-      disclaimerLines.length * 4.8 + 15;
+      disclaimerLines.length * 4.8 +
+      15;
 
     addPageIfNeeded(
       disclaimerHeight
@@ -966,9 +1367,16 @@ export default function VisaChecker() {
       "F"
     );
 
-    doc.setFont("helvetica", "bold");
+    doc.setFont(
+      "helvetica",
+      "bold"
+    );
+
     doc.setFontSize(9);
-    doc.setTextColor(...colors.red);
+
+    doc.setTextColor(
+      ...colors.red
+    );
 
     doc.text(
       "IMPORTANT",
@@ -976,9 +1384,16 @@ export default function VisaChecker() {
       y + 9
     );
 
-    doc.setFont("helvetica", "normal");
+    doc.setFont(
+      "helvetica",
+      "normal"
+    );
+
     doc.setFontSize(8.5);
-    doc.setTextColor(...colors.dark);
+
+    doc.setTextColor(
+      ...colors.dark
+    );
 
     doc.text(
       disclaimerLines,
@@ -986,7 +1401,8 @@ export default function VisaChecker() {
       y + 16
     );
 
-    y += disclaimerHeight + 8;
+    y +=
+      disclaimerHeight + 8;
 
     addParagraph(
       "Always verify the latest requirements directly with the relevant Nepal government authority before booking flights or travelling."
@@ -1012,7 +1428,10 @@ export default function VisaChecker() {
      */
     const safeCountry =
       result.country.name
-        .replace(/[^a-z0-9]+/gi, "-")
+        .replace(
+          /[^a-z0-9]+/gi,
+          "-"
+        )
         .toLowerCase();
 
     doc.save(
@@ -1033,13 +1452,16 @@ export default function VisaChecker() {
 
           <h1>
             Nepal Visa & Entry
-            <strong> Travel Guide</strong>
+            <strong>
+              {" "}Travel Guide
+            </strong>
           </h1>
 
           <p>
-            Select your passport and travel plans to
-            receive general information to help you
-            prepare for your Nepal trip.
+            Select your passport and travel
+            plans to receive general information
+            to help you prepare for your Nepal
+            trip.
           </p>
 
         </div>
@@ -1052,7 +1474,9 @@ export default function VisaChecker() {
 
           <form
             className="visa-form"
-            onSubmit={checkRequirements}
+            onSubmit={
+              checkRequirements
+            }
           >
 
             {/* PASSPORT */}
@@ -1061,7 +1485,9 @@ export default function VisaChecker() {
               <span>01</span>
 
               <div>
-                <small>PASSPORT</small>
+                <small>
+                  PASSPORT
+                </small>
 
                 <h2>
                   What passport do you hold?
@@ -1077,7 +1503,9 @@ export default function VisaChecker() {
                 placeholder="🔍 Search your country..."
                 value={search}
                 onChange={(e) =>
-                  setSearch(e.target.value)
+                  setSearch(
+                    e.target.value
+                  )
                 }
               />
 
@@ -1085,38 +1513,41 @@ export default function VisaChecker() {
 
             <div className="country-grid">
 
-              {filteredCountries.map((item) => (
+              {filteredCountries.map(
+                (item) => (
 
-                <button
-                  type="button"
-                  key={item.code}
-                  className={`country-option ${
-                    country === item.code
-                      ? "selected"
-                      : ""
-                  }`}
-                  onClick={() => {
-                    setCountry(item.code);
-                    setSearch("");
-                  }}
-                >
+                  <button
+                    type="button"
+                    key={item.code}
+                    className={`country-option ${
+                      country === item.code
+                        ? "selected"
+                        : ""
+                    }`}
+                    onClick={() => {
+                      setCountry(
+                        item.code
+                      );
+                      setSearch("");
+                    }}
+                  >
 
-                  <span className="country-flag">
-                    {item.flag}
-                  </span>
+                    <span className="country-flag">
+                      {item.flag}
+                    </span>
 
-                  <span>
-                    {item.name}
-                  </span>
+                    <span>
+                      {item.name}
+                    </span>
 
-                </button>
+                  </button>
 
-              ))}
+                )
+              )}
 
             </div>
 
             {selectedCountry && (
-
               <div className="selected-country">
 
                 <span>
@@ -1129,13 +1560,14 @@ export default function VisaChecker() {
 
                 <button
                   type="button"
-                  onClick={() => setCountry("")}
+                  onClick={() =>
+                    setCountry("")
+                  }
                 >
                   Change
                 </button>
 
               </div>
-
             )}
 
             {/* PURPOSE */}
@@ -1159,24 +1591,26 @@ export default function VisaChecker() {
 
               <div className="choice-grid">
 
-                {purposes.map((item) => (
+                {purposes.map(
+                  (item) => (
 
-                  <button
-                    type="button"
-                    key={item}
-                    className={`choice-button ${
-                      purpose === item
-                        ? "selected"
-                        : ""
-                    }`}
-                    onClick={() =>
-                      setPurpose(item)
-                    }
-                  >
-                    {item}
-                  </button>
+                    <button
+                      type="button"
+                      key={item}
+                      className={`choice-button ${
+                        purpose === item
+                          ? "selected"
+                          : ""
+                      }`}
+                      onClick={() =>
+                        setPurpose(item)
+                      }
+                    >
+                      {item}
+                    </button>
 
-                ))}
+                  )
+                )}
 
               </div>
 
@@ -1190,7 +1624,9 @@ export default function VisaChecker() {
                 <span>03</span>
 
                 <div>
-                  <small>STAY</small>
+                  <small>
+                    STAY
+                  </small>
 
                   <h2>
                     How long will you stay?
@@ -1201,24 +1637,26 @@ export default function VisaChecker() {
 
               <div className="choice-grid">
 
-                {stayOptions.map((item) => (
+                {stayOptions.map(
+                  (item) => (
 
-                  <button
-                    type="button"
-                    key={item}
-                    className={`choice-button ${
-                      stay === item
-                        ? "selected"
-                        : ""
-                    }`}
-                    onClick={() =>
-                      setStay(item)
-                    }
-                  >
-                    {item}
-                  </button>
+                    <button
+                      type="button"
+                      key={item}
+                      className={`choice-button ${
+                        stay === item
+                          ? "selected"
+                          : ""
+                      }`}
+                      onClick={() =>
+                        setStay(item)
+                      }
+                    >
+                      {item}
+                    </button>
 
-                ))}
+                  )
+                )}
 
               </div>
 
@@ -1245,24 +1683,26 @@ export default function VisaChecker() {
 
               <div className="choice-grid">
 
-                {passportTypes.map((item) => (
+                {passportTypes.map(
+                  (item) => (
 
-                  <button
-                    type="button"
-                    key={item}
-                    className={`choice-button ${
-                      passportType === item
-                        ? "selected"
-                        : ""
-                    }`}
-                    onClick={() =>
-                      setPassportType(item)
-                    }
-                  >
-                    {item}
-                  </button>
+                    <button
+                      type="button"
+                      key={item}
+                      className={`choice-button ${
+                        passportType === item
+                          ? "selected"
+                          : ""
+                      }`}
+                      onClick={() =>
+                        setPassportType(item)
+                      }
+                    >
+                      {item}
+                    </button>
 
-                ))}
+                  )
+                )}
 
               </div>
 
@@ -1280,7 +1720,6 @@ export default function VisaChecker() {
 
           {/* RESULT */}
           {result && (
-
             <section
               className="visa-result"
               id="visa-result"
@@ -1295,7 +1734,9 @@ export default function VisaChecker() {
                 <button
                   type="button"
                   className="start-over"
-                  onClick={resetChecker}
+                  onClick={
+                    resetChecker
+                  }
                 >
                   Start Over
                 </button>
@@ -1629,7 +2070,9 @@ export default function VisaChecker() {
                 <button
                   type="button"
                   className="download-guide-button"
-                  onClick={downloadGuide}
+                  onClick={
+                    downloadGuide
+                  }
                 >
                   DOWNLOAD COMPLETE GUIDE
                   <span>↓</span>
@@ -1648,13 +2091,13 @@ export default function VisaChecker() {
               </div>
 
               <p className="verified-text">
-                General information only. Always verify
-                current requirements with the official
-                Nepal immigration authority before travel.
+                General information only. Always
+                verify current requirements with
+                the official Nepal immigration
+                authority before travel.
               </p>
 
             </section>
-
           )}
 
         </div>
@@ -1664,6 +2107,3 @@ export default function VisaChecker() {
     </main>
   );
 }
-
-
-

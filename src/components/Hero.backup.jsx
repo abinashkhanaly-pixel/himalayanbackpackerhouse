@@ -1,13 +1,13 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "./Hero.css";
 
 const heroImages = [
-  "/images/hero/dwarikas-kathmandu.webp",
-  "/images/hero/hyatt-regency-kathmandu.webp",
-  "/images/hero/kathmandu-marriott.webp",
-  "/images/hero/soaltee-kathmandu.webp",
+  "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=1600&q=70",
+  "https://images.unsplash.com/photo-1528360983277-13d401cdc186?auto=format&fit=crop&w=1600&q=70",
+  "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?auto=format&fit=crop&w=1600&q=70",
 ];
+
 const destinations = [
   {
     name: "Kathmandu",
@@ -48,55 +48,61 @@ const destinations = [
 
 const categories = [
   {
-    icon: "🏨",
+    icon: "♙",
     title: "Backpacker Stays",
     subtitle: "Comfortable stays",
   },
   {
-    icon: "🛏️",
+    icon: "▥",
     title: "Budget Hostel",
     subtitle: "From $5",
   },
   {
-    icon: "🏠",
+    icon: "♜",
     title: "Mid-Range",
     subtitle: "From $20",
   },
   {
-    icon: "🏢",
+    icon: "▦",
     title: "Deluxe",
     subtitle: "From $50",
   },
   {
-    icon: "✨",
+    icon: "♛",
     title: "Luxury",
     subtitle: "From $100+",
   },
   {
-    icon: "🏔️",
+    icon: "⌂",
     title: "Trekking Lodges",
     subtitle: "Mountain stays",
   },
   {
-    icon: "⛺",
+    icon: "⌁",
     title: "Camping",
     subtitle: "Wild escapes",
   },
   {
-    icon: "🏡",
+    icon: "⌘",
     title: "Homestay",
     subtitle: "Live local",
   },
   {
-    icon: "🎒",
+    icon: "◇",
     title: "Gear Rental",
     subtitle: "Trek essentials",
   },
   {
-    icon: "🥾",
+    icon: "♟",
     title: "Hiking Trails",
     subtitle: "Find your trail",
   },
+  {
+  icon: "🚐",
+  title: "Tourist Vehicle Rental",
+  subtitle: "Travel Nepal Comfortably",
+  link: "/vehicles",
+}
 ];
 
 const hotels = [
@@ -232,22 +238,22 @@ const hotelFilters = [
 
 const whyUs = [
   {
-    icon: "🏔️",
+    icon: "▣",
     title: "Verified Hotels",
     text: "& Hostels",
   },
   {
-    icon: "📍",
+    icon: "⌖",
     title: "Real Google Map",
     text: "Integration",
   },
   {
-    icon: "🏨",
+    icon: "♙",
     title: "Local Guides",
     text: "& Support",
   },
   {
-    icon: "🗺️",
+    icon: "▢",
     title: "Secure Booking",
     text: "& Payment",
   },
@@ -257,7 +263,7 @@ const whyUs = [
     text: "& Delivery",
   },
   {
-    icon: "☀️",
+    icon: "♧",
     title: "Community of",
     text: "Travellers",
   },
@@ -271,55 +277,15 @@ export default function Hero() {
   const [guestOpen, setGuestOpen] = useState(false);
 
   const [destination, setDestination] = useState("");
-  const [locationSuggestions, setLocationSuggestions] = useState([]);
-  const [locationLoading, setLocationLoading] = useState(false);
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
 
-
-  const [rooms, setRooms] = useState(1);
   const [adults, setAdults] = useState(1);
-
   const [children, setChildren] = useState(0);
 
   const [hotelFilter, setHotelFilter] = useState("All");
 
   const totalGuests = adults + children;
-  useEffect(() => {
-    const searchLocations = async () => {
-      const query = destination.trim();
-
-      if (!query) {
-        setLocationSuggestions([]);
-        return;
-      }
-
-      setLocationLoading(true);
-
-      try {
-        const apiKey = import.meta.env.VITE_GEOAPIFY_API_KEY;
-
-        const response = await fetch(
-          `https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(
-            query
-          )}&limit=6&apiKey=${apiKey}`
-        );
-
-        const data = await response.json();
-
-        setLocationSuggestions(data.features || []);
-      } catch (error) {
-        console.error("Geoapify location search error:", error);
-        setLocationSuggestions([]);
-      } finally {
-        setLocationLoading(false);
-      }
-    };
-
-    const timer = setTimeout(searchLocations, 300);
-
-    return () => clearTimeout(timer);
-  }, [destination]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -341,25 +307,26 @@ export default function Hero() {
   };
 
   const handleSearch = () => {
-  const params = new URLSearchParams();
+    const params = new URLSearchParams();
 
-  if (destination) {
-    params.set("destination", destination);
-  }
+    if (destination) {
+      params.set("destination", destination);
+    }
 
-  if (checkIn) {
-    params.set("checkIn", checkIn);
-  }
+    if (checkIn) {
+      params.set("checkIn", checkIn);
+    }
 
-  if (checkOut) {
-    params.set("checkOut", checkOut);
-  }
+    if (checkOut) {
+      params.set("checkOut", checkOut);
+    }
 
-  params.set("adults", String(adults));
-  params.set("children", String(children));
+    params.set("adults", String(adults));
+    params.set("children", String(children));
 
-  window.location.href = `/rooms?${params.toString()}`;
-};
+    window.location.href = `/rooms?${params.toString()}`;
+  };
+
   const filteredHotels =
     hotelFilter === "All"
       ? hotels
@@ -368,29 +335,34 @@ export default function Hero() {
   return (
     <main className="home-page">
       {/* HERO */}
-<section className="hero">
-  <div className="hero-backgrounds">
-    {heroImages.map((image, index) => (
-      <div
-        key={image}
-        className={`hero-background ${
-          currentImage === index ? "active" : ""
-        }`}
-        style={{
-          backgroundImage: `url("${image}")`,
-        }}
-      />
-    ))}
-  </div>
+      <section className="hero">
+        <div className="hero-backgrounds">
+          {heroImages.map((image, index) => (
+            <div
+              key={image}
+              className={`hero-background ${
+                currentImage === index ? "active" : ""
+              }`}
+              style={
+                currentImage === index
+                  ? {
+                      backgroundImage: `url("${image}")`,
+                    }
+                  : undefined
+              }
+            />
+          ))}
+        </div>
+
         <div className="hero-overlay" />
 
         {/* NAVBAR */}
         <header className="hero-navbar">
           <Link to="/" className="brand">
             <div className="brand-mark">
-              <span>⌂</span>
-              <span>⌂</span>
-              <span>⌂</span>
+              <span>⌃</span>
+              <span>⌃</span>
+              <span>⌃</span>
             </div>
 
             <div className="brand-text">
@@ -454,341 +426,236 @@ export default function Hero() {
           </div>
 
           {/* SEARCH */}
-          
-
-
-               {/* SEARCH */}
-<div className="search-wrapper">
-  <div className="search-tabs">
-    <button
-      type="button"
-      className="search-tab active"
-      onClick={closeDropdowns}
-    >
-      <span>▣</span>
-      Hotels &amp; Hostels
-    </button>
-
-    <Link to="/trekking" className="search-tab">
-      <span>⌂</span>
-      Trekking Packages
-    </Link>
-
-    <Link to="/gear" className="search-tab">
-      <span>◇</span>
-      Gear Shop
-    </Link>
-
-    <Link to="/experiences" className="search-tab">
-      <span>⌖</span>
-      Places
-    </Link>
-  </div>
-
-  <div className="search-bar">
-
-    {/* WHERE ARE YOU GOING */}
-    <div
-      className={`search-field where-field ${
-        whereOpen ? "active" : ""
-      }`}
-      onClick={() => {
-        setWhereOpen(true);
-        setDateOpen(false);
-        setGuestOpen(false);
-      }}
-    >
-      <span className="search-icon">⌖</span>
-
-      <div className="search-field-content">
-        <small>WHERE ARE YOU GOING?</small>
-
-        <input
-          type="text"
-          value={destination}
-          placeholder="e.g. Kathmandu, Pokhara, EBC"
-          onChange={(event) => {
-            setDestination(event.target.value);
-            setWhereOpen(true);
-          }}
-          onFocus={() => {
-            setWhereOpen(true);
-            setDateOpen(false);
-            setGuestOpen(false);
-          }}
-          onClick={(event) => event.stopPropagation()}
-          autoComplete="off"
-        />
-      </div>
-
-      <span className="field-chevron">⌄</span>
-    </div>
-
-    <div className="search-divider" />
-
-    {/* CHECK IN / CHECK OUT */}
-    <div
-      className={`search-field date-field ${
-        dateOpen ? "active" : ""
-      }`}
-      onClick={() => {
-        setDateOpen(true);
-        setWhereOpen(false);
-        setGuestOpen(false);
-      }}
-    >
-      <span className="search-icon">◷</span>
-
-      <div className="search-field-content">
-        <small>CHECK IN – CHECK OUT</small>
-</div>
-
-      <span className="field-chevron">⌄</span>
-    </div>
-
-    <div className="search-divider" />
-
-    {/* GUESTS */}
-    <button
-      type="button"
-      className={`search-field ${
-        guestOpen ? "active" : ""
-      }`}
-      onClick={() => {
-        setGuestOpen(!guestOpen);
-        setWhereOpen(false);
-        setDateOpen(false);
-      }}
-    >
-      <span className="search-icon">♙</span>
-
-      <span className="search-field-content">
-        <small>GUESTS</small>
-
-        <strong>
-          {rooms} room{rooms !== 1 ? "s" : ""}, {adults} adult
-          {adults !== 1 ? "s" : ""}, {children} child
-          {children !== 1 ? "ren" : ""}
-        </strong>
-      </span>
-
-      <span className="field-chevron">⌄</span>
-    </button>
-
-    {/* SEARCH BUTTON */}
-    <button
-      type="button"
-      className="search-button"
-      onClick={(event) => {
-        event.stopPropagation();
-        handleSearch();
-      }}
-    >
-      <span>⌕</span>
-      Search
-    </button>
-  </div>
-
-  {/* DESTINATION DROPDOWN */}
-  {whereOpen && (
-    <div
-      className="search-dropdown destination-dropdown"
-      onClick={(event) => event.stopPropagation()}
-    >
-      <div className="dropdown-heading">
-        <span>LOCATION SEARCH</span>
-        <strong>Where are you going?</strong>
-      </div>
-
-      <div className="destination-options">
-        {locationLoading && (
-          <div className="location-search-message">
-            <span>⌖</span>
-
-            <div>
-              <strong>Searching locations...</strong>
-              <small>Finding places worldwide</small>
-            </div>
-          </div>
-        )}
-
-        {!locationLoading &&
-          locationSuggestions.map((feature) => {
-            const properties = feature.properties || {};
-
-            const name =
-              properties.name ||
-              properties.city ||
-              properties.town ||
-              properties.village ||
-              properties.country ||
-              properties.formatted ||
-              "";
-
-            const formatted =
-              properties.formatted ||
-              properties.country ||
-              "";
-
-            return (
+          <div className="search-wrapper">
+            <div className="search-tabs">
               <button
                 type="button"
-                key={
-                  properties.place_id ||
-                  `${name}-${properties.lat}-${properties.lon}`
-                }
-                onClick={() =>
-                  selectDestination(formatted || name)
-                }
+                className="search-tab active"
+                onClick={closeDropdowns}
               >
-                <span className="destination-map-icon">
-                  ⌖
-                </span>
-
-                <span>
-                  <strong>{name}</strong>
-                  <small>{formatted}</small>
-                </span>
-
-                <b>→</b>
+                <span>▣</span>
+                Hotels &amp; Hostels
               </button>
-            );
-          })}
 
-        {!locationLoading &&
-          destination.trim() &&
-          locationSuggestions.length === 0 && (
-            <div className="no-location-result">
-              <span>⌖</span>
+              <Link to="/trekking" className="search-tab">
+                <span>⌁</span>
+                Trekking Packages
+              </Link>
 
-              <div>
-                <strong>{destination}</strong>
-                <small>No matching location found</small>
-              </div>
+              <Link to="/gear" className="search-tab">
+                <span>◇</span>
+                Gear Shop
+              </Link>
+
+              <Link to="/experiences" className="search-tab">
+                <span>⌖</span>
+                Places
+              </Link>
             </div>
-          )}
-      </div>
-    </div>
-  )}
-  {/* DATE DROPDOWN */}
-  {dateOpen && (
-    <div
-      className="search-dropdown date-dropdown"
-      onClick={(event) => event.stopPropagation()}
-    >
-      <div className="dropdown-heading">
-        <span>YOUR STAY</span>
-        <strong>When are you travelling?</strong>
-      </div>
 
-      <div className="date-fields">
-        <label>
-          <span>CHECK-IN</span>
+            <div className="search-bar">
+              {/* WHERE */}
+              <button
+                type="button"
+                className={`search-field ${whereOpen ? "active" : ""}`}
+                onClick={() => {
+                  setWhereOpen(!whereOpen);
+                  setDateOpen(false);
+                  setGuestOpen(false);
+                }}
+              >
+                <span className="search-icon">⌖</span>
 
-          <input
-            type="date"
-            value={checkIn}
-            min={new Date().toISOString().split("T")[0]}
-            onChange={(event) => {
-              const value = event.target.value;
+                <span className="search-field-content">
+                  <small>WHERE ARE YOU GOING?</small>
+                  <strong>
+                    {destination || "e.g. Kathmandu, Pokhara, EBC"}
+                  </strong>
+                </span>
 
-              setCheckIn(value);
+                <span className="field-chevron">⌄</span>
+              </button>
 
-              if (checkOut && value && checkOut <= value) {
-                setCheckOut("");
-              }
-            }}
-          />
-        </label>
+              <div className="search-divider" />
 
-        <label>
-          <span>CHECK-OUT</span>
+              {/* DATE */}
+              <button
+                type="button"
+                className={`search-field ${dateOpen ? "active" : ""}`}
+                onClick={() => {
+                  setDateOpen(!dateOpen);
+                  setWhereOpen(false);
+                  setGuestOpen(false);
+                }}
+              >
+                <span className="search-icon">◷</span>
 
-          <input
-            type="date"
-            value={checkOut}
-            min={
-              checkIn ||
-              new Date().toISOString().split("T")[0]
-            }
-            disabled={!checkIn}
-            onChange={(event) =>
-              setCheckOut(event.target.value)
-            }
-          />
-        </label>
-      </div>
+                <span className="search-field-content">
+                  <small>CHECK IN – CHECK OUT</small>
 
-      <button
-        type="button"
-        className="done-button"
-        onClick={() => setDateOpen(false)}
-      >
-        Done
-      </button>
-    </div>
-  )}
+                  <strong>
+                    {checkIn
+                      ? `${checkIn}${checkOut ? ` — ${checkOut}` : ""}`
+                      : "Add date"}
+                  </strong>
+                </span>
 
-  {/* GUEST DROPDOWN */}
-  {guestOpen && (
-    <div
-      className="search-dropdown guest-dropdown"
-      onClick={(event) => event.stopPropagation()}
-    >
-      <div className="dropdown-heading">
-        <span>TRAVELLERS</span>
-        <strong>Who's joining you?</strong>
-      </div>
-     <GuestRow 
-       title="Rooms" 
-       subtitle="Number of rooms" 
-       value={rooms} 
-       decrease={() => 
-       setRooms(Math.max(1, rooms - 1)) 
-       } 
-       increase={() => 
-       setRooms(rooms + 1) 
-       } 
-       />
+                <span className="field-chevron">⌄</span>
+              </button>
 
-      <GuestRow
-        title="Adults"
-        subtitle="Age 13+"
-        value={adults}
-        decrease={() =>
-          setAdults(Math.max(1, adults - 1))
-        }
-        increase={() =>
-          setAdults(adults + 1)
-        }
-      />
+              <div className="search-divider" />
 
-      <GuestRow
-        title="Children"
-        subtitle="Age 2–12"
-        value={children}
-        decrease={() =>
-          setChildren(Math.max(0, children - 1))
-        }
-        increase={() =>
-          setChildren(children + 1)
-        }
-      />
+              {/* GUESTS */}
+              <button
+                type="button"
+                className={`search-field ${guestOpen ? "active" : ""}`}
+                onClick={() => {
+                  setGuestOpen(!guestOpen);
+                  setWhereOpen(false);
+                  setDateOpen(false);
+                }}
+              >
+                <span className="search-icon">♙</span>
 
-      <button
-        type="button"
-        className="done-button"
-        onClick={() => setGuestOpen(false)}
-      >
-        Done
-      </button>
-    </div>
-  )}
-</div>
-         
-             
-             
-              
+                <span className="search-field-content">
+                  <small>GUESTS</small>
+
+                  <strong>
+                    {totalGuests}{" "}
+                    {totalGuests === 1 ? "Guest" : "Guests"}
+                  </strong>
+                </span>
+
+                <span className="field-chevron">⌄</span>
+              </button>
+
+              <button
+                type="button"
+                className="search-button"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  handleSearch();
+                }}
+              >
+                <span>⌕</span>
+                Search
+              </button>
+            </div>
+
+            {/* DESTINATION DROPDOWN */}
+            {whereOpen && (
+              <div
+                className="search-dropdown destination-dropdown"
+                onClick={(event) => event.stopPropagation()}
+              >
+                <div className="dropdown-heading">
+                  <span>EXPLORE NEPAL</span>
+                  <strong>Where are you going?</strong>
+                </div>
+
+                <div className="destination-options">
+                  {destinations.slice(0, 4).map((item) => (
+                    <button
+                      type="button"
+                      key={item.name}
+                      onClick={() => selectDestination(item.name)}
+                    >
+                      <img src={item.image} alt={item.name} />
+
+                      <span>
+                        <strong>{item.name}</strong>
+                        <small>{item.location}</small>
+                      </span>
+
+                      <b>→</b>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* DATE DROPDOWN */}
+            {dateOpen && (
+              <div
+                className="search-dropdown date-dropdown"
+                onClick={(event) => event.stopPropagation()}
+              >
+                <div className="dropdown-heading">
+                  <span>YOUR STAY</span>
+                  <strong>When are you travelling?</strong>
+                </div>
+
+                <div className="date-fields">
+                  <label>
+                    <span>CHECK-IN</span>
+
+                    <input
+                      type="date"
+                      value={checkIn}
+                      min={new Date().toISOString().split("T")[0]}
+                      onChange={(event) => setCheckIn(event.target.value)}
+                    />
+                  </label>
+
+                  <label>
+                    <span>CHECK-OUT</span>
+
+                    <input
+                      type="date"
+                      value={checkOut}
+                      min={checkIn || undefined}
+                      onChange={(event) => setCheckOut(event.target.value)}
+                    />
+                  </label>
+                </div>
+
+                <button
+                  type="button"
+                  className="done-button"
+                  onClick={() => setDateOpen(false)}
+                >
+                  Done
+                </button>
+              </div>
+            )}
+
+            {/* GUEST DROPDOWN */}
+            {guestOpen && (
+              <div
+                className="search-dropdown guest-dropdown"
+                onClick={(event) => event.stopPropagation()}
+              >
+                <div className="dropdown-heading">
+                  <span>TRAVELLERS</span>
+                  <strong>Who's joining you?</strong>
+                </div>
+
+                <GuestRow
+                  title="Adults"
+                  subtitle="Age 13+"
+                  value={adults}
+                  decrease={() => setAdults(Math.max(1, adults - 1))}
+                  increase={() => setAdults(adults + 1)}
+                />
+
+                <GuestRow
+                  title="Children"
+                  subtitle="Age 2–12"
+                  value={children}
+                  decrease={() => setChildren(Math.max(0, children - 1))}
+                  increase={() => setChildren(children + 1)}
+                />
+
+                <button
+                  type="button"
+                  className="done-button"
+                  onClick={() => setGuestOpen(false)}
+                >
+                  Done
+                </button>
+              </div>
+            )}
+          </div>
 
           {/* TRUST */}
           <div className="hero-trust">
@@ -856,18 +723,39 @@ export default function Hero() {
           ))}
         </div>
       </section>
-{/* FLIGHT CTA */}
-<section className="hero-flight-section">
-  <Link
-    to="/flights"
-    className="hero-flight-search"
-  >
-    <span>Search Flights</span>
-    <span className="hero-flight-arrow">→</span>
-  </Link>
-</section>
 
-            {/* HOTELS */}
+      {/* TRENDING DESTINATIONS */}
+      <section className="content-section trending-section">
+        <div className="section-top">
+          <div>
+            <span className="section-label">EXPLORE NEPAL</span>
+            <h2>Trending Destinations</h2>
+          </div>
+
+          <Link to="/experiences">See All →</Link>
+        </div>
+
+        <div className="destination-grid-modern">
+          {destinations.map((item) => (
+            <Link
+              to="/experiences"
+              className="trending-card"
+              key={item.name}
+            >
+              <img src={item.image} alt={item.name} loading="lazy" />
+
+              <div className="trending-card-overlay" />
+
+              <div className="trending-card-content">
+                <h3>{item.name}</h3>
+                <span>{item.price}</span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* HOTELS */}
       <section className="content-section hotel-section">
         <div className="section-top">
           <div>
@@ -876,7 +764,7 @@ export default function Hero() {
           </div>
 
           <button type="button" className="map-view-button">
-            âŒ– &nbsp; Map View
+            ⌖ &nbsp; Map View
           </button>
         </div>
 
@@ -908,7 +796,7 @@ export default function Hero() {
                     onClick={(event) => event.preventDefault()}
                     aria-label={`Save ${hotel.name}`}
                   >
-                    â™¡
+                    ♡
                   </button>
                 </div>
 
@@ -916,11 +804,11 @@ export default function Hero() {
                   <div className="hotel-title-row">
                     <div>
                       <h3>{hotel.name}</h3>
-                      <p>âŒ– {hotel.location}</p>
+                      <p>⌖ {hotel.location}</p>
                     </div>
 
                     <div className="hotel-rating">
-                      â˜… {hotel.rating}
+                      ★ {hotel.rating}
                       <small>({hotel.reviews})</small>
                     </div>
                   </div>
@@ -970,13 +858,13 @@ export default function Hero() {
 
               <div>
                 <strong>{hotels[0].name}</strong>
-                <span>â˜… {hotels[0].rating} Â· {hotels[0].type}</span>
+                <span>★ {hotels[0].rating} · {hotels[0].type}</span>
                 <b>{hotels[0].price}/night</b>
               </div>
             </div>
 
             <button type="button" className="explore-map-button">
-              âŒ– &nbsp; Explore on Map
+              ⌖ &nbsp; Explore on Map
             </button>
           </div>
         </div>
@@ -991,10 +879,10 @@ export default function Hero() {
           </div>
 
           <span className="section-helper">
-            Rent or Buy&nbsp; â€“ &nbsp;Travel Smart
+            Rent or Buy&nbsp; – &nbsp;Travel Smart
           </span>
 
-          <Link to="/gear">View Shop â†’</Link>
+          <Link to="/gear">View Shop →</Link>
         </div>
 
         <div className="gear-grid">
@@ -1050,7 +938,7 @@ export default function Hero() {
 
               <div className="experience-content">
                 <h3>{item.name}</h3>
-                <span>âŒ– {item.location}</span>
+                <span>⌖ {item.location}</span>
                 <b>{item.category}</b>
               </div>
             </Link>
@@ -1068,7 +956,7 @@ export default function Hero() {
       <h2>Backpacker Community</h2>
 
       <p className="section-subtitle">
-        Share Â· Plan Â· Travel Together
+        Share · Plan · Travel Together
       </p>
     </div>
 
@@ -1091,7 +979,7 @@ export default function Hero() {
     </p>
 
     <Link to="/community" className="community-explore-button">
-      Explore Community â†’
+      Explore Community →
     </Link>
   </div>
 </section>
@@ -1123,7 +1011,7 @@ export default function Hero() {
             </Link>
 
             <Link to="/experiences" className="cta-secondary">
-              <span>â–·</span>
+              <span>▷</span>
               Watch Tour
             </Link>
           </div>
@@ -1161,16 +1049,16 @@ export default function Hero() {
           <div className="footer-brand">
             <Link to="/" className="brand footer-logo">
               <div className="brand-mark">
-                <span>âŒƒ</span>
-                <span>âŒƒ</span>
-                <span>âŒƒ</span>
+                <span>⌃</span>
+                <span>⌃</span>
+                <span>⌃</span>
               </div>
 
               <div className="brand-text">
                 <strong>Backpacker Gateways</strong>
 
                 <small>
-                  Explore Â· Stay Â· Trek Â· Connect
+                  Explore · Stay · Trek · Connect
                 </small>
               </div>
             </Link>
@@ -1184,11 +1072,11 @@ export default function Hero() {
 
             <div className="social-links">
               <a href="#instagram" aria-label="Instagram">
-                â—Ž
+                ◎
               </a>
 
               <a href="#youtube" aria-label="YouTube">
-                â–¶
+                ▶
               </a>
 
               <a href="#x" aria-label="X">
@@ -1238,10 +1126,10 @@ export default function Hero() {
 
         <div className="footer-bottom">
           <span>
-            Â© 2026 Backpacker Gateways. All rights reserved.
+            © 2026 Backpacker Gateways. All rights reserved.
           </span>
 
-          <span>Made with â™¥ in Nepal</span>
+          <span>Made with ♥ in Nepal</span>
         </div>
       </footer>
     </main>
@@ -1271,7 +1159,7 @@ function GuestRow({
           }}
           aria-label={`Decrease ${title}`}
         >
-          -
+          −
         </button>
 
         <strong>{value}</strong>
@@ -1290,6 +1178,7 @@ function GuestRow({
     </div>
   );
 }
+
 function MapPin({ className = "", color = "blue" }) {
   return (
     <span className={`${className} map-pin-${color}`}>
@@ -1297,13 +1186,6 @@ function MapPin({ className = "", color = "blue" }) {
     </span>
   );
 }
-
-
-
-
-
-
-
 
 
 

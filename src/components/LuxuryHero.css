@@ -243,7 +243,6 @@
 
 /* =========================================================
    LUXURY CATEGORY TABS
-   IMAGE KO EXACT BOTTOM MA
    ========================================================= */
 
 .luxury-tabs {
@@ -311,6 +310,7 @@
   font-family: inherit;
 
   font-size: 14px;
+
   font-weight: 600;
 
   cursor: pointer;
@@ -351,6 +351,7 @@
   color: #fff;
 
   font-size: 14px;
+
   font-weight: 700;
 
   box-shadow:
@@ -546,10 +547,56 @@
 
   min-width: 0;
 
+  min-height: 64px;
+
   padding: 0 18px;
 
   box-sizing: border-box;
+
+  /* Modern field background */
+  background: #f8fafc;
+
+  border: 1px solid transparent;
+
+  border-radius: 12px;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
 }
+
+
+/* =========================================================
+   SEARCH FIELD HOVER
+   ========================================================= */
+
+.search-field:hover {
+  background: #f1f5f9;
+
+  border-color: #e2e8f0;
+}
+
+
+/* =========================================================
+   SEARCH FIELD ACTIVE / FOCUS
+   ========================================================= */
+
+.search-field:focus-within {
+  background: #ffffff;
+
+  border-color: rgba(11, 61, 145, 0.20);
+
+  box-shadow:
+    0 0 0 3px rgba(11, 61, 145, 0.06),
+    0 5px 16px rgba(0, 0, 0, 0.06);
+}
+
+
+/* =========================================================
+   SEARCH FIELD SIZING
+   ========================================================= */
 
 .destination-field {
   flex: 1.35 1 0;
@@ -732,9 +779,11 @@
 }
 
 .destination-field input::placeholder {
-  color: #999;
+  color: #64748b;
 
   opacity: 1;
+
+  font-weight: 500;
 }
 
 .destination-field input:focus {
@@ -817,9 +866,11 @@
   justify-content: center;
 
   padding: 0;
+
   margin: 0;
 
   border: 0;
+
   outline: 0;
 
   background: transparent;
@@ -1209,15 +1260,21 @@
   }
 
 
-  /* SEARCH */
+  /* =====================================================
+     TABLET SEARCH
+     ===================================================== */
 
   .luxury-search {
     border-radius: 0 0 16px 16px;
   }
 
   .search-field {
+    min-height: 60px;
+
     padding-left: 11px;
     padding-right: 11px;
+
+    border-radius: 10px;
   }
 
   .search-icon {
@@ -1305,7 +1362,9 @@
   }
 
 
-  /* EYEBROW */
+  /* =====================================================
+     EYEBROW
+     ===================================================== */
 
   .luxury-eyebrow {
     font-size: 9px;
@@ -1320,7 +1379,9 @@
   }
 
 
-  /* TITLE */
+  /* =====================================================
+     TITLE
+     ===================================================== */
 
   .luxury-hero h1 {
     font-size: 48px;
@@ -1329,7 +1390,9 @@
   }
 
 
-  /* CATEGORY TABS */
+  /* =====================================================
+     CATEGORY TABS
+     ===================================================== */
 
   .luxury-tabs {
     left: 0;
@@ -1378,7 +1441,9 @@
   }
 
 
-  /* TAB ICONS */
+  /* =====================================================
+     TAB ICONS
+     ===================================================== */
 
   .luxury-tab-icon {
     width: 17px;
@@ -1391,7 +1456,9 @@
   }
 
 
-  /* DOTS */
+  /* =====================================================
+     DOTS
+     ===================================================== */
 
   .luxury-hero-dots {
     margin-top: 12px;
@@ -1410,6 +1477,8 @@
     padding: 8px;
 
     border-radius: 0 0 16px 16px;
+
+    gap: 6px;
   }
 
   .search-field {
@@ -1418,6 +1487,27 @@
     min-height: 65px;
 
     padding: 0 14px;
+
+    background: #f8fafc;
+
+    border: 1px solid transparent;
+
+    border-radius: 12px;
+
+    box-sizing: border-box;
+  }
+
+  .search-field:hover {
+    background: #f1f5f9;
+  }
+
+  .search-field:focus-within {
+    background: #fff;
+
+    border-color: rgba(11, 61, 145, 0.20);
+
+    box-shadow:
+      0 0 0 3px rgba(11, 61, 145, 0.06);
   }
 
   .search-divider {
@@ -1430,6 +1520,10 @@
     flex: none;
   }
 
+
+  /* =====================================================
+     MOBILE ICON
+     ===================================================== */
 
   .search-icon {
     width: 20px;
@@ -1446,6 +1540,10 @@
   }
 
 
+  /* =====================================================
+     MOBILE DATE
+     ===================================================== */
+
   .date-inputs {
     gap: 8px;
   }
@@ -1455,7 +1553,9 @@
   }
 
 
-  /* TRAVELER POPUP */
+  /* =====================================================
+     TRAVELER POPUP
+     ===================================================== */
 
   .luxury-search .traveler-popup {
     top: calc(100% + 8px);
@@ -1468,14 +1568,18 @@
   }
 
 
-  /* SEARCH BUTTON */
+  /* =====================================================
+     SEARCH BUTTON
+     ===================================================== */
 
   .luxury-search-button {
     width: 100%;
 
     min-height: 56px;
 
-    margin-top: 4px;
+    margin-top: 2px;
+
+    border-radius: 12px;
   }
 }
 
@@ -1511,11 +1615,21 @@
 
   .luxury-search {
     border-radius: 0 0 14px 14px;
+
+    padding: 7px;
+
+    gap: 5px;
   }
 
   .search-field {
+    width: 100%;
+
+    min-height: 62px;
+
     padding-left: 12px;
     padding-right: 12px;
+
+    border-radius: 11px;
   }
 
   .search-icon {
@@ -1525,6 +1639,8 @@
     min-width: 20px;
 
     flex-basis: 20px;
+
+    margin-right: 9px;
   }
 
   .search-icon svg {
@@ -1537,6 +1653,10 @@
     font-size: 14px;
   }
 
+  .destination-field input::placeholder {
+    font-size: 13px;
+  }
+
   .luxury-search .traveler-popup {
     width: 300px;
 
@@ -1547,6 +1667,228 @@
 
   .traveler-row {
     padding: 12px 2px;
+  }
+
+  .luxury-search-button {
+    min-height: 54px;
+
+    border-radius: 11px;
+  }
+}
+
+
+/* =========================================================
+   EXTRA SMALL DEVICES
+   ========================================================= */
+
+@media (max-width: 360px) {
+
+  .luxury-hero-container {
+    padding-left: 9px;
+    padding-right: 9px;
+  }
+
+  .luxury-hero h1 {
+    font-size: 38px;
+  }
+
+  .luxury-search {
+    padding: 6px;
+
+    gap: 5px;
+  }
+
+  .search-field {
+    min-height: 60px;
+
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .search-icon {
+    margin-right: 7px;
+
+    width: 19px;
+    height: 19px;
+
+    min-width: 19px;
+
+    flex-basis: 19px;
+  }
+
+  .search-icon svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .search-field-content label,
+  .traveler-label {
+    font-size: 9px;
+
+    letter-spacing: 1px;
+  }
+
+  .destination-field input,
+  .traveler-summary {
+    font-size: 13px;
+  }
+
+  .date-inputs {
+    gap: 5px;
+  }
+
+  .date-inputs input {
+    font-size: 12px;
+  }
+}
+ /* =========================================================
+    FINAL MOBILE OVERFLOW FIX
+    ========================================================= */
+
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+#root {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.luxury-hero,
+.luxury-search-section {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+
+/* Hero background never creates horizontal overflow */
+.luxury-hero-bg,
+.luxury-hero-overlay {
+  left: 0;
+  right: 0;
+  width: 100%;
+  max-width: 100%;
+}
+
+
+/* Search wrapper stays inside viewport */
+.luxury-search-wrap {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+
+/* Main search cannot become wider than viewport */
+.luxury-search {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+
+/* Mobile */
+@media (max-width: 700px) {
+
+  .luxury-hero {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: clip;
+  }
+
+  .luxury-search-section {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: clip;
+  }
+
+  .luxury-search-wrap {
+    width: 100%;
+    max-width: 100%;
+
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+
+    box-sizing: border-box;
+  }
+
+  .luxury-search {
+    width: 100%;
+    max-width: 100%;
+
+    box-sizing: border-box;
+  }
+
+  .search-field {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+
+    box-sizing: border-box;
+  }
+
+  .luxury-search-button {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+
+    box-sizing: border-box;
+  }
+
+
+  /* Tabs are allowed to scroll INSIDE themselves,
+     not expand the page */
+  .luxury-tabs {
+    left: 0;
+    right: 0;
+
+    width: 100%;
+    max-width: 100%;
+
+    transform: none;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    box-sizing: border-box;
+  }
+}
+
+
+/* Small mobile */
+@media (max-width: 420px) {
+
+  .luxury-search-wrap {
+    padding-left: 6px !important;
+    padding-right: 6px !important;
+  }
+
+  .luxury-search {
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+
+/* 320px */
+@media (max-width: 320px) {
+
+  .luxury-search-wrap {
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+  }
+
+  .luxury-search {
+    width: 100%;
+    max-width: 100%;
   }
 }
 
@@ -1567,7 +1909,8 @@
   .luxury-search-button,
   .luxury-hero-dots button,
   .counter button,
-  .traveler-done {
+  .traveler-done,
+  .search-field {
     transition: none;
   }
 }

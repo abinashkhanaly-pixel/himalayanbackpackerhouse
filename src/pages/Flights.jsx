@@ -62,20 +62,154 @@ function Flights() {
     );
   };
 
+  // =========================================================
+  // FLIGHT SEARCH VALIDATION + REQUEST OBJECT
+  // =========================================================
+
   const handleSearch = (event) => {
     event.preventDefault();
 
-    console.log({
+    // -------------------------------------------------------
+    // COMMON VALIDATION
+    // -------------------------------------------------------
+
+    if (!nationality) {
+      alert("Please select your nationality.");
+      return;
+    }
+
+    if (adults < 1) {
+      alert("At least 1 adult traveller is required.");
+      return;
+    }
+
+    // -------------------------------------------------------
+    // ONE WAY / ROUND TRIP VALIDATION
+    // -------------------------------------------------------
+
+    if (tripType !== "multiCity") {
+      if (!origin.trim()) {
+        alert("Please enter your departure location.");
+        return;
+      }
+
+      if (!destination.trim()) {
+        alert("Please enter your destination.");
+        return;
+      }
+
+      if (!departure) {
+        alert("Please select a departure date.");
+        return;
+      }
+
+      if (tripType === "roundTrip" && !returnDate) {
+        alert("Please select a return date.");
+        return;
+      }
+
+      if (
+        tripType === "roundTrip" &&
+        returnDate < departure
+      ) {
+        alert("Return date cannot be before departure date.");
+        return;
+      }
+
+      if (
+        origin.trim().toLowerCase() ===
+        destination.trim().toLowerCase()
+      ) {
+        alert("Departure and destination cannot be the same.");
+        return;
+      }
+    }
+
+    // -------------------------------------------------------
+    // MULTI-CITY VALIDATION
+    // -------------------------------------------------------
+
+    if (tripType === "multiCity") {
+      if (multiCityFlights.length < 2) {
+        alert("At least 2 flights are required for Multi-City.");
+        return;
+      }
+
+      const invalidFlight = multiCityFlights.some(
+        (flight) =>
+          !flight.origin.trim() ||
+          !flight.destination.trim() ||
+          !flight.date
+      );
+
+      if (invalidFlight) {
+        alert(
+          "Please complete From, To and Date for every flight."
+        );
+        return;
+      }
+
+      const sameLocationFlight = multiCityFlights.some(
+        (flight) =>
+          flight.origin.trim().toLowerCase() ===
+          flight.destination.trim().toLowerCase()
+      );
+
+      if (sameLocationFlight) {
+        alert(
+          "Departure and destination cannot be the same."
+        );
+        return;
+      }
+    }
+
+    // -------------------------------------------------------
+    // CREATE CLEAN SEARCH REQUEST
+    // -------------------------------------------------------
+
+    const searchRequest = {
       tripType,
-      origin,
-      destination,
-      departure,
-      returnDate,
+
+      travellers: {
+        adults,
+        children,
+        total: adults + children,
+      },
+
       nationality,
-      adults,
-      children,
-      multiCityFlights,
-    });
+
+      ...(tripType !== "multiCity"
+        ? {
+            route: {
+              from: origin.trim(),
+              to: destination.trim(),
+            },
+
+            departureDate: departure,
+
+            ...(tripType === "roundTrip"
+              ? {
+                  returnDate,
+                }
+              : {}),
+          }
+        : {
+            flights: multiCityFlights.map((flight) => ({
+              from: flight.origin.trim(),
+              to: flight.destination.trim(),
+              date: flight.date,
+            })),
+          }),
+    };
+
+    // -------------------------------------------------------
+    // TEMPORARY SEARCH OUTPUT
+    // -------------------------------------------------------
+
+    console.log(
+      "FLIGHT SEARCH REQUEST:",
+      searchRequest
+    );
   };
 
   return (
@@ -372,7 +506,6 @@ function Flights() {
                   </div>
 
                 </div>
-
               </>
             )}
 
@@ -611,7 +744,6 @@ function Flights() {
         </div>
 
       </section>
-
     </main>
   );
 }

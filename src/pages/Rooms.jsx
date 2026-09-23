@@ -1,1218 +1,841 @@
-
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { getRooms } from "../services/roomApi";
 
 const PAGE_TITLE = "Luxury Hotels in Nepal | Backpacker Gateways";
-
 const PAGE_DESCRIPTION =
-  "Discover luxury hotels in Nepal, from Kathmandu and Pokhara to Chitwan and other popular destinations. Compare rooms, facilities and book your stay with Backpacker Gateways.";
-
-const PAGE_CANONICAL =
-  "https://www.backpackergateways.com/rooms";
+  "Discover hotels, hostels, luxury stays and trekking lodges across Nepal with Backpacker Gateways.";
+const CANONICAL_URL = "https://www.backpackergateways.com/rooms";
 
 const HOTEL_HERO_IMAGE =
-  "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=2000&q=85";
+  "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1800&q=85";
 
-const HOTEL_FALLBACK_IMAGE =
-  "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80";
+const FALLBACK_ROOM_IMAGE =
+  "https://images.unsplash.com/photo-1566665797739-1674de7a421a?auto=format&fit=crop&w=900&q=80";
 
-export default function Rooms() {
+const Rooms = () => {
+  const [searchParams] = useSearchParams();
+
+  const destinationQuery =
+    searchParams.get("destination")?.trim() || "";
+
+  const checkInQuery =
+    searchParams.get("checkIn") || "";
+
+  const checkOutQuery =
+    searchParams.get("checkOut") || "";
+
+  const adultsQuery = Math.max(
+    Number(searchParams.get("adults") || 1),
+    1
+  );
+
+  const childrenQuery = Math.max(
+    Number(searchParams.get("children") || 0),
+    0
+  );
+
+  const totalGuestsQuery =
+    adultsQuery + childrenQuery;
+
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const previousTitle = document.title;
 
-    const metaSelectors = [
-      'meta[name="description"]',
-      'meta[name="keywords"]',
-      'meta[property="og:title"]',
-      'meta[property="og:description"]',
-      'meta[property="og:url"]',
-      'meta[property="og:type"]',
-      'meta[property="og:image"]',
-      'meta[name="twitter:title"]',
-      'meta[name="twitter:description"]',
-      'meta[name="twitter:card"]',
-      'link[rel="canonical"]',
-    ];
+    const existingDescription = document.querySelector(
+      'meta[name="description"]'
+    );
 
-    const previousMeta = metaSelectors.map((selector) => {
-      const element = document.head.querySelector(selector);
+    const previousDescription =
+      existingDescription?.getAttribute("content") || "";
 
-      return {
-        selector,
-        element,
-        attributes: element
-          ? Array.from(element.attributes).map((attr) => [
-              attr.name,
-              attr.value,
-            ])
-          : null,
-      };
-    });
+    document.title = destinationQuery
+      ? `${destinationQuery} Hotels | Backpacker Gateways`
+      : PAGE_TITLE;
 
-    const setMeta = (selector, attribute, content) => {
-      let element = document.head.querySelector(selector);
+    if (existingDescription) {
+      existingDescription.setAttribute(
+        "content",
+        destinationQuery
+          ? `Find hotels and rooms in ${destinationQuery} with Backpacker Gateways. Compare stays, prices, amenities and book your Nepal accommodation.`
+          : PAGE_DESCRIPTION
+      );
+    }
 
-      if (!element) {
-        element = document.createElement(
-          attribute === "href" ? "link" : "meta"
-        );
+    let cancelled = false;
 
-        if (attribute === "href") {
-          element.setAttribute("rel", "canonical");
+    const loadRooms = async () => {
+      try {
+        setLoading(true);
+
+        const result = await getRooms({
+          destination: destinationQuery,
+          checkIn: checkInQuery,
+          checkOut: checkOutQuery,
+          guests: totalGuestsQuery,
+        });
+
+        console.log("ROOM SEARCH RESULT:", result);
+
+        if (cancelled) return;
+
+        let roomData = [];
+
+        if (Array.isArray(result)) {
+          roomData = result;
+        } else if (Array.isArray(result?.data)) {
+          roomData = result.data;
+        } else if (Array.isArray(result?.rooms)) {
+          roomData = result.rooms;
+        } else if (Array.isArray(result?.data?.rooms)) {
+          roomData = result.data.rooms;
         }
 
-        document.head.appendChild(element);
-      }
+        setRooms(roomData);
+      } catch (error) {
+        console.error("ROOM SEARCH ERROR:", error);
 
-      element.setAttribute(attribute, content);
-    };
-
-    document.title = PAGE_TITLE;
-
-    setMeta(
-      'meta[name="description"]',
-      "content",
-      PAGE_DESCRIPTION
-    );
-
-    setMeta(
-      'meta[name="keywords"]',
-      "content",
-      "luxury hotels in Nepal, luxury hotels Nepal, hotels in Nepal, best hotels in Nepal, luxury hotel Kathmandu, luxury hotel Pokhara, hotels Kathmandu, hotels Pokhara, Nepal hotels, Backpacker Gateways"
-    );
-
-    setMeta(
-      'meta[property="og:title"]',
-      "content",
-      PAGE_TITLE
-    );
-
-    setMeta(
-      'meta[property="og:description"]',
-      "content",
-      PAGE_DESCRIPTION
-    );
-
-    setMeta(
-      'meta[property="og:url"]',
-      "content",
-      PAGE_CANONICAL
-    );
-
-    setMeta(
-      'meta[property="og:type"]',
-      "content",
-      "website"
-    );
-
-    setMeta(
-      'meta[property="og:image"]',
-      "content",
-      HOTEL_HERO_IMAGE
-    );
-
-    setMeta(
-      'meta[name="twitter:card"]',
-      "content",
-      "summary_large_image"
-    );
-
-    setMeta(
-      'meta[name="twitter:title"]',
-      "content",
-      PAGE_TITLE
-    );
-
-    setMeta(
-      'meta[name="twitter:description"]',
-      "content",
-      PAGE_DESCRIPTION
-    );
-
-    setMeta(
-      'link[rel="canonical"]',
-      "href",
-      PAGE_CANONICAL
-    );
-
-    async function loadRooms() {
-      try {
-        const result = await getRooms();
-
-        console.log("ROOM RESULT:", result);
-
-        if (Array.isArray(result?.data)) {
-          setRooms(result.data);
-        } else if (Array.isArray(result)) {
-          setRooms(result);
-        } else {
+        if (!cancelled) {
           setRooms([]);
         }
-      } catch (error) {
-        console.error("ROOM ERROR:", error);
-        setRooms([]);
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
-    }
+    };
 
     loadRooms();
 
     return () => {
+      cancelled = true;
+
       document.title = previousTitle;
 
-      previousMeta.forEach(
-        ({ selector, element, attributes }) => {
-          const currentElement =
-            document.head.querySelector(selector);
-
-          if (element && attributes) {
-            if (currentElement) {
-              Array.from(currentElement.attributes).forEach(
-                (attr) => {
-                  currentElement.removeAttribute(attr.name);
-                }
-              );
-
-              attributes.forEach(([name, value]) => {
-                currentElement.setAttribute(name, value);
-              });
-            } else {
-              const restored =
-                document.createElement(
-                  element.tagName.toLowerCase()
-                );
-
-              attributes.forEach(([name, value]) => {
-                restored.setAttribute(name, value);
-              });
-
-              document.head.appendChild(restored);
-            }
-          } else if (currentElement) {
-            currentElement.remove();
-          }
-        }
-      );
+      if (existingDescription) {
+        existingDescription.setAttribute(
+          "content",
+          previousDescription
+        );
+      }
     };
-  }, []);
+  }, [
+    destinationQuery,
+    checkInQuery,
+    checkOutQuery,
+    totalGuestsQuery,
+  ]);
+
+  const hasSearch =
+    destinationQuery ||
+    checkInQuery ||
+    checkOutQuery ||
+    searchParams.has("adults") ||
+    searchParams.has("children");
+
+  const formatDate = (date) => {
+    if (!date) return "";
+
+    const parsed = new Date(`${date}T00:00:00`);
+
+    if (Number.isNaN(parsed.getTime())) {
+      return date;
+    }
+
+    return parsed.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
 
   return (
     <div className="rooms-page">
+      {/* =========================
+          HERO
+      ========================== */}
+      <section
+        className="rooms-hero"
+        style={{
+          backgroundImage: `linear-gradient(
+            rgba(0,0,0,0.48),
+            rgba(0,0,0,0.58)
+          ), url(${HOTEL_HERO_IMAGE})`,
+        }}
+      >
+        <div className="rooms-hero-content">
+          <span className="rooms-eyebrow">
+            PREMIUM STAYS • NEPAL
+          </span>
 
-      {/* HERO */}
+          <h1>
+            {destinationQuery
+              ? `Hotels in ${destinationQuery}`
+              : "Stay in Style, Discover Nepal"}
+          </h1>
 
-      <section className="rooms-hero">
-
-        <div className="rooms-hero-overlay">
-
-          <div className="rooms-hero-content">
-
-            <span className="hero-eyebrow">
-              PREMIUM STAYS • NEPAL
-            </span>
-
-            <h1>
-              Stay in Style,
-              <br />
-              <em>Discover Nepal</em>
-            </h1>
-
-            <p>
-              Discover elegant hotels and memorable stays
-              across Kathmandu, Pokhara, Chitwan and beyond.
-              Comfort, character and Himalayan hospitality,
-              all in one place.
-            </p>
-
-          </div>
-
+          <p>
+            Discover comfortable stays from budget
+            hostels to luxury hotels across Nepal.
+          </p>
         </div>
-
       </section>
 
-      {/* ROOMS */}
+      {/* =========================
+          SEARCH SUMMARY
+      ========================== */}
+      {hasSearch && (
+        <section className="rooms-search-summary">
+          <div className="search-summary-inner">
+            <div>
+              <span className="summary-label">
+                YOUR SEARCH
+              </span>
 
+              <div className="summary-main">
+                {destinationQuery
+                  ? destinationQuery
+                  : "All Nepal"}
+              </div>
+            </div>
+
+            <div className="summary-item">
+              <span>CHECK-IN</span>
+              <strong>
+                {checkInQuery
+                  ? formatDate(checkInQuery)
+                  : "Any date"}
+              </strong>
+            </div>
+
+            <div className="summary-item">
+              <span>CHECK-OUT</span>
+              <strong>
+                {checkOutQuery
+                  ? formatDate(checkOutQuery)
+                  : "Any date"}
+              </strong>
+            </div>
+
+            <div className="summary-item">
+              <span>GUESTS</span>
+              <strong>
+                {totalGuestsQuery}{" "}
+                {totalGuestsQuery === 1
+                  ? "Guest"
+                  : "Guests"}
+              </strong>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* =========================
+          ROOMS
+      ========================== */}
       <section className="rooms-section">
-
-        <div className="rooms-container">
-
-          <div className="section-heading">
-
-            <span>
-              EXPLORE HOTELS IN NEPAL
+        <div className="section-heading">
+          <div>
+            <span className="section-eyebrow">
+              {destinationQuery
+                ? "SEARCH RESULTS"
+                : "BACKPACKER GATEWAYS"}
             </span>
 
             <h2>
-              Luxury Hotels in Nepal
+              {destinationQuery
+                ? `Available Stays in ${destinationQuery}`
+                : "Find Your Perfect Stay"}
             </h2>
 
             <p>
-              Explore carefully selected hotels and stays
-              across Nepal. Compare rooms, prices,
-              facilities and locations before booking
-              your next Himalayan stay.
+              Comfortable rooms, trusted properties
+              and memorable stays across Nepal.
             </p>
-
           </div>
 
-          {/* LOADING */}
-
-          {loading && (
-            <div className="loading">
-              Loading luxury hotels in Nepal...
+          {!loading && rooms.length > 0 && (
+            <div className="rooms-count">
+              {rooms.length}{" "}
+              {rooms.length === 1
+                ? "Room"
+                : "Rooms"}
             </div>
           )}
+        </div>
 
-          {/* ROOMS */}
+        {/* =========================
+            LOADING
+        ========================== */}
+        {loading && (
+          <div className="rooms-loading">
+            <div className="loading-spinner"></div>
+            <p>
+              {destinationQuery
+                ? `Finding stays in ${destinationQuery}...`
+                : "Finding available rooms..."}
+            </p>
+          </div>
+        )}
 
-          {!loading && rooms.length > 0 && (
-            <>
-              <div className="rooms-count">
+        {/* =========================
+            ROOM GRID
+        ========================== */}
+        {!loading && rooms.length > 0 && (
+          <div className="rooms-grid">
+            {rooms.map((room) => {
+              const roomImage =
+                room.images?.[0] ||
+                FALLBACK_ROOM_IMAGE;
 
-                <strong>
-                  {rooms.length}
-                </strong>{" "}
-                hotels and stays available
+              return (
+                <article
+                  className="room-card"
+                  key={room._id}
+                >
+                  <div className="room-image-wrap">
+                    <img
+                      src={roomImage}
+                      alt={`${room.name || "Hotel room"} in ${
+                        room.destination || "Nepal"
+                      }`}
+                      className="room-image"
+                      loading="lazy"
+                    />
 
-              </div>
+                    {room.available !== false && (
+                      <span className="available-badge">
+                        Available
+                      </span>
+                    )}
+                  </div>
 
-              <div className="rooms-grid">
+                  <div className="room-card-content">
+                    <div className="room-location">
+                      {room.destination ||
+                        "Nepal"}
+                    </div>
 
-                {rooms.map((room) => (
+                    <h3>
+                      {room.name ||
+                        "Comfortable Room"}
+                    </h3>
 
-                  <article
-                    className="room-card"
-                    key={room._id}
-                  >
+                    {room.description && (
+                      <p className="room-description">
+                        {room.description}
+                      </p>
+                    )}
 
-                    {/* IMAGE */}
-
-                    <div className="room-image">
-
-                      <img
-                        src={
-                          room.images?.[0] ||
-                          HOTEL_FALLBACK_IMAGE
-                        }
-                        alt={`${room.name} in ${
-                          room.destination || "Nepal"
-                        }`}
-                        loading="lazy"
-                        decoding="async"
-                        onError={(e) => {
-                          e.currentTarget.src =
-                            HOTEL_FALLBACK_IMAGE;
-                        }}
-                      />
-
-                      {room.available && (
-                        <span className="available">
-                          ● Available
+                    <div className="room-meta">
+                      {room.capacity && (
+                        <span>
+                          👤 {room.capacity} Guests
                         </span>
                       )}
 
-                    </div>
-
-                    {/* CONTENT */}
-
-                    <div className="room-content">
-
-                      <div className="room-top">
-
-                        <div>
-
-                          <h3>
-                            {room.name}
-                          </h3>
-
-                          <p className="location">
-                            📍 {room.destination}
-                          </p>
-
-                        </div>
-
-                        <div className="price">
-
-                          <strong>
-                            NPR{" "}
-                            {Number(
-                              room.price || 0
-                            ).toLocaleString("en-NP")}
-                          </strong>
-
-                          <small>
-                            per night
-                          </small>
-
-                        </div>
-
-                      </div>
-
-                      <p className="description">
-                        {room.description}
-                      </p>
-
-                      {/* INFO */}
-
-                      <div className="info">
-
-                        <span>
-                          👥 {room.capacity} Guests
-                        </span>
-
+                      {room.beds && (
                         <span>
                           🛏 {room.beds}
                         </span>
-
-                      </div>
-
-                      {/* AMENITIES */}
-
-                      <div className="amenities">
-
-                        {room.amenities
-                          ?.slice(0, 4)
-                          .map(
-                            (item, index) => (
-                              <span key={index}>
-                                {item}
-                              </span>
-                            )
-                          )}
-
-                      </div>
-
-                      {/* BUTTONS */}
-
-                      <div className="buttons">
-
-                        <Link
-                          to={`/rooms/${
-                            room.seoSlug || room._id
-                          }`}
-                          className="details"
-                        >
-                          View Details
-                        </Link>
-
-                        <Link
-                          to={`/booking?room=${room._id}`}
-                          className="book"
-                        >
-                          Book Now
-                        </Link>
-
-                      </div>
-
+                      )}
                     </div>
 
-                  </article>
+                    {room.amenities?.length > 0 && (
+                      <div className="room-amenities">
+                        {room.amenities
+                          .slice(0, 4)
+                          .map((amenity, index) => (
+                            <span
+                              key={`${amenity}-${index}`}
+                            >
+                              {amenity}
+                            </span>
+                          ))}
+                      </div>
+                    )}
 
-                ))}
+                    <div className="room-card-bottom">
+                      <div className="room-price">
+                        <small>
+                          From
+                        </small>
 
-              </div>
-            </>
-          )}
+                        <strong>
+                          NPR{" "}
+                          {Number(
+                            room.price || 0
+                          ).toLocaleString()}
+                        </strong>
 
-          {/* NO ROOMS */}
+                        <span>
+                          / night
+                        </span>
+                      </div>
 
-          {!loading && rooms.length === 0 && (
+                      <Link
+                        to={`/rooms/${
+                          room.seoSlug ||
+                          room._id
+                        }`}
+                        className="view-details-btn"
+                      >
+                        View Details
+                      </Link>
+                    </div>
 
-            <div className="no-rooms">
+                    <Link
+                      to={`/booking?room=${room._id}`}
+                      className="book-now-btn"
+                    >
+                      Book Now
+                    </Link>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
 
-              <h2>
-                Luxury Hotels in Nepal
-              </h2>
-
-              <p>
-                No hotel rooms are currently available.
-                Please check again soon.
-              </p>
-
+        {/* =========================
+            NO RESULTS
+        ========================== */}
+        {!loading && rooms.length === 0 && (
+          <div className="no-rooms">
+            <div className="no-rooms-icon">
+              🏨
             </div>
 
-          )}
+            <h3>
+              No rooms found
+            </h3>
 
-        </div>
+            <p>
+              {destinationQuery
+                ? `We couldn't find available rooms matching your search in ${destinationQuery}.`
+                : "No hotel rooms are currently available."}
+            </p>
 
+            <Link
+              to="/rooms"
+              className="clear-search-btn"
+            >
+              View All Rooms
+            </Link>
+          </div>
+        )}
       </section>
 
-      {/* SEO CONTENT */}
-
-      <section className="rooms-seo-section">
-
-        <div className="rooms-seo-container">
-
+      {/* =========================
+          SEO CONTENT
+      ========================== */}
+      <section className="rooms-seo">
+        <div className="rooms-seo-inner">
           <h2>
-            Find Luxury Hotels in Nepal
+            Hotels & Accommodation in Nepal
           </h2>
 
           <p>
-            Looking for luxury hotels in Nepal?
-            Backpacker Gateways helps travelers discover
-            quality hotels and comfortable stays in some
-            of Nepal's most popular destinations.
+            Backpacker Gateways helps travellers
+            discover hotels, hostels, luxury stays
+            and comfortable accommodation across
+            Nepal. Explore stays in Kathmandu,
+            Pokhara, Chitwan, Everest and other
+            popular destinations.
           </p>
-
-          <p>
-            Explore hotels in Kathmandu, Pokhara,
-            Chitwan and other destinations across Nepal.
-            Compare room types, prices, facilities and
-            locations to find a stay that matches your
-            travel plans.
-          </p>
-
-          <p>
-            Whether you are visiting Nepal for a holiday,
-            business trip, trekking adventure or cultural
-            experience, explore our hotel collection and
-            find your ideal place to stay.
-          </p>
-
         </div>
-
       </section>
 
-      {/* CSS */}
-
+      {/* =========================
+          STYLES
+      ========================== */}
       <style>{`
-
-        * {
-          box-sizing: border-box;
-        }
-
         .rooms-page {
-          width: 100%;
+          background: #fff;
+          color: #172033;
           min-height: 100vh;
-          background: #f7f8f6;
-          color: #18231d;
-          font-family:
-            Arial,
-            Helvetica,
-            sans-serif;
         }
-
-        /* =========================
-           HERO
-        ========================= */
 
         .rooms-hero {
-          position: relative;
-          width: 100%;
-          min-height: 520px;
-
-          background-image:
-            url("${HOTEL_HERO_IMAGE}");
-
+          min-height: 430px;
           background-size: cover;
           background-position: center;
-        }
-
-        .rooms-hero-overlay {
-          min-height: 520px;
-          width: 100%;
-
           display: flex;
           align-items: center;
-
-          background:
-            linear-gradient(
-              90deg,
-              rgba(8,18,13,.84) 0%,
-              rgba(8,18,13,.58) 42%,
-              rgba(8,18,13,.20) 100%
-            );
+          justify-content: center;
+          text-align: center;
+          padding: 70px 20px;
         }
 
         .rooms-hero-content {
-          width: 100%;
-          max-width: 1280px;
-          margin: 0 auto;
-
-          padding: 70px 6%;
-
-          color: white;
+          max-width: 850px;
+          color: #fff;
         }
 
-        /* PREMIUM LABEL */
-
-        .hero-eyebrow {
-          display: inline-block;
-
-          margin-bottom: 22px;
-
-          padding:
-            8px 16px;
-
-          color:
-            rgba(255,255,255,.97);
-
-          background:
-            rgba(255,255,255,.10);
-
-          border:
-            1px solid
-            rgba(255,255,255,.32);
-
-          border-radius: 30px;
-
-          font-family:
-            Georgia,
-            "Times New Roman",
-            serif;
-
-          font-size: 13px;
-          font-style: italic;
-          font-weight: 500;
-
-          letter-spacing: 2.6px;
-
-          backdrop-filter:
-            blur(7px);
-
-          -webkit-backdrop-filter:
-            blur(7px);
-
-          box-shadow:
-            0 8px 25px
-            rgba(0,0,0,.12);
-        }
-
-        /* HERO TITLE */
-
-        .rooms-hero-content h1 {
-          margin:
-            0 0 22px;
-
-          max-width: 780px;
-
-          font-family:
-            Georgia,
-            "Times New Roman",
-            serif;
-
-          font-size:
-            clamp(48px, 6.5vw, 82px);
-
-          line-height: 1.02;
-
-          font-weight: 500;
-
-          letter-spacing: -1.5px;
-
-          color: #ffffff;
-
-          text-shadow:
-            0 4px 25px
-            rgba(0,0,0,.28);
-        }
-
-        .rooms-hero-content h1 em {
-          color: #f1d7a2;
-
-          font-style: italic;
-
-          font-weight: 400;
-        }
-
-        /* HERO DESCRIPTION */
-
-        .rooms-hero-content p {
-          max-width: 680px;
-
-          margin: 0;
-
-          color:
-            rgba(255,255,255,.91);
-
-          font-family:
-            Arial,
-            Helvetica,
-            sans-serif;
-
-          font-size: 17px;
-
-          line-height: 1.75;
-
-          font-weight: 400;
-
-          text-shadow:
-            0 2px 12px
-            rgba(0,0,0,.25);
-        }
-
-        /* =========================
-           SECTION
-        ========================= */
-
-        .rooms-section {
-          padding:
-            90px 6%;
-        }
-
-        .rooms-container {
-          max-width: 1280px;
-          margin: 0 auto;
-        }
-
-        /* =========================
-           HEADING
-        ========================= */
-
-        .section-heading {
-          max-width: 800px;
-
-          margin:
-            0 auto 50px;
-
-          text-align: center;
-        }
-
-        .section-heading span {
-          color: #8b6b3f;
-
+        .rooms-eyebrow,
+        .section-eyebrow,
+        .summary-label {
           font-size: 12px;
-
           font-weight: 800;
-
           letter-spacing: 2px;
         }
 
+        .rooms-hero h1 {
+          font-size: clamp(38px, 6vw, 68px);
+          line-height: 1.05;
+          margin: 18px 0;
+          font-weight: 800;
+        }
+
+        .rooms-hero p {
+          font-size: 18px;
+          line-height: 1.7;
+          max-width: 650px;
+          margin: 0 auto;
+        }
+
+        .rooms-search-summary {
+          background: #f7f8fa;
+          border-bottom: 1px solid #e8eaf0;
+        }
+
+        .search-summary-inner {
+          max-width: 1250px;
+          margin: auto;
+          padding: 22px 24px;
+          display: flex;
+          align-items: center;
+          gap: 45px;
+          flex-wrap: wrap;
+        }
+
+        .summary-label {
+          display: block;
+          color: #7b8190;
+          margin-bottom: 5px;
+        }
+
+        .summary-main {
+          font-size: 20px;
+          font-weight: 800;
+        }
+
+        .summary-item {
+          display: flex;
+          flex-direction: column;
+          gap: 5px;
+        }
+
+        .summary-item span {
+          font-size: 11px;
+          font-weight: 700;
+          color: #888f9e;
+          letter-spacing: 1px;
+        }
+
+        .summary-item strong {
+          font-size: 14px;
+        }
+
+        .rooms-section {
+          max-width: 1250px;
+          margin: 0 auto;
+          padding: 75px 24px;
+        }
+
+        .section-heading {
+          display: flex;
+          align-items: end;
+          justify-content: space-between;
+          gap: 30px;
+          margin-bottom: 40px;
+        }
+
         .section-heading h2 {
-          margin:
-            12px 0 16px;
-
-          font-size:
-            clamp(34px, 5vw, 54px);
-
-          line-height: 1.1;
+          font-size: clamp(30px, 4vw, 46px);
+          margin: 10px 0;
+          line-height: 1.15;
         }
 
         .section-heading p {
-          margin: 0;
-
-          color: #68716b;
-
-          font-size: 17px;
-
+          color: #697386;
+          max-width: 650px;
           line-height: 1.7;
+          margin: 0;
         }
-
-        /* =========================
-           COUNT
-        ========================= */
 
         .rooms-count {
-          margin-bottom: 20px;
-
-          color: #68716b;
-
-          font-size: 14px;
+          white-space: nowrap;
+          font-weight: 800;
+          font-size: 15px;
         }
-
-        .rooms-count strong {
-          color: #18231d;
-        }
-
-        /* =========================
-           GRID
-        ========================= */
 
         .rooms-grid {
           display: grid;
-
-          grid-template-columns:
-            repeat(3, minmax(0, 1fr));
-
+          grid-template-columns: repeat(3, minmax(0, 1fr));
           gap: 28px;
         }
 
-        /* =========================
-           CARD
-        ========================= */
-
         .room-card {
+          background: #fff;
+          border: 1px solid #e8eaf0;
+          border-radius: 18px;
           overflow: hidden;
-
-          background: white;
-
-          border:
-            1px solid #e2e6e1;
-
-          border-radius: 22px;
-
-          box-shadow:
-            0 12px 35px
-            rgba(24,35,29,.08);
-
-          transition:
-            transform .3s ease,
-            box-shadow .3s ease;
+          box-shadow: 0 10px 35px rgba(20, 30, 50, 0.07);
+          transition: transform 0.25s ease,
+            box-shadow 0.25s ease;
         }
 
         .room-card:hover {
-          transform:
-            translateY(-7px);
-
-          box-shadow:
-            0 22px 50px
-            rgba(24,35,29,.14);
+          transform: translateY(-5px);
+          box-shadow: 0 18px 45px rgba(20, 30, 50, 0.12);
         }
 
-        /* =========================
-           IMAGE
-        ========================= */
+        .room-image-wrap {
+          height: 240px;
+          position: relative;
+          overflow: hidden;
+        }
 
         .room-image {
-          position: relative;
-
-          height: 260px;
-
-          overflow: hidden;
-
-          background: #dfe5df;
-        }
-
-        .room-image img {
           width: 100%;
           height: 100%;
-
-          display: block;
-
           object-fit: cover;
-
-          transition:
-            transform .5s ease;
+          display: block;
+          transition: transform 0.4s ease;
         }
 
-        .room-card:hover
-        .room-image img {
-          transform:
-            scale(1.06);
+        .room-card:hover .room-image {
+          transform: scale(1.04);
         }
 
-        .available {
+        .available-badge {
           position: absolute;
-
-          top: 16px;
-          left: 16px;
-
-          padding:
-            8px 13px;
-
-          background:
-            rgba(255,255,255,.95);
-
+          top: 15px;
+          left: 15px;
+          background: #fff;
+          padding: 7px 11px;
           border-radius: 30px;
-
-          color: #28613b;
-
-          font-size: 12px;
-
+          font-size: 11px;
           font-weight: 800;
         }
 
-        /* =========================
-           CONTENT
-        ========================= */
-
-        .room-content {
-          padding: 24px;
+        .room-card-content {
+          padding: 23px;
         }
 
-        .room-top {
-          display: flex;
-
-          justify-content:
-            space-between;
-
-          align-items:
-            flex-start;
-
-          gap: 15px;
-        }
-
-        .room-top h3 {
-          margin:
-            0 0 8px;
-
-          font-size: 22px;
-
-          line-height: 1.25;
-
-          color: #18231d;
-        }
-
-        .location {
-          margin: 0;
-
-          color: #8b6b3f;
-
+        .room-location {
+          color: #72798a;
           font-size: 12px;
-
           font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 1px;
         }
 
-        .price {
-          text-align: right;
-
-          flex-shrink: 0;
+        .room-card h3 {
+          font-size: 23px;
+          margin: 8px 0 12px;
         }
 
-        .price strong {
-          display: block;
-
-          color: #8b6b3f;
-
-          font-size: 19px;
+        .room-description {
+          color: #697386;
+          font-size: 14px;
+          line-height: 1.65;
+          display: -webkit-box;
+          -webkit-line-clamp: 3;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+          min-height: 68px;
         }
 
-        .price small {
-          color: #8b918d;
+        .room-meta {
+          display: flex;
+          gap: 15px;
+          flex-wrap: wrap;
+          margin: 17px 0;
+          font-size: 13px;
+          color: #525b6c;
+        }
 
+        .room-amenities {
+          display: flex;
+          gap: 7px;
+          flex-wrap: wrap;
+          margin-bottom: 20px;
+        }
+
+        .room-amenities span {
+          background: #f4f5f7;
+          padding: 6px 9px;
+          border-radius: 6px;
           font-size: 11px;
         }
 
-        .description {
-          margin:
-            18px 0;
-
-          color: #68716b;
-
-          font-size: 14px;
-
-          line-height: 1.65;
-
-          display: -webkit-box;
-
-          -webkit-line-clamp: 4;
-
-          -webkit-box-orient: vertical;
-
-          overflow: hidden;
-        }
-
-        /* =========================
-           INFO
-        ========================= */
-
-        .info {
+        .room-card-bottom {
           display: flex;
-
-          flex-wrap: wrap;
-
-          gap: 8px;
-
-          padding-bottom: 18px;
-
-          border-bottom:
-            1px solid #eceeeb;
+          align-items: center;
+          justify-content: space-between;
+          gap: 15px;
+          margin-top: 20px;
         }
 
-        .info span {
-          padding:
-            8px 10px;
-
-          background:
-            #f4f6f3;
-
-          border-radius: 8px;
-
-          color: #4d5751;
-
-          font-size: 12px;
-
-          font-weight: 600;
-        }
-
-        /* =========================
-           AMENITIES
-        ========================= */
-
-        .amenities {
+        .room-price {
           display: flex;
-
-          flex-wrap: wrap;
-
-          gap: 8px;
-
-          margin:
-            17px 0 22px;
+          flex-direction: column;
         }
 
-        .amenities span {
-          color: #59635d;
-
-          font-size: 12px;
+        .room-price small {
+          color: #858b98;
+          font-size: 11px;
         }
 
-        .amenities span:not(:last-child)::after {
-          content: "•";
-
-          margin-left: 8px;
-
-          color: #aaa;
+        .room-price strong {
+          font-size: 22px;
         }
 
-        /* =========================
-           BUTTONS
-        ========================= */
-
-        .buttons {
-          display: flex;
-
-          gap: 10px;
+        .room-price span {
+          font-size: 11px;
+          color: #858b98;
         }
 
-        .details,
-        .book {
-          flex: 1;
-
-          text-align: center;
-
-          padding:
-            13px 12px;
-
-          border-radius: 10px;
-
+        .view-details-btn,
+        .book-now-btn,
+        .clear-search-btn {
           text-decoration: none;
-
-          font-size: 13px;
-
           font-weight: 800;
-
-          transition: .25s ease;
+          border-radius: 9px;
+          transition: 0.2s ease;
         }
 
-        .details {
-          color: #26332b;
-
-          background: white;
-
-          border:
-            1px solid #d8ddd8;
+        .view-details-btn {
+          color: #172033;
+          font-size: 13px;
         }
 
-        .details:hover {
-          background:
-            #f3f5f2;
-        }
-
-        .book {
-          color: white;
-
-          background:
-            #18231d;
-
-          border:
-            1px solid #18231d;
-        }
-
-        .book:hover {
-          background:
-            #8b6b3f;
-
-          border-color:
-            #8b6b3f;
-        }
-
-        /* =========================
-           SEO CONTENT
-        ========================= */
-
-        .rooms-seo-section {
-          padding:
-            0 6% 90px;
-        }
-
-        .rooms-seo-container {
-          max-width: 950px;
-
-          margin: 0 auto;
-
-          padding: 45px;
-
-          background: white;
-
-          border:
-            1px solid #e2e6e1;
-
-          border-radius: 22px;
-        }
-
-        .rooms-seo-container h2 {
-          margin:
-            0 0 20px;
-
-          font-size:
-            clamp(28px, 4vw, 40px);
-
-          line-height: 1.2;
-        }
-
-        .rooms-seo-container p {
-          margin:
-            0 0 16px;
-
-          color: #68716b;
-
-          font-size: 16px;
-
-          line-height: 1.8;
-        }
-
-        .rooms-seo-container p:last-child {
-          margin-bottom: 0;
-        }
-
-        /* =========================
-           LOADING
-        ========================= */
-
-        .loading {
-          padding:
-            100px 20px;
-
+        .book-now-btn {
+          display: block;
           text-align: center;
-
-          color: #68716b;
-
-          font-size: 18px;
+          background: #172033;
+          color: #fff;
+          padding: 13px;
+          margin-top: 18px;
         }
 
-        /* =========================
-           NO ROOMS
-        ========================= */
+        .book-now-btn:hover {
+          opacity: 0.9;
+        }
+
+        .rooms-loading {
+          min-height: 300px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          color: #697386;
+        }
+
+        .loading-spinner {
+          width: 35px;
+          height: 35px;
+          border: 3px solid #e5e7eb;
+          border-top-color: #172033;
+          border-radius: 50%;
+          animation: spin 0.8s linear infinite;
+          margin-bottom: 15px;
+        }
+
+        @keyframes spin {
+          to {
+            transform: rotate(360deg);
+          }
+        }
 
         .no-rooms {
-          padding:
-            80px 20px;
-
-          background: white;
-
-          border-radius: 20px;
-
           text-align: center;
+          padding: 80px 20px;
+          border: 1px dashed #dfe2e8;
+          border-radius: 18px;
         }
 
-        .no-rooms h2 {
-          margin-bottom: 10px;
+        .no-rooms-icon {
+          font-size: 45px;
+          margin-bottom: 15px;
+        }
+
+        .no-rooms h3 {
+          font-size: 25px;
+          margin: 0 0 10px;
         }
 
         .no-rooms p {
-          color: #68716b;
+          color: #697386;
+          margin-bottom: 25px;
         }
 
-        /* =========================
-           RESPONSIVE
-        ========================= */
+        .clear-search-btn {
+          display: inline-block;
+          background: #172033;
+          color: #fff;
+          padding: 13px 22px;
+        }
 
-        @media (max-width: 1000px) {
+        .rooms-seo {
+          background: #f7f8fa;
+          padding: 65px 24px;
+        }
 
+        .rooms-seo-inner {
+          max-width: 950px;
+          margin: auto;
+        }
+
+        .rooms-seo h2 {
+          font-size: 32px;
+          margin-bottom: 15px;
+        }
+
+        .rooms-seo p {
+          color: #697386;
+          line-height: 1.8;
+        }
+
+        @media (max-width: 900px) {
           .rooms-grid {
-            grid-template-columns:
-              repeat(2, minmax(0, 1fr));
+            grid-template-columns: repeat(2, minmax(0, 1fr));
           }
 
+          .section-heading {
+            align-items: start;
+            flex-direction: column;
+          }
         }
 
-        @media (max-width: 650px) {
-
+        @media (max-width: 620px) {
           .rooms-hero {
-            min-height: 450px;
-
-            background-position:
-              center center;
+            min-height: 360px;
           }
 
-          .rooms-hero-overlay {
-            min-height: 450px;
-
-            background:
-              linear-gradient(
-                90deg,
-                rgba(8,18,13,.84),
-                rgba(8,18,13,.42)
-              );
-          }
-
-          .rooms-hero-content {
-            padding:
-              55px 20px;
-          }
-
-          .hero-eyebrow {
-            margin-bottom: 16px;
-
-            padding:
-              6px 11px;
-
-            font-size: 10px;
-
-            letter-spacing: 1.8px;
-          }
-
-          .rooms-hero-content h1 {
-            font-size:
-              clamp(42px, 12vw, 58px);
-
-            line-height: 1.04;
-
-            letter-spacing:
-              -0.8px;
-          }
-
-          .rooms-hero-content p {
-            max-width: 100%;
-
-            font-size: 15px;
-
-            line-height: 1.65;
-          }
-
-          .rooms-section {
-            padding:
-              60px 18px;
+          .rooms-hero h1 {
+            font-size: 38px;
           }
 
           .rooms-grid {
             grid-template-columns: 1fr;
           }
 
-          .room-top {
-            flex-direction:
-              column;
+          .search-summary-inner {
+            gap: 20px;
           }
 
-          .price {
-            text-align: left;
+          .rooms-section {
+            padding: 55px 18px;
           }
-
-          .buttons {
-            flex-direction:
-              column;
-          }
-
-          .rooms-seo-section {
-            padding:
-              0 18px 60px;
-          }
-
-          .rooms-seo-container {
-            padding:
-              28px 22px;
-          }
-
         }
-
       `}</style>
-
     </div>
   );
-}
+};
 
+export default Rooms;

@@ -1,13 +1,13 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "./Hero.css";
 
 const heroImages = [
-  "/images/hero/dwarikas-kathmandu.webp",
-  "/images/hero/hyatt-regency-kathmandu.webp",
-  "/images/hero/kathmandu-marriott.webp",
-  "/images/hero/soaltee-kathmandu.webp",
+  "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=1600&q=70",
+  "https://images.unsplash.com/photo-1528360983277-13d401cdc186?auto=format&fit=crop&w=1600&q=70",
+  "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?auto=format&fit=crop&w=1600&q=70",
 ];
+
 const destinations = [
   {
     name: "Kathmandu",
@@ -48,55 +48,61 @@ const destinations = [
 
 const categories = [
   {
-    icon: "🏨",
+    icon: "♙",
     title: "Backpacker Stays",
     subtitle: "Comfortable stays",
   },
   {
-    icon: "🛏️",
+    icon: "▥",
     title: "Budget Hostel",
     subtitle: "From $5",
   },
   {
-    icon: "🏠",
+    icon: "♜",
     title: "Mid-Range",
     subtitle: "From $20",
   },
   {
-    icon: "🏢",
+    icon: "▦",
     title: "Deluxe",
     subtitle: "From $50",
   },
   {
-    icon: "✨",
+    icon: "♛",
     title: "Luxury",
     subtitle: "From $100+",
   },
   {
-    icon: "🏔️",
+    icon: "⌂",
     title: "Trekking Lodges",
     subtitle: "Mountain stays",
   },
   {
-    icon: "⛺",
+    icon: "⌁",
     title: "Camping",
     subtitle: "Wild escapes",
   },
   {
-    icon: "🏡",
+    icon: "⌘",
     title: "Homestay",
     subtitle: "Live local",
   },
   {
-    icon: "🎒",
+    icon: "◇",
     title: "Gear Rental",
     subtitle: "Trek essentials",
   },
   {
-    icon: "🥾",
+    icon: "♟",
     title: "Hiking Trails",
     subtitle: "Find your trail",
   },
+  {
+  icon: "🚐",
+  title: "Tourist Vehicle Rental",
+  subtitle: "Travel Nepal Comfortably",
+  link: "/vehicles",
+}
 ];
 
 const hotels = [
@@ -232,22 +238,22 @@ const hotelFilters = [
 
 const whyUs = [
   {
-    icon: "🏔️",
+    icon: "▣",
     title: "Verified Hotels",
     text: "& Hostels",
   },
   {
-    icon: "📍",
+    icon: "⌖",
     title: "Real Google Map",
     text: "Integration",
   },
   {
-    icon: "🏨",
+    icon: "♙",
     title: "Local Guides",
     text: "& Support",
   },
   {
-    icon: "🗺️",
+    icon: "▢",
     title: "Secure Booking",
     text: "& Payment",
   },
@@ -257,7 +263,7 @@ const whyUs = [
     text: "& Delivery",
   },
   {
-    icon: "☀️",
+    icon: "♧",
     title: "Community of",
     text: "Travellers",
   },
@@ -271,8 +277,6 @@ export default function Hero() {
   const [guestOpen, setGuestOpen] = useState(false);
 
   const [destination, setDestination] = useState("");
-  const [locationSuggestions, setLocationSuggestions] = useState([]);
-  const [locationLoading, setLocationLoading] = useState(false);
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
 
@@ -285,41 +289,6 @@ export default function Hero() {
   const [hotelFilter, setHotelFilter] = useState("All");
 
   const totalGuests = adults + children;
-  useEffect(() => {
-    const searchLocations = async () => {
-      const query = destination.trim();
-
-      if (!query) {
-        setLocationSuggestions([]);
-        return;
-      }
-
-      setLocationLoading(true);
-
-      try {
-        const apiKey = import.meta.env.VITE_GEOAPIFY_API_KEY;
-
-        const response = await fetch(
-          `https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(
-            query
-          )}&limit=6&apiKey=${apiKey}`
-        );
-
-        const data = await response.json();
-
-        setLocationSuggestions(data.features || []);
-      } catch (error) {
-        console.error("Geoapify location search error:", error);
-        setLocationSuggestions([]);
-      } finally {
-        setLocationLoading(false);
-      }
-    };
-
-    const timer = setTimeout(searchLocations, 300);
-
-    return () => clearTimeout(timer);
-  }, [destination]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -368,29 +337,34 @@ export default function Hero() {
   return (
     <main className="home-page">
       {/* HERO */}
-<section className="hero">
-  <div className="hero-backgrounds">
-    {heroImages.map((image, index) => (
-      <div
-        key={image}
-        className={`hero-background ${
-          currentImage === index ? "active" : ""
-        }`}
-        style={{
-          backgroundImage: `url("${image}")`,
-        }}
-      />
-    ))}
-  </div>
+      <section className="hero">
+        <div className="hero-backgrounds">
+          {heroImages.map((image, index) => (
+            <div
+              key={image}
+              className={`hero-background ${
+                currentImage === index ? "active" : ""
+              }`}
+              style={
+                currentImage === index
+                  ? {
+                      backgroundImage: `url("${image}")`,
+                    }
+                  : undefined
+              }
+            />
+          ))}
+        </div>
+
         <div className="hero-overlay" />
 
         {/* NAVBAR */}
         <header className="hero-navbar">
           <Link to="/" className="brand">
             <div className="brand-mark">
-              <span>⌂</span>
-              <span>⌂</span>
-              <span>⌂</span>
+              <span>⌃</span>
+              <span>⌃</span>
+              <span>⌃</span>
             </div>
 
             <div className="brand-text">
@@ -470,7 +444,7 @@ export default function Hero() {
     </button>
 
     <Link to="/trekking" className="search-tab">
-      <span>⌂</span>
+      <span>⌁</span>
       Trekking Packages
     </Link>
 
@@ -601,75 +575,64 @@ export default function Hero() {
       </div>
 
       <div className="destination-options">
-        {locationLoading && (
-          <div className="location-search-message">
+        {destinations
+          .filter((item) => {
+            const search = destination.trim().toLowerCase();
+
+            if (!search) return true;
+
+            return (
+              item.name.toLowerCase().includes(search) ||
+              item.location.toLowerCase().includes(search)
+            );
+          })
+          .map((item) => (
+            <button
+              type="button"
+              key={item.name}
+              onClick={() => selectDestination(item.name)}
+            >
+              <span className="destination-map-icon">
+                ⌖
+              </span>
+
+              <img
+                src={item.image}
+                alt={item.name}
+              />
+
+              <span>
+                <strong>{item.name}</strong>
+                <small>{item.location}</small>
+              </span>
+
+              <b>→</b>
+            </button>
+          ))}
+
+        {destinations.filter((item) => {
+          const search = destination.trim().toLowerCase();
+
+          if (!search) return true;
+
+          return (
+            item.name.toLowerCase().includes(search) ||
+            item.location.toLowerCase().includes(search)
+          );
+        }).length === 0 && (
+          <div className="no-location-result">
             <span>⌖</span>
 
             <div>
-              <strong>Searching locations...</strong>
-              <small>Finding places worldwide</small>
+              <strong>{destination}</strong>
+              <small>Search this destination</small>
             </div>
           </div>
         )}
-
-        {!locationLoading &&
-          locationSuggestions.map((feature) => {
-            const properties = feature.properties || {};
-
-            const name =
-              properties.name ||
-              properties.city ||
-              properties.town ||
-              properties.village ||
-              properties.country ||
-              properties.formatted ||
-              "";
-
-            const formatted =
-              properties.formatted ||
-              properties.country ||
-              "";
-
-            return (
-              <button
-                type="button"
-                key={
-                  properties.place_id ||
-                  `${name}-${properties.lat}-${properties.lon}`
-                }
-                onClick={() =>
-                  selectDestination(formatted || name)
-                }
-              >
-                <span className="destination-map-icon">
-                  ⌖
-                </span>
-
-                <span>
-                  <strong>{name}</strong>
-                  <small>{formatted}</small>
-                </span>
-
-                <b>→</b>
-              </button>
-            );
-          })}
-
-        {!locationLoading &&
-          destination.trim() &&
-          locationSuggestions.length === 0 && (
-            <div className="no-location-result">
-              <span>⌖</span>
-
-              <div>
-                <strong>{destination}</strong>
-                <small>No matching location found</small>
-              </div>
-            </div>
-          )}
       </div>
     </div>
   )}
+
   {/* DATE DROPDOWN */}
   {dateOpen && (
     <div
@@ -856,18 +819,39 @@ export default function Hero() {
           ))}
         </div>
       </section>
-{/* FLIGHT CTA */}
-<section className="hero-flight-section">
-  <Link
-    to="/flights"
-    className="hero-flight-search"
-  >
-    <span>Search Flights</span>
-    <span className="hero-flight-arrow">→</span>
-  </Link>
-</section>
 
-            {/* HOTELS */}
+      {/* TRENDING DESTINATIONS */}
+      <section className="content-section trending-section">
+        <div className="section-top">
+          <div>
+            <span className="section-label">EXPLORE NEPAL</span>
+            <h2>Trending Destinations</h2>
+          </div>
+
+          <Link to="/experiences">See All →</Link>
+        </div>
+
+        <div className="destination-grid-modern">
+          {destinations.map((item) => (
+            <Link
+              to="/experiences"
+              className="trending-card"
+              key={item.name}
+            >
+              <img src={item.image} alt={item.name} loading="lazy" />
+
+              <div className="trending-card-overlay" />
+
+              <div className="trending-card-content">
+                <h3>{item.name}</h3>
+                <span>{item.price}</span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* HOTELS */}
       <section className="content-section hotel-section">
         <div className="section-top">
           <div>
@@ -876,7 +860,7 @@ export default function Hero() {
           </div>
 
           <button type="button" className="map-view-button">
-            âŒ– &nbsp; Map View
+            ⌖ &nbsp; Map View
           </button>
         </div>
 
@@ -908,7 +892,7 @@ export default function Hero() {
                     onClick={(event) => event.preventDefault()}
                     aria-label={`Save ${hotel.name}`}
                   >
-                    â™¡
+                    ♡
                   </button>
                 </div>
 
@@ -916,11 +900,11 @@ export default function Hero() {
                   <div className="hotel-title-row">
                     <div>
                       <h3>{hotel.name}</h3>
-                      <p>âŒ– {hotel.location}</p>
+                      <p>⌖ {hotel.location}</p>
                     </div>
 
                     <div className="hotel-rating">
-                      â˜… {hotel.rating}
+                      ★ {hotel.rating}
                       <small>({hotel.reviews})</small>
                     </div>
                   </div>
@@ -970,13 +954,13 @@ export default function Hero() {
 
               <div>
                 <strong>{hotels[0].name}</strong>
-                <span>â˜… {hotels[0].rating} Â· {hotels[0].type}</span>
+                <span>★ {hotels[0].rating} · {hotels[0].type}</span>
                 <b>{hotels[0].price}/night</b>
               </div>
             </div>
 
             <button type="button" className="explore-map-button">
-              âŒ– &nbsp; Explore on Map
+              ⌖ &nbsp; Explore on Map
             </button>
           </div>
         </div>
@@ -991,10 +975,10 @@ export default function Hero() {
           </div>
 
           <span className="section-helper">
-            Rent or Buy&nbsp; â€“ &nbsp;Travel Smart
+            Rent or Buy&nbsp; – &nbsp;Travel Smart
           </span>
 
-          <Link to="/gear">View Shop â†’</Link>
+          <Link to="/gear">View Shop →</Link>
         </div>
 
         <div className="gear-grid">
@@ -1050,7 +1034,7 @@ export default function Hero() {
 
               <div className="experience-content">
                 <h3>{item.name}</h3>
-                <span>âŒ– {item.location}</span>
+                <span>⌖ {item.location}</span>
                 <b>{item.category}</b>
               </div>
             </Link>
@@ -1068,7 +1052,7 @@ export default function Hero() {
       <h2>Backpacker Community</h2>
 
       <p className="section-subtitle">
-        Share Â· Plan Â· Travel Together
+        Share · Plan · Travel Together
       </p>
     </div>
 
@@ -1091,7 +1075,7 @@ export default function Hero() {
     </p>
 
     <Link to="/community" className="community-explore-button">
-      Explore Community â†’
+      Explore Community →
     </Link>
   </div>
 </section>
@@ -1123,7 +1107,7 @@ export default function Hero() {
             </Link>
 
             <Link to="/experiences" className="cta-secondary">
-              <span>â–·</span>
+              <span>▷</span>
               Watch Tour
             </Link>
           </div>
@@ -1161,16 +1145,16 @@ export default function Hero() {
           <div className="footer-brand">
             <Link to="/" className="brand footer-logo">
               <div className="brand-mark">
-                <span>âŒƒ</span>
-                <span>âŒƒ</span>
-                <span>âŒƒ</span>
+                <span>⌃</span>
+                <span>⌃</span>
+                <span>⌃</span>
               </div>
 
               <div className="brand-text">
                 <strong>Backpacker Gateways</strong>
 
                 <small>
-                  Explore Â· Stay Â· Trek Â· Connect
+                  Explore · Stay · Trek · Connect
                 </small>
               </div>
             </Link>
@@ -1184,11 +1168,11 @@ export default function Hero() {
 
             <div className="social-links">
               <a href="#instagram" aria-label="Instagram">
-                â—Ž
+                ◎
               </a>
 
               <a href="#youtube" aria-label="YouTube">
-                â–¶
+                ▶
               </a>
 
               <a href="#x" aria-label="X">
@@ -1238,10 +1222,10 @@ export default function Hero() {
 
         <div className="footer-bottom">
           <span>
-            Â© 2026 Backpacker Gateways. All rights reserved.
+            © 2026 Backpacker Gateways. All rights reserved.
           </span>
 
-          <span>Made with â™¥ in Nepal</span>
+          <span>Made with ♥ in Nepal</span>
         </div>
       </footer>
     </main>
@@ -1271,7 +1255,7 @@ function GuestRow({
           }}
           aria-label={`Decrease ${title}`}
         >
-          -
+          −
         </button>
 
         <strong>{value}</strong>
@@ -1290,6 +1274,7 @@ function GuestRow({
     </div>
   );
 }
+
 function MapPin({ className = "", color = "blue" }) {
   return (
     <span className={`${className} map-pin-${color}`}>
@@ -1297,12 +1282,6 @@ function MapPin({ className = "", color = "blue" }) {
     </span>
   );
 }
-
-
-
-
-
-
 
 
 

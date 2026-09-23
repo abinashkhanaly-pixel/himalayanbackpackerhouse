@@ -1,4 +1,3 @@
-
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
@@ -12,6 +11,7 @@ const gearRoutes = require("./routes/gearRoutes");
 const communityRoutes = require("./routes/communityRoutes");
 const inquiryRoutes = require("./routes/inquiryRoutes");
 const trekRoutes = require("./routes/trekRoutes");
+const flightRoutes = require("./routes/flightRoutes");
 
 const app = express();
 
@@ -73,6 +73,12 @@ app.use("/api/inquiries", inquiryRoutes);
 app.use("/api/treks", trekRoutes);
 
 // ==========================================
+// FLIGHT API
+// ==========================================
+
+app.use("/api/flights", flightRoutes);
+
+// ==========================================
 // HOME ROUTE
 // ==========================================
 
@@ -128,10 +134,10 @@ connectDB()
       );
       console.log("MongoDB connected");
       console.log("Trekking API: /api/treks");
+      console.log("Flight API: /api/flights");
       console.log("=================================");
     });
   })
   .catch((error) => {
     console.error("Server startup failed:", error.message);
   });
-
