@@ -1,0 +1,720 @@
+/* =========================================================
+   RECOMMENDED STAYS
+   Premium Travel Marketplace Style
+========================================================= */
+
+.recommended-stays {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 76px 24px 92px;
+  background: #f7f7f5;
+  overflow: hidden;
+}
+
+.recommended-stays-container {
+  width: min(1240px, 100%);
+  margin: 0 auto;
+}
+
+/* =========================================================
+   SECTION HEADER
+========================================================= */
+
+.recommended-stays-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+  margin-bottom: 32px;
+}
+
+.recommended-eyebrow {
+  display: block;
+  margin-bottom: 11px;
+
+  color: #6b7280;
+
+  font-family: "Inter", "Manrope", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 1.7px;
+  text-transform: uppercase;
+}
+
+.recommended-stays-header h2 {
+  margin: 0;
+
+  color: #111827;
+
+  font-family: "Inter", "Manrope", sans-serif;
+  font-size: clamp(32px, 4vw, 46px);
+  font-weight: 750;
+  line-height: 1.08;
+  letter-spacing: -1.8px;
+}
+
+.recommended-stays-header p {
+  max-width: 570px;
+  margin: 12px 0 0;
+
+  color: #667085;
+
+  font-family: "Inter", "Manrope", sans-serif;
+  font-size: 14px;
+  font-weight: 450;
+  line-height: 1.65;
+}
+
+/* =========================================================
+   VIEW ALL
+========================================================= */
+
+.view-all-stays {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  flex-shrink: 0;
+
+  min-height: 44px;
+  padding: 0 17px;
+
+  border: 1px solid #d9dde3;
+  border-radius: 10px;
+
+  background: #ffffff;
+  color: #1f2937;
+
+  font-family: "Inter", "Manrope", sans-serif;
+  font-size: 13px;
+  font-weight: 650;
+
+  text-decoration: none;
+
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.view-all-stays span {
+  font-size: 17px;
+  line-height: 1;
+  transition: transform 0.2s ease;
+}
+
+.view-all-stays:hover {
+  background: #ffffff;
+  border-color: #b8bec7;
+
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 7px 20px rgba(16, 24, 40, 0.07);
+}
+
+.view-all-stays:hover span {
+  transform: translateX(3px);
+}
+
+/* =========================================================
+   GRID
+========================================================= */
+
+.recommended-stays-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+
+/* =========================================================
+   CARD
+========================================================= */
+
+.recommended-stay-card {
+  min-width: 0;
+
+  overflow: hidden;
+
+  border: 1px solid #e4e7ec;
+  border-radius: 16px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 2px 6px rgba(16, 24, 40, 0.03);
+
+  transition:
+    transform 0.28s ease,
+    box-shadow 0.28s ease,
+    border-color 0.28s ease;
+}
+
+.recommended-stay-card:hover {
+  transform: translateY(-5px);
+
+  border-color: #d7dbe1;
+
+  box-shadow:
+    0 18px 42px rgba(16, 24, 40, 0.10);
+}
+
+/* =========================================================
+   IMAGE
+========================================================= */
+
+.stay-image-wrapper {
+  position: relative;
+
+  display: block;
+
+  width: 100%;
+  aspect-ratio: 16 / 10;
+
+  overflow: hidden;
+
+  background: #e8e9e7;
+
+  text-decoration: none;
+}
+
+.stay-image-wrapper::after {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.02) 40%,
+      rgba(0, 0, 0, 0.30) 100%
+    );
+
+  pointer-events: none;
+}
+
+.stay-image-wrapper img {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+
+  transition:
+    transform 0.65s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.recommended-stay-card:hover .stay-image-wrapper img {
+  transform: scale(1.045);
+}
+
+/* =========================================================
+   PREMIUM BADGE
+========================================================= */
+
+.stay-badge {
+  position: absolute;
+
+  top: 14px;
+  left: 14px;
+
+  z-index: 2;
+
+  padding: 7px 10px;
+
+  border-radius: 7px;
+
+  background: rgba(255, 255, 255, 0.94);
+
+  color: #344054;
+
+  font-family: "Inter", "Manrope", sans-serif;
+  font-size: 9px;
+  font-weight: 750;
+  letter-spacing: 1px;
+  line-height: 1;
+
+  backdrop-filter: blur(10px);
+}
+
+/* =========================================================
+   IMAGE ACTION
+========================================================= */
+
+.stay-image-arrow {
+  position: absolute;
+
+  right: 14px;
+  bottom: 14px;
+
+  z-index: 2;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 38px;
+  height: 38px;
+
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.95);
+
+  color: #111827;
+
+  font-size: 16px;
+  line-height: 1;
+
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.10);
+
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease;
+}
+
+.recommended-stay-card:hover .stay-image-arrow {
+  transform: translate(2px, -2px);
+
+  box-shadow:
+    0 7px 18px rgba(0, 0, 0, 0.14);
+}
+
+/* =========================================================
+   CONTENT
+========================================================= */
+
+.stay-card-content {
+  padding: 19px 20px 20px;
+}
+
+/* =========================================================
+   LOCATION
+========================================================= */
+
+.stay-location {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  margin-bottom: 8px;
+
+  color: #667085;
+
+  font-family: "Inter", "Manrope", sans-serif;
+  font-size: 11px;
+  font-weight: 550;
+  line-height: 1.4;
+}
+
+.stay-location span {
+  color: #8b6f47;
+  font-size: 14px;
+}
+
+/* =========================================================
+   HOTEL NAME
+========================================================= */
+
+.stay-name {
+  display: block;
+
+  margin: 0;
+
+  color: #101828;
+
+  font-family: "Inter", "Manrope", sans-serif;
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.28;
+  letter-spacing: -0.35px;
+
+  text-decoration: none;
+
+  transition: color 0.2s ease;
+}
+
+.stay-name:hover {
+  color: #7a5b2e;
+}
+
+/* =========================================================
+   DESCRIPTION
+========================================================= */
+
+.stay-description {
+  display: -webkit-box;
+
+  margin: 9px 0 15px;
+
+  overflow: hidden;
+
+  color: #667085;
+
+  font-family: "Inter", "Manrope", sans-serif;
+  font-size: 12px;
+  font-weight: 450;
+  line-height: 1.55;
+
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+/* =========================================================
+   AMENITIES
+========================================================= */
+
+.stay-amenities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+
+  margin-bottom: 18px;
+}
+
+.stay-amenities span {
+  max-width: 100%;
+
+  padding: 6px 9px;
+
+  border: 1px solid #eaecf0;
+  border-radius: 6px;
+
+  background: #f9fafb;
+
+  color: #475467;
+
+  font-family: "Inter", "Manrope", sans-serif;
+  font-size: 10px;
+  font-weight: 550;
+  line-height: 1;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+.stay-card-footer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+
+  gap: 14px;
+
+  padding-top: 16px;
+
+  border-top: 1px solid #eef0f2;
+}
+
+/* =========================================================
+   PRICE
+========================================================= */
+
+.stay-price {
+  min-width: 0;
+}
+
+.stay-price small {
+  display: block;
+
+  margin-bottom: 3px;
+
+  color: #98a2b3;
+
+  font-family: "Inter", "Manrope", sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.stay-price strong {
+  color: #101828;
+
+  font-family: "Inter", "Manrope", sans-serif;
+  font-size: 17px;
+  font-weight: 750;
+  line-height: 1.2;
+  letter-spacing: -0.25px;
+}
+
+.stay-price > span {
+  margin-left: 4px;
+
+  color: #98a2b3;
+
+  font-family: "Inter", "Manrope", sans-serif;
+  font-size: 10px;
+}
+
+/* =========================================================
+   VIEW STAY CTA
+========================================================= */
+
+.stay-view-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  flex-shrink: 0;
+
+  min-height: 38px;
+  padding: 0 13px;
+
+  border-radius: 8px;
+
+  background: #18221b;
+  color: #ffffff;
+
+  font-family: "Inter", "Manrope", sans-serif;
+  font-size: 11px;
+  font-weight: 650;
+
+  text-decoration: none;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.stay-view-button span {
+  font-size: 15px;
+  line-height: 1;
+
+  transition: transform 0.2s ease;
+}
+
+.stay-view-button:hover {
+  background: #27342a;
+
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 6px 14px rgba(24, 34, 27, 0.16);
+}
+
+.stay-view-button:hover span {
+  transform: translateX(3px);
+}
+
+/* =========================================================
+   LOADING
+========================================================= */
+
+.recommended-loading {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.stay-skeleton {
+  height: 390px;
+
+  border-radius: 16px;
+
+  background:
+    linear-gradient(
+      90deg,
+      #eceeed 25%,
+      #f7f8f7 50%,
+      #eceeed 75%
+    );
+
+  background-size: 200% 100%;
+
+  animation: staySkeletonLoading 1.5s infinite;
+}
+
+@keyframes staySkeletonLoading {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 1000px) {
+  .recommended-stays {
+    padding: 62px 20px 76px;
+  }
+
+  .recommended-stays-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .recommended-loading {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 640px) {
+  .recommended-stays {
+    padding: 50px 14px 62px;
+  }
+
+  .recommended-stays-header {
+    display: block;
+
+    margin-bottom: 24px;
+  }
+
+  .recommended-eyebrow {
+    margin-bottom: 10px;
+
+    font-size: 9px;
+    letter-spacing: 1.5px;
+  }
+
+  .recommended-stays-header h2 {
+    font-size: 30px;
+    letter-spacing: -1.15px;
+  }
+
+  .recommended-stays-header p {
+    margin-top: 9px;
+
+    font-size: 13px;
+    line-height: 1.55;
+  }
+
+  .view-all-stays {
+    margin-top: 17px;
+  }
+
+  .recommended-stays-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .recommended-loading {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .stay-image-wrapper {
+    aspect-ratio: 16 / 10;
+  }
+
+  .stay-card-content {
+    padding: 17px 16px 17px;
+  }
+
+  .stay-name {
+    font-size: 18px;
+  }
+
+  .stay-card-footer {
+    gap: 10px;
+  }
+}
+
+/* =========================================================
+   SMALL MOBILE — 320px
+========================================================= */
+
+@media (max-width: 380px) {
+  .recommended-stays {
+    padding-right: 11px;
+    padding-left: 11px;
+  }
+
+  .recommended-stays-header h2 {
+    font-size: 27px;
+  }
+
+  .recommended-stays-header p {
+    font-size: 12px;
+  }
+
+  .stay-card-content {
+    padding: 15px 14px;
+  }
+
+  .stay-name {
+    font-size: 17px;
+  }
+
+  .stay-location {
+    font-size: 10px;
+  }
+
+  .stay-description {
+    font-size: 11px;
+  }
+
+  .stay-amenities {
+    gap: 5px;
+  }
+
+  .stay-amenities span {
+    padding: 5px 7px;
+
+    font-size: 9px;
+  }
+
+  .stay-price strong {
+    font-size: 15px;
+  }
+
+  .stay-view-button {
+    min-height: 36px;
+    padding: 0 10px;
+
+    font-size: 10px;
+  }
+
+  .stay-image-arrow {
+    right: 10px;
+    bottom: 10px;
+
+    width: 34px;
+    height: 34px;
+  }
+
+  .stay-badge {
+    top: 10px;
+    left: 10px;
+
+    padding: 6px 8px;
+
+    font-size: 8px;
+  }
+}
+
+/* =========================================================
+   ACCESSIBILITY
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .recommended-stay-card,
+  .stay-image-wrapper img,
+  .view-all-stays,
+  .stay-image-arrow,
+  .stay-view-button,
+  .stay-view-button span {
+    transition: none;
+  }
+
+  .stay-skeleton {
+    animation: none;
+  }
+}
