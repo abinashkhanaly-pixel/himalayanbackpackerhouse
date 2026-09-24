@@ -2431,3 +2431,300 @@ body {
   }
 
 }
+/* =========================================================
+   MODERN LOCATION SUGGESTIONS
+   ========================================================= */
+
+.destination-field {
+  position: relative;
+}
+
+.destination-options {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  width: 100%;
+  min-width: 320px;
+
+  z-index: 9999;
+
+  background: #ffffff;
+  border: 1px solid #e8e2d9;
+  border-radius: 14px;
+
+  padding: 6px;
+
+  box-shadow:
+    0 12px 35px rgba(31, 35, 40, 0.14),
+    0 2px 8px rgba(31, 35, 40, 0.06);
+
+  max-height: 210px;
+  overflow-y: auto;
+}
+
+/* Each suggestion */
+
+.destination-options button {
+  width: 100%;
+  min-height: 52px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 8px 10px;
+
+  border: 0;
+  border-radius: 10px;
+
+  background: transparent;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    background 0.18s ease,
+    transform 0.18s ease;
+}
+
+.destination-options button:hover {
+  background: #f8f5ef;
+}
+
+.destination-options button:active {
+  transform: scale(0.99);
+}
+
+/* Location icon */
+
+.destination-map-icon {
+  width: 30px;
+  height: 30px;
+
+  flex: 0 0 30px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #faf4e9;
+
+  color: #c58b3a;
+
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* Text container */
+
+.destination-options button > span:nth-child(2) {
+  min-width: 0;
+
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 2px;
+}
+
+/* Main location */
+
+.destination-options strong {
+  display: block;
+
+  color: #263238;
+
+  font-family: "Inter", "Manrope", sans-serif;
+
+  font-size: 13.5px;
+  font-weight: 650;
+
+  line-height: 1.3;
+
+  letter-spacing: -0.01em;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Location details */
+
+.destination-options small {
+  display: block;
+
+  color: #7b8187;
+
+  font-family: "Inter", "Manrope", sans-serif;
+
+  font-size: 11.5px;
+  font-weight: 450;
+
+  line-height: 1.3;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Arrow */
+
+.destination-options b {
+  flex: 0 0 auto;
+
+  color: #a5a9ad;
+
+  font-size: 16px;
+  font-weight: 400;
+
+  padding-left: 4px;
+
+  transition:
+    color 0.18s ease,
+    transform 0.18s ease;
+}
+
+.destination-options button:hover b {
+  color: #c58b3a;
+  transform: translateX(2px);
+}
+
+/* =========================================================
+   SEARCHING STATE
+   ========================================================= */
+
+.location-search-message,
+.no-location-result {
+  min-height: 52px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 8px 10px;
+
+  border-radius: 10px;
+}
+
+.location-search-message > span,
+.no-location-result > span {
+  width: 30px;
+  height: 30px;
+
+  flex: 0 0 30px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #faf4e9;
+
+  color: #c58b3a;
+
+  font-size: 16px;
+}
+
+.location-search-message > div,
+.no-location-result > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.location-search-message strong,
+.no-location-result strong {
+  color: #39434a;
+
+  font-family: "Inter", "Manrope", sans-serif;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.location-search-message small,
+.no-location-result small {
+  color: #8a9095;
+
+  font-family: "Inter", "Manrope", sans-serif;
+
+  font-size: 11px;
+}
+
+/* =========================================================
+   CUSTOM SCROLLBAR
+   ========================================================= */
+
+.destination-options::-webkit-scrollbar {
+  width: 5px;
+}
+
+.destination-options::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.destination-options::-webkit-scrollbar-thumb {
+  background: #d8d0c4;
+  border-radius: 10px;
+}
+
+.destination-options::-webkit-scrollbar-thumb:hover {
+  background: #c58b3a;
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+  .destination-options {
+    top: calc(100% + 7px);
+
+    min-width: 0;
+    width: 100%;
+
+    max-height: 190px;
+
+    padding: 5px;
+
+    border-radius: 12px;
+  }
+
+  .destination-options button {
+    min-height: 48px;
+
+    padding: 7px 8px;
+
+    gap: 8px;
+
+    border-radius: 9px;
+  }
+
+  .destination-map-icon {
+    width: 27px;
+    height: 27px;
+    flex-basis: 27px;
+
+    font-size: 14px;
+  }
+
+  .destination-options strong {
+    font-size: 13px;
+  }
+
+  .destination-options small {
+    font-size: 10.5px;
+  }
+
+  .destination-options b {
+    font-size: 14px;
+  }
+}

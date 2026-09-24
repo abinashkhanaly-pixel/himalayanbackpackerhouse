@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./LuxuryHero.css";
@@ -96,6 +97,15 @@ function LuxuryHero() {
   const [activeTab, setActiveTab] = useState("hotel");
 
   const [destination, setDestination] = useState("");
+
+  /* =========================================================
+     GEOAPIFY LOCATION SEARCH
+     ========================================================= */
+
+  const [locationSuggestions, setLocationSuggestions] = useState([]);
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [locationOpen, setLocationOpen] = useState(false);
+
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
 
@@ -111,6 +121,82 @@ function LuxuryHero() {
   const totalTravelers = adults + children;
 
   const currentHotel = heroImages[activeImage];
+
+  /* =========================================================
+     GEOAPIFY AUTOCOMPLETE
+     ========================================================= */
+
+  useEffect(() => {
+    const searchLocations = async () => {
+      const query = destination.trim();
+
+      if (!query) {
+        setLocationSuggestions([]);
+        setLocationLoading(false);
+        return;
+      }
+
+      setLocationLoading(true);
+
+      try {
+        const apiKey = import.meta.env.VITE_GEOAPIFY_API_KEY;
+
+        if (!apiKey) {
+          console.error(
+            "VITE_GEOAPIFY_API_KEY is missing from environment variables."
+          );
+          setLocationSuggestions([]);
+          return;
+        }
+
+        const response = await fetch(
+          `https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(
+            query
+          )}&limit=5&apiKey=${apiKey}`
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            `Geoapify request failed: ${response.status}`
+          );
+        }
+
+        const data = await response.json();
+
+        setLocationSuggestions(data.features || []);
+      } catch (error) {
+        console.error("Geoapify location search error:", error);
+        setLocationSuggestions([]);
+      } finally {
+        setLocationLoading(false);
+      }
+    };
+
+    const timer = setTimeout(searchLocations, 300);
+
+    return () => clearTimeout(timer);
+  }, [destination]);
+
+  /* =========================================================
+     SELECT LOCATION
+     ========================================================= */
+
+  const selectDestination = (feature) => {
+    const properties = feature.properties || {};
+
+    const name =
+      properties.name ||
+      properties.city ||
+      properties.town ||
+      properties.village ||
+      properties.country ||
+      properties.formatted ||
+      "";
+
+    setDestination(name);
+    setLocationSuggestions([]);
+    setLocationOpen(false);
+  };
 
   /* =========================================================
      AUTOMATIC CINEMATIC SLIDER
@@ -311,6 +397,7 @@ function LuxuryHero() {
                 onClick={() => {
                   setActiveTab(tab.id);
                   setTravelerOpen(false);
+                  setLocationOpen(false);
                 }}
               >
                 <span className="luxury-tab-icon">
@@ -362,7 +449,10 @@ function LuxuryHero() {
                 WHERE
             ================================================= */}
 
-            <div className="search-field destination-field">
+            <div
+              className="search-field destination-field"
+              style={{ position: "relative" }}
+            >
 
               <div className="search-icon">
 
@@ -390,14 +480,118 @@ function LuxuryHero() {
                   id="luxury-destination"
                   type="text"
                   value={destination}
-                  onChange={(e) =>
-                    setDestination(e.target.value)
-                  }
+                  onChange={(e) => {
+                    setDestination(e.target.value);
+                    setLocationOpen(true);
+                  }}
+                  onFocus={() => {
+                    setLocationOpen(true);
+                    setTravelerOpen(false);
+                  }}
                   placeholder="Kathmandu, Pokhara, Everest..."
                   autoComplete="off"
                 />
 
               </div>
+
+              {/* =================================================
+                  LOCATION SUGGESTIONS
+              ================================================= */}
+
+              {locationOpen && destination.trim() && (
+                <div className="destination-options">
+
+                  {locationLoading && (
+                    <div className="location-search-message">
+                      <span>⌖</span>
+
+                      <div>
+                        <strong>
+                          Searching locations...
+                        </strong>
+
+                        <small>
+                          Finding places worldwide
+                        </small>
+                      </div>
+                    </div>
+                  )}
+
+                  {!locationLoading &&
+                    locationSuggestions.map((feature) => {
+                      const properties =
+                        feature.properties || {};
+
+                      const name =
+                        properties.name ||
+                        properties.city ||
+                        properties.town ||
+                        properties.village ||
+                        properties.country ||
+                        properties.formatted ||
+                        "";
+
+                      const formatted =
+                        properties.formatted ||
+                        properties.country ||
+                        "";
+
+                      return (
+                        <button
+                          key={
+                            properties.place_id ||
+                            `${name}-${properties.lat}-${properties.lon}`
+                          }
+                          type="button"
+                          onClick={() =>
+                            selectDestination(feature)
+                          }
+                        >
+
+                          <span className="destination-map-icon">
+                            ⌖
+                          </span>
+
+                          <span>
+                            <strong>
+                              {name}
+                            </strong>
+
+                            <small>
+                              {formatted}
+                            </small>
+                          </span>
+
+                          <b>
+                            →
+                          </b>
+
+                        </button>
+                      );
+                    })}
+
+                  {!locationLoading &&
+                    destination.trim() &&
+                    locationSuggestions.length === 0 && (
+                      <div className="no-location-result">
+
+                        <span>⌖</span>
+
+                        <div>
+                          <strong>
+                            {destination}
+                          </strong>
+
+                          <small>
+                            No matching location found
+                          </small>
+                        </div>
+
+                      </div>
+                    )}
+
+                </div>
+              )}
 
             </div>
 
@@ -494,9 +688,10 @@ function LuxuryHero() {
               <button
                 type="button"
                 className="traveler-trigger"
-                onClick={() =>
-                  setTravelerOpen((current) => !current)
-                }
+                onClick={() => {
+                  setTravelerOpen((current) => !current);
+                  setLocationOpen(false);
+                }}
               >
 
                 <span className="traveler-label">
@@ -713,3 +908,4 @@ function LuxuryHero() {
 }
 
 export default LuxuryHero;
+
