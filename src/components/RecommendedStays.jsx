@@ -91,9 +91,11 @@ const RecommendedStays = () => {
           </div>
         ) : (
           <div className="recommended-stays-grid">
-            {stays.map((stay) => {
+            {stays.map((stay, index) => {
               const image =
-                stay.images?.[0] || FALLBACK_IMAGE;
+                Array.isArray(stay.images) && stay.images.length > 0
+                  ? stay.images[0]
+                  : FALLBACK_IMAGE;
 
               const amenities = Array.isArray(stay.amenities)
                 ? stay.amenities.slice(0, 3)
@@ -112,7 +114,15 @@ const RecommendedStays = () => {
                     <img
                       src={image}
                       alt={stay.name || "Luxury stay in Nepal"}
-                      loading="lazy"
+                      loading={index === 0 ? "eager" : "lazy"}
+                      decoding="async"
+                      fetchPriority={index === 0 ? "high" : "auto"}
+                      width="1200"
+                      height="800"
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = FALLBACK_IMAGE;
+                      }}
                     />
 
                     <span className="stay-badge">
@@ -150,8 +160,8 @@ const RecommendedStays = () => {
 
                     {amenities.length > 0 && (
                       <div className="stay-amenities">
-                        {amenities.map((amenity, index) => (
-                          <span key={index}>
+                        {amenities.map((amenity, amenityIndex) => (
+                          <span key={amenityIndex}>
                             {amenity}
                           </span>
                         ))}
@@ -161,13 +171,15 @@ const RecommendedStays = () => {
                     <div className="stay-card-footer">
                       <div className="stay-price">
                         <small>From</small>
+
                         <strong>
                           NPR{" "}
                           {Number(
                             stay.price || 0
                           ).toLocaleString()}
                         </strong>
-                          <span>/ night</span>
+
+                        <span>/ night</span>
                       </div>
 
                       <Link
