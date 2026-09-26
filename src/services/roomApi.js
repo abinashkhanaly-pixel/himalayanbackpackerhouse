@@ -4,58 +4,139 @@ const API_URL =
 // ==========================================
 // FETCH HELPER
 // ==========================================
+
 const fetchJson = async (url, options = {}) => {
-  const controller = new AbortController();
+  const MAX_RETRIES = 1;
+  const TIMEOUT_MS = 30000;
 
-  const timeout = setTimeout(() => {
-    controller.abort();
-  }, 15000);
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    const controller = new AbortController();
 
-  try {
-    const response = await fetch(url, {
-      ...options,
-      signal: options.signal || controller.signal,
-    });
+    // Respect an externally supplied AbortSignal
+    let abortHandler;
 
-    clearTimeout(timeout);
+    if (options.signal) {
+      if (options.signal.aborted) {
+        throw new Error("Request was cancelled");
+      }
 
-    let data = null;
+      abortHandler = () => controller.abort();
+
+      options.signal.addEventListener(
+        "abort",
+        abortHandler,
+        { once: true }
+      );
+    }
+
+    const timeout = setTimeout(() => {
+      controller.abort();
+    }, TIMEOUT_MS);
 
     try {
-      data = await response.json();
-    } catch {
-      data = null;
+      const response = await fetch(url, {
+        ...options,
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeout);
+
+      if (options.signal && abortHandler) {
+        options.signal.removeEventListener(
+          "abort",
+          abortHandler
+        );
+      }
+
+      let data = null;
+
+      try {
+        data = await response.json();
+      } catch {
+        data = null;
+      }
+
+      if (!response.ok) {
+        throw new Error(
+          data?.message ||
+            `Request failed (${response.status})`
+        );
+      }
+
+      return data;
+    } catch (error) {
+      clearTimeout(timeout);
+
+      if (options.signal && abortHandler) {
+        options.signal.removeEventListener(
+          "abort",
+          abortHandler
+        );
+      }
+
+      // ==========================================
+      // USER / COMPONENT CANCELLED REQUEST
+      // ==========================================
+
+      if (
+        options.signal?.aborted &&
+        error.name === "AbortError"
+      ) {
+        throw new Error("Request was cancelled");
+      }
+
+      // ==========================================
+      // TIMEOUT
+      // ==========================================
+
+      if (error.name === "AbortError") {
+        if (attempt < MAX_RETRIES) {
+          console.warn(
+            `Room API timeout. Retrying... (${attempt + 1}/${MAX_RETRIES})`
+          );
+
+          continue;
+        }
+
+        throw new Error(
+          "The server is taking longer than expected. Please try again."
+        );
+      }
+
+      // ==========================================
+      // NETWORK ERROR
+      // ==========================================
+
+      if (
+        error instanceof TypeError &&
+        attempt < MAX_RETRIES
+      ) {
+        console.warn(
+          `Room API network error. Retrying... (${attempt + 1}/${MAX_RETRIES})`
+        );
+
+        continue;
+      }
+
+      throw error;
     }
-
-    if (!response.ok) {
-      throw new Error(
-        data?.message ||
-          `Request failed (${response.status})`
-      );
-    }
-
-    return data;
-  } catch (error) {
-    clearTimeout(timeout);
-
-    if (error.name === "AbortError") {
-      throw new Error(
-        "Request timed out or was cancelled"
-      );
-    }
-
-    throw error;
   }
+
+  throw new Error(
+    "Unable to complete the request."
+  );
 };
 
 // ==========================================
 // GET ALL ROOMS
 // ==========================================
+
 export const getRooms = async ({
   destination = "",
   checkIn = "",
   checkOut = "",
   guests = "",
+  signal,
 } = {}) => {
   const params = new URLSearchParams();
 
@@ -87,26 +168,39 @@ export const getRooms = async ({
   return await fetchJson(url, {
     method: "GET",
     cache: "no-store",
+    signal,
   });
 };
 
 // ==========================================
 // GET ROOM BY MONGODB ID
 // ==========================================
-export const getRoom = async (id) => {
+
+export const getRoom = async (
+  id,
+  options = {}
+) => {
   if (!id) {
     throw new Error("Room ID is required");
   }
 
   return await fetchJson(
-    `${API_URL}/${encodeURIComponent(id)}`
+    `${API_URL}/${encodeURIComponent(id)}`,
+    {
+      method: "GET",
+      ...options,
+    }
   );
 };
 
 // ==========================================
 // GET ROOM BY SEO SLUG
 // ==========================================
-export const getRoomBySlug = async (slug) => {
+
+export const getRoomBySlug = async (
+  slug,
+  options = {}
+) => {
   if (!slug) {
     throw new Error(
       "Room SEO slug is required"
@@ -118,16 +212,23 @@ export const getRoomBySlug = async (slug) => {
     .toLowerCase();
 
   return await fetchJson(
-    `${API_URL}/slug/${encodeURIComponent(cleanSlug)}`
+    `${API_URL}/slug/${encodeURIComponent(cleanSlug)}`,
+    {
+      method: "GET",
+      ...options,
+    }
   );
 };
 
 // ==========================================
 // UPLOAD ROOM IMAGE
 // ==========================================
+
 export const uploadRoomImage = async (file) => {
   if (!file) {
-    throw new Error("Please select an image.");
+    throw new Error(
+      "Please select an image."
+    );
   }
 
   const formData = new FormData();
@@ -146,7 +247,10 @@ export const uploadRoomImage = async (file) => {
 // ==========================================
 // CREATE ROOM
 // ==========================================
-export const createRoom = async (roomData) => {
+
+export const createRoom = async (
+  roomData
+) => {
   return await fetchJson(API_URL, {
     method: "POST",
     headers: {
@@ -159,12 +263,15 @@ export const createRoom = async (roomData) => {
 // ==========================================
 // UPDATE ROOM
 // ==========================================
+
 export const updateRoom = async (
   id,
   roomData
 ) => {
   if (!id) {
-    throw new Error("Room ID is required");
+    throw new Error(
+      "Room ID is required"
+    );
   }
 
   return await fetchJson(
@@ -182,9 +289,12 @@ export const updateRoom = async (
 // ==========================================
 // DELETE ROOM
 // ==========================================
+
 export const deleteRoom = async (id) => {
   if (!id) {
-    throw new Error("Room ID is required");
+    throw new Error(
+      "Room ID is required"
+    );
   }
 
   return await fetchJson(
