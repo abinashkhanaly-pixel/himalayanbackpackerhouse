@@ -1,14 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { getRooms } from "../services/roomApi";
+import heroImages from "../data/heroImages";
 
 const PAGE_TITLE = "Luxury Hotels in Nepal | Backpacker Gateways";
 const PAGE_DESCRIPTION =
   "Discover hotels, hostels, luxury stays and trekking lodges across Nepal with Backpacker Gateways.";
 const CANONICAL_URL = "https://www.backpackergateways.com/rooms";
-
-const HOTEL_HERO_IMAGE =
-  "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1800&q=85";
 
 const FALLBACK_ROOM_IMAGE =
   "https://images.unsplash.com/photo-1566665797739-1674de7a421a?auto=format&fit=crop&w=900&q=80";
@@ -40,6 +38,26 @@ const Rooms = () => {
 
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  /* =========================================================
+     HERO SLIDER
+  ========================================================= */
+
+  const [activeImage, setActiveImage] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveImage(
+        (current) => (current + 1) % heroImages.length
+      );
+    }, 6000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  /* =========================================================
+     SEO + LOAD ROOMS
+  ========================================================= */
 
   useEffect(() => {
     const previousTitle = document.title;
@@ -153,19 +171,38 @@ const Rooms = () => {
 
   return (
     <div className="rooms-page">
-      {/* =========================
+
+      {/* =====================================================
           HERO
-      ========================== */}
-      <section
-        className="rooms-hero"
-        style={{
-          backgroundImage: `linear-gradient(
-            rgba(0,0,0,0.48),
-            rgba(0,0,0,0.58)
-          ), url(${HOTEL_HERO_IMAGE})`,
-        }}
-      >
+      ====================================================== */}
+
+      <section className="rooms-hero">
+
+        {/* SAME HERO IMAGES AS LUXURY HERO */}
+
+        <div className="rooms-hero-bg">
+          {heroImages.map((image, index) => (
+            <img
+              key={image.src}
+              src={image.src}
+              alt={image.alt}
+              className={
+                index === activeImage
+                  ? "active"
+                  : ""
+              }
+            />
+          ))}
+        </div>
+
+        {/* PREMIUM DARK OVERLAY */}
+
+        <div className="rooms-hero-overlay" />
+
+        {/* ROOMS PAGE TEXT */}
+
         <div className="rooms-hero-content">
+
           <span className="rooms-eyebrow">
             PREMIUM STAYS • NEPAL
           </span>
@@ -180,15 +217,20 @@ const Rooms = () => {
             Discover comfortable stays from budget
             hostels to luxury hotels across Nepal.
           </p>
+
         </div>
+
       </section>
 
-      {/* =========================
+      {/* =====================================================
           SEARCH SUMMARY
-      ========================== */}
+      ====================================================== */}
+
       {hasSearch && (
         <section className="rooms-search-summary">
+
           <div className="search-summary-inner">
+
             <div>
               <span className="summary-label">
                 YOUR SEARCH
@@ -203,6 +245,7 @@ const Rooms = () => {
 
             <div className="summary-item">
               <span>CHECK-IN</span>
+
               <strong>
                 {checkInQuery
                   ? formatDate(checkInQuery)
@@ -212,6 +255,7 @@ const Rooms = () => {
 
             <div className="summary-item">
               <span>CHECK-OUT</span>
+
               <strong>
                 {checkOutQuery
                   ? formatDate(checkOutQuery)
@@ -221,6 +265,7 @@ const Rooms = () => {
 
             <div className="summary-item">
               <span>GUESTS</span>
+
               <strong>
                 {totalGuestsQuery}{" "}
                 {totalGuestsQuery === 1
@@ -228,16 +273,22 @@ const Rooms = () => {
                   : "Guests"}
               </strong>
             </div>
+
           </div>
+
         </section>
       )}
 
-      {/* =========================
+      {/* =====================================================
           ROOMS
-      ========================== */}
+      ====================================================== */}
+
       <section className="rooms-section">
+
         <div className="section-heading">
+
           <div>
+
             <span className="section-eyebrow">
               {destinationQuery
                 ? "SEARCH RESULTS"
@@ -254,6 +305,7 @@ const Rooms = () => {
               Comfortable rooms, trusted properties
               and memorable stays across Nepal.
             </p>
+
           </div>
 
           {!loading && rooms.length > 0 && (
@@ -264,28 +316,36 @@ const Rooms = () => {
                 : "Rooms"}
             </div>
           )}
+
         </div>
 
-        {/* =========================
+        {/* =====================================================
             LOADING
-        ========================== */}
+        ====================================================== */}
+
         {loading && (
           <div className="rooms-loading">
+
             <div className="loading-spinner"></div>
+
             <p>
               {destinationQuery
                 ? `Finding stays in ${destinationQuery}...`
                 : "Finding available rooms..."}
             </p>
+
           </div>
         )}
 
-        {/* =========================
+        {/* =====================================================
             ROOM GRID
-        ========================== */}
+        ====================================================== */}
+
         {!loading && rooms.length > 0 && (
           <div className="rooms-grid">
+
             {rooms.map((room) => {
+
               const roomImage =
                 room.images?.[0] ||
                 FALLBACK_ROOM_IMAGE;
@@ -295,7 +355,9 @@ const Rooms = () => {
                   className="room-card"
                   key={room._id}
                 >
+
                   <div className="room-image-wrap">
+
                     <img
                       src={roomImage}
                       alt={`${room.name || "Hotel room"} in ${
@@ -310,9 +372,11 @@ const Rooms = () => {
                         Available
                       </span>
                     )}
+
                   </div>
 
                   <div className="room-card-content">
+
                     <div className="room-location">
                       {room.destination ||
                         "Nepal"}
@@ -330,6 +394,7 @@ const Rooms = () => {
                     )}
 
                     <div className="room-meta">
+
                       {room.capacity && (
                         <span>
                           👤 {room.capacity} Guests
@@ -341,10 +406,12 @@ const Rooms = () => {
                           🛏 {room.beds}
                         </span>
                       )}
+
                     </div>
 
                     {room.amenities?.length > 0 && (
                       <div className="room-amenities">
+
                         {room.amenities
                           .slice(0, 4)
                           .map((amenity, index) => (
@@ -354,11 +421,14 @@ const Rooms = () => {
                               {amenity}
                             </span>
                           ))}
+
                       </div>
                     )}
 
                     <div className="room-card-bottom">
+
                       <div className="room-price">
+
                         <small>
                           From
                         </small>
@@ -373,6 +443,7 @@ const Rooms = () => {
                         <span>
                           / night
                         </span>
+
                       </div>
 
                       <Link
@@ -384,6 +455,7 @@ const Rooms = () => {
                       >
                         View Details
                       </Link>
+
                     </div>
 
                     <Link
@@ -392,18 +464,23 @@ const Rooms = () => {
                     >
                       Book Now
                     </Link>
+
                   </div>
+
                 </article>
               );
             })}
+
           </div>
         )}
 
-        {/* =========================
+        {/* =====================================================
             NO RESULTS
-        ========================== */}
+        ====================================================== */}
+
         {!loading && rooms.length === 0 && (
           <div className="no-rooms">
+
             <div className="no-rooms-icon">
               🏨
             </div>
@@ -424,15 +501,20 @@ const Rooms = () => {
             >
               View All Rooms
             </Link>
+
           </div>
         )}
+
       </section>
 
-      {/* =========================
+      {/* =====================================================
           SEO CONTENT
-      ========================== */}
+      ====================================================== */}
+
       <section className="rooms-seo">
+
         <div className="rooms-seo-inner">
+
           <h2>
             Hotels & Accommodation in Nepal
           </h2>
@@ -445,56 +527,123 @@ const Rooms = () => {
             Pokhara, Chitwan, Everest and other
             popular destinations.
           </p>
+
         </div>
+
       </section>
 
-      {/* =========================
+      {/* =====================================================
           STYLES
-      ========================== */}
+      ====================================================== */}
+
       <style>{`
+
         .rooms-page {
           background: #fff;
           color: #172033;
           min-height: 100vh;
         }
 
+        /* =====================================================
+           HERO SLIDER
+        ====================================================== */
+
         .rooms-hero {
+          position: relative;
           min-height: 430px;
-          background-size: cover;
-          background-position: center;
           display: flex;
           align-items: center;
           justify-content: center;
           text-align: center;
-          padding: 70px 20px;
+          padding: 80px 24px;
+          overflow: hidden;
+          isolation: isolate;
+        }
+
+        .rooms-hero-bg {
+          position: absolute;
+          inset: 0;
+          z-index: -3;
+          overflow: hidden;
+        }
+
+        .rooms-hero-bg img {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center 55%;
+          opacity: 0;
+          transform: scale(1.04);
+          transition:
+            opacity 1.2s ease,
+            transform 7s ease;
+        }
+
+        .rooms-hero-bg img.active {
+          opacity: 1;
+          transform: scale(1);
+        }
+
+        .rooms-hero-overlay {
+          position: absolute;
+          inset: 0;
+          z-index: -2;
+          background:
+            linear-gradient(
+              180deg,
+              rgba(8, 16, 28, 0.30) 0%,
+              rgba(8, 16, 28, 0.48) 48%,
+              rgba(8, 16, 28, 0.72) 100%
+            );
         }
 
         .rooms-hero-content {
+          position: relative;
+          z-index: 2;
+          width: 100%;
           max-width: 850px;
+          margin: 0 auto;
           color: #fff;
         }
 
-        .rooms-eyebrow,
-        .section-eyebrow,
-        .summary-label {
+        .rooms-eyebrow {
+          display: inline-block;
+          margin-bottom: 18px;
+          color: #f1d29a;
           font-size: 12px;
-          font-weight: 800;
-          letter-spacing: 2px;
+          font-weight: 700;
+          letter-spacing: 3px;
+          line-height: 1.4;
+          text-transform: uppercase;
         }
 
         .rooms-hero h1 {
-          font-size: clamp(38px, 6vw, 68px);
-          line-height: 1.05;
-          margin: 18px 0;
+          margin: 0 0 20px;
+          color: #fff;
+          font-size: clamp(42px, 6vw, 68px);
           font-weight: 800;
+          line-height: 1.05;
+          letter-spacing: -1.5px;
+          text-shadow:
+            0 4px 22px rgba(0, 0, 0, 0.28);
         }
 
         .rooms-hero p {
-          font-size: 18px;
-          line-height: 1.7;
           max-width: 650px;
           margin: 0 auto;
+          color: rgba(255, 255, 255, 0.92);
+          font-size: 17px;
+          font-weight: 400;
+          line-height: 1.75;
+          text-shadow:
+            0 2px 12px rgba(0, 0, 0, 0.35);
         }
+
+        /* =====================================================
+           SEARCH SUMMARY
+        ====================================================== */
 
         .rooms-search-summary {
           background: #f7f8fa;
@@ -515,6 +664,9 @@ const Rooms = () => {
           display: block;
           color: #7b8190;
           margin-bottom: 5px;
+          font-size: 12px;
+          font-weight: 800;
+          letter-spacing: 2px;
         }
 
         .summary-main {
@@ -539,6 +691,10 @@ const Rooms = () => {
           font-size: 14px;
         }
 
+        /* =====================================================
+           ROOMS SECTION
+        ====================================================== */
+
         .rooms-section {
           max-width: 1250px;
           margin: 0 auto;
@@ -551,6 +707,12 @@ const Rooms = () => {
           justify-content: space-between;
           gap: 30px;
           margin-bottom: 40px;
+        }
+
+        .section-eyebrow {
+          font-size: 12px;
+          font-weight: 800;
+          letter-spacing: 2px;
         }
 
         .section-heading h2 {
@@ -572,9 +734,14 @@ const Rooms = () => {
           font-size: 15px;
         }
 
+        /* =====================================================
+           ROOM GRID
+        ====================================================== */
+
         .rooms-grid {
           display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
+          grid-template-columns:
+            repeat(3, minmax(0, 1fr));
           gap: 28px;
         }
 
@@ -583,14 +750,17 @@ const Rooms = () => {
           border: 1px solid #e8eaf0;
           border-radius: 18px;
           overflow: hidden;
-          box-shadow: 0 10px 35px rgba(20, 30, 50, 0.07);
-          transition: transform 0.25s ease,
+          box-shadow:
+            0 10px 35px rgba(20, 30, 50, 0.07);
+          transition:
+            transform 0.25s ease,
             box-shadow 0.25s ease;
         }
 
         .room-card:hover {
           transform: translateY(-5px);
-          box-shadow: 0 18px 45px rgba(20, 30, 50, 0.12);
+          box-shadow:
+            0 18px 45px rgba(20, 30, 50, 0.12);
         }
 
         .room-image-wrap {
@@ -727,6 +897,10 @@ const Rooms = () => {
           opacity: 0.9;
         }
 
+        /* =====================================================
+           LOADING
+        ====================================================== */
+
         .rooms-loading {
           min-height: 300px;
           display: flex;
@@ -751,6 +925,10 @@ const Rooms = () => {
             transform: rotate(360deg);
           }
         }
+
+        /* =====================================================
+           NO ROOMS
+        ====================================================== */
 
         .no-rooms {
           text-align: center;
@@ -781,6 +959,10 @@ const Rooms = () => {
           padding: 13px 22px;
         }
 
+        /* =====================================================
+           SEO
+        ====================================================== */
+
         .rooms-seo {
           background: #f7f8fa;
           padding: 65px 24px;
@@ -801,24 +983,51 @@ const Rooms = () => {
           line-height: 1.8;
         }
 
+        /* =====================================================
+           RESPONSIVE
+        ====================================================== */
+
         @media (max-width: 900px) {
+
           .rooms-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
+            grid-template-columns:
+              repeat(2, minmax(0, 1fr));
           }
 
           .section-heading {
             align-items: start;
             flex-direction: column;
           }
+
         }
 
         @media (max-width: 620px) {
+
           .rooms-hero {
             min-height: 360px;
+            padding: 65px 20px;
+          }
+
+          .rooms-hero-bg img {
+            object-position: center;
+          }
+
+          .rooms-eyebrow {
+            font-size: 10px;
+            letter-spacing: 2.2px;
+            margin-bottom: 14px;
           }
 
           .rooms-hero h1 {
-            font-size: 38px;
+            font-size: clamp(34px, 10vw, 44px);
+            letter-spacing: -0.8px;
+            margin-bottom: 16px;
+          }
+
+          .rooms-hero p {
+            max-width: 360px;
+            font-size: 14px;
+            line-height: 1.65;
           }
 
           .rooms-grid {
@@ -832,8 +1041,33 @@ const Rooms = () => {
           .rooms-section {
             padding: 55px 18px;
           }
+
         }
+
+        @media (max-width: 360px) {
+
+          .rooms-hero {
+            min-height: 340px;
+            padding: 55px 16px;
+          }
+
+          .rooms-eyebrow {
+            font-size: 9px;
+            letter-spacing: 1.8px;
+          }
+
+          .rooms-hero h1 {
+            font-size: 32px;
+          }
+
+          .rooms-hero p {
+            font-size: 13px;
+          }
+
+        }
+
       `}</style>
+
     </div>
   );
 };
