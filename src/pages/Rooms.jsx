@@ -204,18 +204,19 @@ const Rooms = () => {
         <div className="rooms-hero-content">
 
           <span className="rooms-eyebrow">
-            PREMIUM STAYS • NEPAL
+             LUXURY HOTELS • NEPAL
           </span>
 
           <h1>
-            {destinationQuery
-              ? `Hotels in ${destinationQuery}`
-              : "Stay in Style, Discover Nepal"}
-          </h1>
+    {destinationQuery
+      ? `Best Luxury Hotels in ${destinationQuery}`
+      : "Best Luxury Hotels in Nepal"}
+       </h1>
 
           <p>
-            Discover comfortable stays from budget
-            hostels to luxury hotels across Nepal.
+            Discover luxury hotels and 5-star stays across Nepal, from
+    Kathmandu to Pokhara. Explore premium rooms, exceptional
+    amenities and unforgettable stays with Backpacker Gateways.
           </p>
 
         </div>
