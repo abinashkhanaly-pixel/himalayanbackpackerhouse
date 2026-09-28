@@ -1,7 +1,12 @@
-
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { getRoomBySlug } from "../services/roomApi";
+import {
+  MapPin,
+  BedDouble,
+  UsersRound,
+  Mountain,
+} from "lucide-react";
 import "./RoomDetails.css";
 
 const RoomDetails = () => {
@@ -465,7 +470,7 @@ const RoomDetails = () => {
 
               {totalImages > 1 && (
                 <span className="gallery-view-button">
-                  📷 View all photos
+                  View all photos
                 </span>
               )}
 
@@ -593,13 +598,13 @@ const RoomDetails = () => {
             </h1>
 
             <p className="room-location">
-              📍 {destination}, Nepal
+              {destination}, Nepal
             </p>
 
             <div className="room-trust-row">
-              <span>✓ Verified accommodation</span>
-              <span>✓ Direct booking</span>
-              <span>✓ Himalayan hospitality</span>
+              <span>Verified accommodation</span>
+              <span>Direct booking</span>
+              <span>Himalayan hospitality</span>
             </div>
 
           </div>
@@ -680,6 +685,7 @@ const RoomDetails = () => {
               <div className="section-heading-row">
 
                 <div>
+
                   <span className="section-label">
                     Overview
                   </span>
@@ -687,19 +693,23 @@ const RoomDetails = () => {
                   <h2>
                     Everything you need for your stay
                   </h2>
+
                 </div>
 
               </div>
 
               <div className="property-highlights">
 
+                {/* GREAT LOCATION */}
+
                 <div className="property-highlight-card">
 
                   <span className="highlight-small-icon">
-                    📍
+                    <MapPin />
                   </span>
 
                   <div>
+
                     <strong>
                       Great Location
                     </strong>
@@ -710,17 +720,21 @@ const RoomDetails = () => {
                       travel connections in{" "}
                       {destination}.
                     </span>
+
                   </div>
 
                 </div>
 
+                {/* COMFORTABLE ROOMS */}
+
                 <div className="property-highlight-card">
 
                   <span className="highlight-small-icon">
-                    🛏️
+                    <BedDouble />
                   </span>
 
                   <div>
+
                     <strong>
                       Comfortable Rooms
                     </strong>
@@ -730,17 +744,21 @@ const RoomDetails = () => {
                       stay after sightseeing,
                       trekking or travelling.
                     </span>
+
                   </div>
 
                 </div>
 
+                {/* GUEST FRIENDLY */}
+
                 <div className="property-highlight-card">
 
                   <span className="highlight-small-icon">
-                    👥
+                    <UsersRound />
                   </span>
 
                   <div>
+
                     <strong>
                       Guest Friendly
                     </strong>
@@ -750,17 +768,21 @@ const RoomDetails = () => {
                       families, solo travellers
                       and business guests.
                     </span>
+
                   </div>
 
                 </div>
 
+                {/* HIMALAYAN EXPERIENCE */}
+
                 <div className="property-highlight-card">
 
                   <span className="highlight-small-icon">
-                    🏔️
+                    <Mountain />
                   </span>
 
                   <div>
+
                     <strong>
                       Himalayan Experience
                     </strong>
@@ -770,6 +792,7 @@ const RoomDetails = () => {
                       discovering Nepal and
                       planning your next adventure.
                     </span>
+
                   </div>
 
                 </div>
@@ -780,6 +803,7 @@ const RoomDetails = () => {
 
                 <div>
                   <span>Guests</span>
+
                   <strong>
                     {room.capacity || 1}
                   </strong>
@@ -787,6 +811,7 @@ const RoomDetails = () => {
 
                 <div>
                   <span>Beds</span>
+
                   <strong>
                     {room.beds || "Comfortable bedding"}
                   </strong>
@@ -794,6 +819,7 @@ const RoomDetails = () => {
 
                 <div>
                   <span>Location</span>
+
                   <strong>
                     {destination}, Nepal
                   </strong>
@@ -801,6 +827,7 @@ const RoomDetails = () => {
 
                 <div>
                   <span>Availability</span>
+
                   <strong>
                     {room.available
                       ? "Available"
@@ -945,41 +972,55 @@ const RoomDetails = () => {
                   ) : (
 
                     <>
+
                       <div className="facility-item">
+
                         <span className="facility-check">
                           ✓
                         </span>
+
                         <strong>
                           Comfortable Rooms
                         </strong>
+
                       </div>
 
                       <div className="facility-item">
+
                         <span className="facility-check">
                           ✓
                         </span>
+
                         <strong>
                           Free WiFi
                         </strong>
+
                       </div>
 
                       <div className="facility-item">
+
                         <span className="facility-check">
                           ✓
                         </span>
+
                         <strong>
                           Room Service
                         </strong>
+
                       </div>
 
                       <div className="facility-item">
+
                         <span className="facility-check">
                           ✓
                         </span>
+
                         <strong>
                           Restaurant
                         </strong>
+
                       </div>
+
                     </>
 
                   )}
@@ -1117,13 +1158,17 @@ const RoomDetails = () => {
               <div className="room-summary-card">
 
                 {mainImage && (
+
                   <div className="room-summary-image">
+
                     <img
                       src={mainImage}
                       alt={roomName}
                       loading="lazy"
                     />
+
                   </div>
+
                 )}
 
                 <div className="room-summary-content">
@@ -1140,7 +1185,7 @@ const RoomDetails = () => {
                   <div className="room-summary-features">
 
                     <span>
-                      👥 Sleeps{" "}
+                      👥Sleeps{" "}
                       {room.capacity || 1}
                     </span>
 
@@ -1477,15 +1522,15 @@ const RoomDetails = () => {
             <div className="booking-benefits">
 
               <span>
-                ✓ Secure booking
+                Secure booking
               </span>
 
               <span>
-                ✓ Direct with Backpacker Gateways
+                Direct with Backpacker Gateways
               </span>
 
               <span>
-                ✓ Himalayan travel support
+                Himalayan travel support
               </span>
 
             </div>
@@ -1531,6 +1576,7 @@ const RoomDetails = () => {
             </button>
 
             {totalImages > 1 && (
+
               <button
                 type="button"
                 className="gallery-arrow gallery-arrow-left"
@@ -1542,6 +1588,7 @@ const RoomDetails = () => {
               >
                 ‹
               </button>
+
             )}
 
             <img
@@ -1557,6 +1604,7 @@ const RoomDetails = () => {
             />
 
             {totalImages > 1 && (
+
               <button
                 type="button"
                 className="gallery-arrow gallery-arrow-right"
@@ -1568,6 +1616,7 @@ const RoomDetails = () => {
               >
                 ›
               </button>
+
             )}
 
             <div className="gallery-modal-counter">
@@ -1584,4 +1633,3 @@ const RoomDetails = () => {
 };
 
 export default RoomDetails;
-

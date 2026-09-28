@@ -594,17 +594,28 @@
   transform: translateY(-1px);
 }
 
+/* =========================================================
+   PREMIUM CIRCULAR OVERVIEW ICONS
+   ========================================================= */
+
 .highlight-small-icon {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex: 0 0 35px;
-  width: 35px;
-  height: 35px;
-  border: 1px solid #dce8f8;
-  border-radius: 9px;
-  background: var(--rd-brand-soft);
-  font-size: 16px;
+  flex: 0 0 58px;
+  width: 58px;
+  height: 58px;
+  border: 1px solid #e6d9c5;
+  border-radius: 50%;
+  background: #f3ebdd;
+  color: #252525;
+  box-shadow: 0 4px 14px rgba(70, 55, 35, 0.08);
+}
+
+.highlight-small-icon svg {
+  width: 25px;
+  height: 25px;
+  stroke-width: 1.8;
 }
 
 .property-highlight-card strong {
@@ -1722,11 +1733,17 @@
     transform: none;
   }
 
+  /* Premium circular icon — mobile */
+
   .highlight-small-icon {
-    flex-basis: 31px;
-    width: 31px;
-    height: 31px;
-    font-size: 14px;
+    flex: 0 0 52px;
+    width: 52px;
+    height: 52px;
+  }
+
+  .highlight-small-icon svg {
+    width: 23px;
+    height: 23px;
   }
 
   .property-highlight-card strong {
@@ -2130,15 +2147,24 @@
   }
 
   .property-highlight-card {
-    gap: 9px;
+    gap: 10px;
     padding: 10px;
   }
 
+  /*
+    Keep the premium circular icon visible
+    on small mobile instead of shrinking it.
+  */
+
   .highlight-small-icon {
-    flex-basis: 28px;
-    width: 28px;
-    height: 28px;
-    font-size: 13px;
+    flex: 0 0 48px;
+    width: 48px;
+    height: 48px;
+  }
+
+  .highlight-small-icon svg {
+    width: 21px;
+    height: 21px;
   }
 
   .property-highlight-card strong {
@@ -2226,7 +2252,24 @@
   }
 
   .property-highlight-card {
+    gap: 9px;
     padding: 9px;
+  }
+
+  /*
+    Slightly smaller only for 320px safety,
+    while remaining circular and premium.
+  */
+
+  .highlight-small-icon {
+    flex: 0 0 45px;
+    width: 45px;
+    height: 45px;
+  }
+
+  .highlight-small-icon svg {
+    width: 20px;
+    height: 20px;
   }
 
   .overview-facts > div {
