@@ -498,6 +498,12 @@
   gap: 34px;
 }
 
+/*
+   IMPORTANT:
+   The content-section owns the main horizontal content line.
+   Every .details-section starts from the same left edge.
+*/
+
 .content-section {
   min-width: 0;
   background: var(--rd-card);
@@ -510,6 +516,7 @@
   scroll-margin-top: 75px;
   padding: 32px 0;
   border-bottom: 1px solid var(--rd-border);
+  text-align: left;
 }
 
 .details-section:first-child {
@@ -529,6 +536,15 @@
   letter-spacing: 0.09em;
   line-height: 1.4;
   text-transform: uppercase;
+  text-align: left;
+}
+
+.details-section h2,
+.details-section h3,
+.details-section p,
+.details-section ul,
+.details-section ol {
+  text-align: left;
 }
 
 .details-section h2 {
@@ -680,10 +696,12 @@
   color: #475467;
   font-size: 14px;
   line-height: 1.78;
+  text-align: left;
 }
 
 .property-description p {
   margin: 0 0 15px;
+  text-align: left;
 }
 
 .property-description p:last-child {
@@ -704,6 +722,7 @@
   color: var(--rd-heading);
   font-weight: 700;
   line-height: 1.35;
+  text-align: left;
 }
 
 .property-description h1 {
@@ -726,10 +745,12 @@
 .property-description ol {
   margin: 10px 0 18px;
   padding-left: 22px;
+  text-align: left;
 }
 
 .property-description li {
   margin-bottom: 6px;
+  text-align: left;
 }
 
 .property-description a {
@@ -755,6 +776,7 @@
   min-width: 0;
   padding: 12px 0;
   border-bottom: 1px solid var(--rd-border);
+  text-align: left;
 }
 
 .facility-check {
@@ -777,17 +799,26 @@
   font-weight: 600;
   line-height: 1.45;
   overflow-wrap: anywhere;
+  text-align: left;
 }
 
 /* =========================================================
    TEXT BOXES
    ========================================================= */
 
+/*
+   The outer box now follows the same left/right content line.
+   Text remains comfortably spaced inside the box.
+*/
+
 .property-text-box {
-  padding: 16px 17px;
+  width: 100%;
+  margin: 0;
+  padding: 16px;
   border: 1px solid var(--rd-border);
   border-radius: var(--rd-radius);
   background: #fbfcfd;
+  text-align: left;
 }
 
 .property-text-box p {
@@ -795,6 +826,7 @@
   color: #475467;
   font-size: 13px;
   line-height: 1.7;
+  text-align: left;
 }
 
 .property-text-box p:last-child {
@@ -806,28 +838,58 @@
   font-weight: 700;
 }
 
+.property-text-box h1,
+.property-text-box h2,
+.property-text-box h3,
+.property-text-box h4 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: var(--rd-heading);
+  font-weight: 700;
+  line-height: 1.35;
+  text-align: left;
+}
+
 .breakfast-box {
+  width: 100%;
+  margin: 0;
   padding: 17px;
-  border: 1px solid #eadfbf;
+  border: 1px solid rgba(181, 83, 126, 0.35);
   border-radius: var(--rd-radius);
-  background: var(--rd-gold-soft);
+  background: linear-gradient(
+    135deg,
+    #fff0f3 0%,
+    #f9eafa 55%,
+    #eee9ff 100%
+  );
+  box-shadow:
+    0 8px 24px rgba(153, 65, 115, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  text-align: left;
+  position: relative;
+  overflow: hidden;
 }
 
 .breakfast-box strong {
   display: block;
   margin-bottom: 5px;
-  color: #795619;
+  color: #9b3f68;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 800;
+  text-align: left;
+  position: relative;
+  z-index: 1;
 }
 
 .breakfast-box p {
   margin: 0;
-  color: #6b5a38;
+  color: #5f5368;
   font-size: 12px;
   line-height: 1.65;
+  text-align: left;
+  position: relative;
+  z-index: 1;
 }
-
 /* =========================================================
    ROOMS WITH
    ========================================================= */
@@ -836,12 +898,14 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px 24px;
+  text-align: left;
 }
 
 .rooms-with-list div {
   color: #475467;
   font-size: 12px;
   line-height: 1.5;
+  text-align: left;
 }
 
 /* =========================================================
@@ -883,6 +947,7 @@
 .room-summary-content {
   min-width: 0;
   padding: 19px 20px;
+  text-align: left;
 }
 
 .room-summary-content h3 {
@@ -891,6 +956,7 @@
   font-size: 18px;
   font-weight: 700;
   line-height: 1.35;
+  text-align: left;
 }
 
 .room-summary-content p {
@@ -898,6 +964,7 @@
   color: var(--rd-muted);
   font-size: 12px;
   line-height: 1.6;
+  text-align: left;
 }
 
 .room-summary-features {
@@ -950,6 +1017,7 @@
   border: 1px solid var(--rd-border-light);
   border-radius: var(--rd-radius);
   background: #fbfcfd;
+  text-align: left;
 }
 
 .highlight-icon {
@@ -965,6 +1033,7 @@
   font-size: 12px;
   font-weight: 700;
   line-height: 1.4;
+  text-align: left;
 }
 
 .highlight span {
@@ -973,6 +1042,7 @@
   font-size: 11px;
   line-height: 1.5;
   overflow-wrap: anywhere;
+  text-align: left;
 }
 
 /* =========================================================
@@ -997,6 +1067,7 @@
   transition:
     border-color 0.2s ease,
     background 0.2s ease;
+  text-align: left;
 }
 
 .amenity-card:hover {
@@ -1023,6 +1094,7 @@
   font-size: 12px;
   line-height: 1.45;
   overflow-wrap: anywhere;
+  text-align: left;
 }
 
 /* =========================================================
@@ -1030,10 +1102,12 @@
    ========================================================= */
 
 .simple-info-box {
+  width: 100%;
   padding: 17px;
   border: 1px solid var(--rd-border);
   border-radius: var(--rd-radius);
   background: #fbfcfd;
+  text-align: left;
 }
 
 .simple-info-box p {
@@ -1041,6 +1115,7 @@
   color: #475467;
   font-size: 13px;
   line-height: 1.7;
+  text-align: left;
 }
 
 /* =========================================================
@@ -1059,6 +1134,7 @@
   border: 1px solid var(--rd-border);
   border-radius: var(--rd-radius);
   background: #fff;
+  text-align: left;
 }
 
 .policy-card strong {
@@ -1068,6 +1144,7 @@
   font-size: 13px;
   font-weight: 700;
   line-height: 1.4;
+  text-align: left;
 }
 
 .policy-card span {
@@ -1076,6 +1153,7 @@
   font-size: 11px;
   line-height: 1.55;
   overflow-wrap: anywhere;
+  text-align: left;
 }
 
 /* =========================================================
@@ -1464,11 +1542,6 @@
     gap: 22px;
   }
 
-  /*
-    Booking card moves above the content.
-    It becomes a horizontal OTA-style booking panel.
-  */
-
   .booking-card {
     position: relative;
     top: auto;
@@ -1586,9 +1659,7 @@
     line-height: 1.2;
   }
 
-  /* -------------------------
-     HEADER
-     ------------------------- */
+  /* HEADER */
 
   .room-header {
     padding: 15px 12px 18px;
@@ -1659,9 +1730,7 @@
     font-size: 10px;
   }
 
-  /* -------------------------
-     SECTION NAV
-     ------------------------- */
+  /* SECTION NAV */
 
   .details-section-nav-inner {
     gap: 22px;
@@ -1674,9 +1743,7 @@
     font-size: 11px;
   }
 
-  /* -------------------------
-     CONTENT
-     ------------------------- */
+  /* CONTENT */
 
   .details-container {
     padding: 18px 12px 50px;
@@ -1694,6 +1761,7 @@
   .details-section {
     scroll-margin-top: 60px;
     padding: 27px 0;
+    text-align: left;
   }
 
   .details-section:first-child {
@@ -1703,22 +1771,23 @@
   .section-label {
     margin-bottom: 5px;
     font-size: 9px;
+    text-align: left;
   }
 
   .details-section h2 {
     margin-bottom: 15px;
     font-size: 20px;
     line-height: 1.28;
+    text-align: left;
   }
 
   .details-section h3 {
     margin-bottom: 11px;
     font-size: 16px;
+    text-align: left;
   }
 
-  /* -------------------------
-     OVERVIEW
-     ------------------------- */
+  /* OVERVIEW */
 
   .property-highlights {
     grid-template-columns: 1fr;
@@ -1732,8 +1801,6 @@
   .property-highlight-card:hover {
     transform: none;
   }
-
-  /* Premium circular icon — mobile */
 
   .highlight-small-icon {
     flex: 0 0 52px;
@@ -1779,38 +1846,43 @@
     font-size: 10px;
   }
 
-  /* -------------------------
-     DESCRIPTION
-     ------------------------- */
+  /* DESCRIPTION */
 
   .property-description {
     font-size: 12px;
     line-height: 1.72;
+    text-align: left;
+  }
+
+  .property-description p {
+    text-align: left;
   }
 
   .property-description h1 {
     font-size: 20px;
+    text-align: left;
   }
 
   .property-description h2 {
     font-size: 18px;
+    text-align: left;
   }
 
   .property-description h3 {
     font-size: 16px;
+    text-align: left;
   }
 
   .property-description h4 {
     font-size: 14px;
+    text-align: left;
   }
 
   .property-info-section {
     margin-top: 25px;
   }
 
-  /* -------------------------
-     FACILITIES
-     ------------------------- */
+  /* FACILITIES */
 
   .facilities-list {
     grid-template-columns: 1fr;
@@ -1824,28 +1896,35 @@
     font-size: 11px;
   }
 
-  /* -------------------------
-     TEXT BOXES
-     ------------------------- */
+  /* TEXT BOXES */
 
   .property-text-box {
-    padding: 13px;
+    width: 100%;
+    margin: 0;
+    padding: 13px 14px;
+    text-align: left;
   }
 
   .property-text-box p {
     font-size: 11px;
+    text-align: left;
   }
 
   .breakfast-box {
-    padding: 13px;
+    width: 100%;
+    margin: 0;
+    padding: 13px 14px;
+    text-align: left;
   }
 
   .breakfast-box strong {
     font-size: 12px;
+    text-align: left;
   }
 
   .breakfast-box p {
     font-size: 11px;
+    text-align: left;
   }
 
   .rooms-with-list {
@@ -1855,11 +1934,10 @@
 
   .rooms-with-list div {
     font-size: 11px;
+    text-align: left;
   }
 
-  /* -------------------------
-     ROOM CARD
-     ------------------------- */
+  /* ROOM CARD */
 
   .room-summary-card {
     grid-template-columns: 1fr;
@@ -1908,9 +1986,7 @@
     font-size: 10px;
   }
 
-  /* -------------------------
-     ROOM HIGHLIGHTS
-     ------------------------- */
+  /* ROOM HIGHLIGHTS */
 
   .room-highlights {
     grid-template-columns: 1fr;
@@ -1934,9 +2010,7 @@
     font-size: 10px;
   }
 
-  /* -------------------------
-     AMENITIES
-     ------------------------- */
+  /* AMENITIES */
 
   .amenities-grid {
     grid-template-columns: 1fr;
@@ -1950,9 +2024,7 @@
     font-size: 11px;
   }
 
-  /* -------------------------
-     ACCESSIBILITY
-     ------------------------- */
+  /* ACCESSIBILITY */
 
   .simple-info-box {
     padding: 13px;
@@ -1962,9 +2034,7 @@
     font-size: 11px;
   }
 
-  /* -------------------------
-     POLICIES
-     ------------------------- */
+  /* POLICIES */
 
   .policies-grid {
     grid-template-columns: 1fr;
@@ -1983,9 +2053,7 @@
     font-size: 10px;
   }
 
-  /* -------------------------
-     BOOKING CARD
-     ------------------------- */
+  /* BOOKING CARD */
 
   .booking-card {
     position: relative;
@@ -2043,9 +2111,7 @@
     font-size: 10px;
   }
 
-  /* -------------------------
-     MODAL
-     ------------------------- */
+  /* MODAL */
 
   .gallery-modal {
     padding: 45px 12px;
@@ -2151,11 +2217,6 @@
     padding: 10px;
   }
 
-  /*
-    Keep the premium circular icon visible
-    on small mobile instead of shrinking it.
-  */
-
   .highlight-small-icon {
     flex: 0 0 48px;
     width: 48px;
@@ -2189,6 +2250,14 @@
 
   .property-description {
     font-size: 11px;
+  }
+
+  .property-text-box {
+    padding: 11px 12px;
+  }
+
+  .breakfast-box {
+    padding: 11px 12px;
   }
 
   .room-summary-content {
@@ -2256,11 +2325,6 @@
     padding: 9px;
   }
 
-  /*
-    Slightly smaller only for 320px safety,
-    while remaining circular and premium.
-  */
-
   .highlight-small-icon {
     flex: 0 0 45px;
     width: 45px;
@@ -2274,6 +2338,14 @@
 
   .overview-facts > div {
     padding: 9px;
+  }
+
+  .property-text-box {
+    padding: 10px 11px;
+  }
+
+  .breakfast-box {
+    padding: 10px 11px;
   }
 
   .room-summary-content {
