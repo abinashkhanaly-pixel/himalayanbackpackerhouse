@@ -1,38 +1,223 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getRoom } from "../services/roomApi";
 
+const BOOKINGS_API =
+  "https://backpacker-gateways-2.onrender.com/api/bookings";
+
 const WHATSAPP_NUMBER =
-  import.meta.env.VITE_BOOKING_WHATSAPP || "";
+  import.meta.env.VITE_BOOKING_WHATSAPP || "9779800000000";
+
+const FALLBACK_IMAGE =
+  "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=85";
+
+const COUNTRY_CODES = [
+  { code: "+977", name: "Nepal" },
+  { code: "+1", name: "United States" },
+  { code: "+44", name: "United Kingdom" },
+  { code: "+61", name: "Australia" },
+  { code: "+81", name: "Japan" },
+  { code: "+82", name: "South Korea" },
+  { code: "+86", name: "China" },
+  { code: "+91", name: "India" },
+  { code: "+33", name: "France" },
+  { code: "+49", name: "Germany" },
+  { code: "+39", name: "Italy" },
+  { code: "+34", name: "Spain" },
+  { code: "+31", name: "Netherlands" },
+  { code: "+41", name: "Switzerland" },
+  { code: "+971", name: "UAE" },
+  { code: "+65", name: "Singapore" },
+  { code: "+64", name: "New Zealand" },
+  { code: "+7", name: "Russia" },
+  { code: "+55", name: "Brazil" },
+  { code: "+27", name: "South Africa" },
+];
+
+const INITIAL_FORM = {
+  firstName: "",
+  lastName: "",
+  countryCode: "+977",
+  phone: "",
+  email: "",
+  passportNumber: "",
+  citizenshipNumber: "",
+  nationality: "",
+  city: "",
+  address: "",
+  checkIn: "",
+  checkOut: "",
+  guests: 2,
+  rooms: 1,
+};
+
+const normalizeRoomResponse = (data) => {
+  if (!data) return null;
+
+  // Direct room:
+  // { _id, name, price }
+  if (data?._id || data?.id) {
+    return data;
+  }
+
+  // { room: { _id, name, price } }
+  if (data?.room?._id || data?.room?.id) {
+    return data.room;
+  }
+
+  // { data: { _id, name, price } }
+  if (data?.data?._id || data?.data?.id) {
+    return data.data;
+  }
+
+  // { data: { room: {...} } }
+  if (data?.data?.room?._id || data?.data?.room?.id) {
+    return data.data.room;
+  }
+
+  // Last fallback
+  return data?.room || data?.data || data;
+};
+
+const getRoomPrice = (room) => {
+  if (!room) return 0;
+
+  const possiblePrices = [
+    room.price,
+    room.roomPrice,
+    room.nightlyPrice,
+    room.pricePerNight,
+    room.pricing?.price,
+    room.pricing?.nightly,
+    room.pricing?.pricePerNight,
+  ];
+
+  for (const value of possiblePrices) {
+    if (value !== undefined && value !== null && value !== "") {
+      const number = Number(
+        String(value).replace(/[^0-9.-]/g, "")
+      );
+
+      if (Number.isFinite(number) && number > 0) {
+        return number;
+      }
+    }
+  }
+
+  return 0;
+};
+
+const getRoomName = (room) => {
+  return (
+    room?.name ||
+    room?.roomName ||
+    room?.title ||
+    room?.roomType ||
+    "Luxury Room"
+  );
+};
+
+const getRoomLocation = (room) => {
+  return (
+    room?.location ||
+    room?.city ||
+    room?.destination ||
+    room?.address ||
+    "Nepal"
+  );
+};
+
+const getRoomImage = (room) => {
+  if (!room) return FALLBACK_IMAGE;
+
+  if (Array.isArray(room.images) && room.images.length > 0) {
+    return room.images[0];
+  }
+
+  if (Array.isArray(room.photos) && room.photos.length > 0) {
+    return room.photos[0];
+  }
+
+  return (
+    room.image ||
+    room.imageUrl ||
+    room.coverImage ||
+    room.thumbnail ||
+    FALLBACK_IMAGE
+  );
+};
+
+const formatCurrency = (amount) => {
+  return new Intl.NumberFormat("en-NP", {
+    style: "currency",
+    currency: "NPR",
+    maximumFractionDigits: 0,
+  }).format(Number(amount || 0));
+};
+
+const calculateNights = (checkIn, checkOut) => {
+  if (!checkIn || !checkOut) return 0;
+
+  const start = new Date(`${checkIn}T00:00:00`);
+  const end = new Date(`${checkOut}T00:00:00`);
+
+  if (
+    Number.isNaN(start.getTime()) ||
+    Number.isNaN(end.getTime())
+  ) {
+    return 0;
+  }
+
+  const difference = end.getTime() - start.getTime();
+  const nights = Math.ceil(
+    difference / (1000 * 60 * 60 * 24)
+  );
+
+  return nights > 0 ? nights : 0;
+};
+
+const formatDate = (date) => {
+  if (!date) return "—";
+
+  const value = new Date(`${date}T00:00:00`);
+
+  if (Number.isNaN(value.getTime())) {
+    return date;
+  }
+
+  return value.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+};
 
 const Booking = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const params = new URLSearchParams(location.search);
+  const roomId = params.get("room");
+
   const [room, setRoom] = useState(null);
   const [loadingRoom, setLoadingRoom] = useState(true);
   const [roomError, setRoomError] = useState("");
 
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    checkIn: "",
-    checkOut: "",
-    guests: 1,
-  });
-
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(null);
+  const [form, setForm] = useState(INITIAL_FORM);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [confirmation, setConfirmation] = useState(null);
 
-  const searchParams = new URLSearchParams(location.search);
-  const roomId = searchParams.get("room");
+  // ==========================================
+  // LOAD ROOM
+  // ==========================================
 
   useEffect(() => {
+    let mounted = true;
+
     const loadRoom = async () => {
       if (!roomId) {
-        setRoomError("No room selected.");
+        setRoomError("No room was selected for booking.");
         setLoadingRoom(false);
         return;
       }
@@ -41,107 +226,390 @@ const Booking = () => {
         setLoadingRoom(true);
         setRoomError("");
 
-        const result = await getRoom(roomId);
+        const data = await getRoom(roomId);
 
-        if (result?.data) {
-          setRoom(result.data);
-        } else {
-          setRoomError("Room not found.");
+        console.log(
+          "========== BOOKING ROOM API =========="
+        );
+        console.log("FULL RESPONSE:", data);
+        console.log("DIRECT PRICE:", data?.price);
+        console.log(
+          "ROOM PRICE:",
+          data?.room?.price
+        );
+        console.log(
+          "DATA PRICE:",
+          data?.data?.price
+        );
+        console.log(
+          "DATA ROOM PRICE:",
+          data?.data?.room?.price
+        );
+        console.log(
+          "======================================"
+        );
+
+        const normalizedRoom =
+          normalizeRoomResponse(data);
+
+        console.log(
+          "NORMALIZED ROOM:",
+          normalizedRoom
+        );
+        console.log(
+          "FINAL ROOM PRICE:",
+          getRoomPrice(normalizedRoom)
+        );
+
+        if (mounted) {
+          setRoom(normalizedRoom);
         }
       } catch (err) {
-        console.error("Room loading error:", err);
-        setRoomError("Unable to load the selected room.");
+        console.error("Failed to load room:", err);
+
+        if (mounted) {
+          setRoomError(
+            err?.message ||
+              "Unable to load this room. Please try again."
+          );
+        }
       } finally {
-        setLoadingRoom(false);
+        if (mounted) {
+          setLoadingRoom(false);
+        }
       }
     };
 
     loadRoom();
+
+    return () => {
+      mounted = false;
+    };
   }, [roomId]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
+  // ==========================================
+  // ROOM DATA
+  // ==========================================
+
+  const roomPrice = useMemo(() => {
+    return getRoomPrice(room);
+  }, [room]);
+
+  const roomName = useMemo(() => {
+    return getRoomName(room);
+  }, [room]);
+
+  const roomLocation = useMemo(() => {
+    return getRoomLocation(room);
+  }, [room]);
+
+  const propertyImage = useMemo(() => {
+    return getRoomImage(room);
+  }, [room]);
+
+  const nights = useMemo(() => {
+    return calculateNights(
+      form.checkIn,
+      form.checkOut
+    );
+  }, [form.checkIn, form.checkOut]);
+
+  const guestCount = Number(form.guests || 1);
+  const roomCount = Number(form.rooms || 1);
+
+  const total = useMemo(() => {
+    if (!roomPrice || !nights) return 0;
+
+    return (
+      roomPrice *
+      nights *
+      roomCount
+    );
+  }, [roomPrice, nights, roomCount]);
+
+  // ==========================================
+  // INPUT HANDLER
+  // ==========================================
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
 
     setForm((previous) => ({
       ...previous,
       [name]: value,
     }));
 
+    if (error) {
+      setError("");
+    }
+  };
+
+  // ==========================================
+  // SUBMIT BOOKING
+  // ==========================================
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
     setError("");
-  };
 
-  const getNights = () => {
-    if (!form.checkIn || !form.checkOut) return 0;
+    const firstName = form.firstName.trim();
+    const lastName = form.lastName.trim();
+    const email = form.email.trim();
+    const phoneDigits = form.phone.replace(/\D/g, "");
 
-    const start = new Date(form.checkIn);
-    const end = new Date(form.checkOut);
+    const guests = Number(form.guests);
+    const rooms = Number(form.rooms);
 
-    const difference = end.getTime() - start.getTime();
-
-    return Math.max(
-      0,
-      Math.ceil(difference / (1000 * 60 * 60 * 24))
-    );
-  };
-
-  const getTotal = () => {
-    const nights = getNights();
-
-    return Number(room?.price || 0) * nights;
-  };
-
-  const formatDate = (date) => {
-    if (!date) return "—";
-
-    const value = new Date(`${date}T00:00:00`);
-
-    return value.toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
-  };
-
-  const createWhatsAppMessage = (bookingId = "") => {
-    const nights = getNights();
-    const total = getTotal();
-
-    return [
-      "Hello Backpacker Gateways,",
-      "",
-      "I would like to request a hotel booking.",
-      "",
-      `Hotel: ${room?.name || "Selected Hotel"}`,
-      `Guest: ${form.name}`,
-      `WhatsApp: ${form.phone}`,
-      `Guests: ${form.guests}`,
-      `Check-in: ${form.checkIn}`,
-      `Check-out: ${form.checkOut}`,
-      `Nights: ${nights}`,
-      `Estimated Total: NPR ${total.toLocaleString("en-NP")}`,
-      bookingId ? `Booking ID: ${bookingId}` : "",
-      "",
-      "Payment: Pay at Hotel",
-      "",
-      "Please confirm availability.",
-    ]
-      .filter(Boolean)
-      .join("\n");
-  };
-
-  const openWhatsApp = (bookingId = "") => {
-    if (!WHATSAPP_NUMBER) {
-      alert(
-        "WhatsApp booking number is not configured yet."
+    if (!room?._id && !room?.id) {
+      setError(
+        "Room information is unavailable. Please reload the page."
       );
       return;
     }
 
-    const message = createWhatsAppMessage(bookingId);
+    if (!firstName) {
+      setError("Please enter your first name.");
+      return;
+    }
 
-    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
-      message
-    )}`;
+    if (!lastName) {
+      setError("Please enter your last name.");
+      return;
+    }
+
+    if (!email) {
+      setError("Please enter your email address.");
+      return;
+    }
+
+    if (!email.includes("@")) {
+      setError(
+        "Please enter a valid email address."
+      );
+      return;
+    }
+
+    if (phoneDigits.length < 6) {
+      setError(
+        "Please enter a valid WhatsApp / phone number."
+      );
+      return;
+    }
+
+    if (!guests || guests < 1 || guests > 20) {
+      setError(
+        "Guests must be between 1 and 20."
+      );
+      return;
+    }
+
+    if (!rooms || rooms < 1 || rooms > 10) {
+      setError(
+        "Rooms must be between 1 and 10."
+      );
+      return;
+    }
+
+    if (!form.checkIn) {
+      setError("Please select your check-in date.");
+      return;
+    }
+
+    if (!form.checkOut) {
+      setError("Please select your check-out date.");
+      return;
+    }
+
+    const calculatedNights = calculateNights(
+      form.checkIn,
+      form.checkOut
+    );
+
+    if (calculatedNights <= 0) {
+      setError(
+        "Check-out must be after check-in."
+      );
+      return;
+    }
+
+    if (!roomPrice || roomPrice <= 0) {
+      setError(
+        "Room price could not be loaded. Please refresh the page and try again."
+      );
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+
+      const roomReference =
+        room._id || room.id;
+
+      const payload = {
+        room: roomReference,
+
+        guestName:
+          `${firstName} ${lastName}`.trim(),
+
+        email,
+
+        phone:
+          `${form.countryCode}${phoneDigits}`,
+
+        guests,
+
+        checkIn: form.checkIn,
+
+        checkOut: form.checkOut,
+
+        firstName,
+
+        lastName,
+
+        countryCode: form.countryCode,
+
+        passportNumber:
+          form.passportNumber.trim(),
+
+        citizenshipNumber:
+          form.citizenshipNumber.trim(),
+
+        nationality:
+          form.nationality.trim(),
+
+        city: form.city.trim(),
+
+        address:
+          form.address.trim(),
+
+        rooms,
+
+        paymentMethod: "pay_at_hotel",
+      };
+
+      console.log(
+        "========== BOOKING PAYLOAD =========="
+      );
+      console.log(payload);
+      console.log(
+        "======================================"
+      );
+
+      const response = await fetch(
+        BOOKINGS_API,
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+
+          body: JSON.stringify(payload),
+        }
+      );
+
+      let data = null;
+
+      try {
+        data = await response.json();
+      } catch {
+        data = null;
+      }
+
+      if (!response.ok) {
+        throw new Error(
+          data?.message ||
+            data?.error ||
+            `Booking failed (${response.status})`
+        );
+      }
+
+      const bookingId =
+        data?.booking?._id ||
+        data?.booking?.id ||
+        data?._id ||
+        data?.id ||
+        data?.bookingId ||
+        data?.reference ||
+        "";
+
+      setConfirmation({
+        bookingId,
+        guestName:
+          `${firstName} ${lastName}`.trim(),
+        email,
+        phone:
+          `${form.countryCode}${phoneDigits}`,
+        checkIn: form.checkIn,
+        checkOut: form.checkOut,
+        guests,
+        rooms,
+        nights: calculatedNights,
+        total:
+          roomPrice *
+          calculatedNights *
+          rooms,
+      });
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    } catch (err) {
+      console.error(
+        "Booking submission error:",
+        err
+      );
+
+      setError(
+        err?.message ||
+          "We could not complete your booking. Please try again."
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // ==========================================
+  // WHATSAPP
+  // ==========================================
+
+  const handleWhatsApp = () => {
+    if (!confirmation) return;
+
+    const message = [
+      "Hello Backpacker Gateways,",
+      "",
+      "I have completed a booking request.",
+      "",
+      `Guest: ${confirmation.guestName}`,
+      `Room: ${roomName}`,
+      `Check-in: ${formatDate(
+        confirmation.checkIn
+      )}`,
+      `Check-out: ${formatDate(
+        confirmation.checkOut
+      )}`,
+      `Guests: ${confirmation.guests}`,
+      `Rooms: ${confirmation.rooms}`,
+      `Nights: ${confirmation.nights}`,
+      `Total: ${formatCurrency(
+        confirmation.total
+      )}`,
+      confirmation.bookingId
+        ? `Booking ID: ${confirmation.bookingId}`
+        : "",
+      "",
+      "Please confirm my reservation.",
+    ]
+      .filter(Boolean)
+      .join("\n");
+
+    const whatsappUrl =
+      `https://wa.me/${WHATSAPP_NUMBER}` +
+      `?text=${encodeURIComponent(message)}`;
 
     window.open(
       whatsappUrl,
@@ -150,2277 +618,2402 @@ const Booking = () => {
     );
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!room) {
-      setError("Room information is missing.");
-      return;
-    }
-
-    /* =========================
-       GUEST VALIDATION
-    ========================== */
-
-    const guestCount = Number(form.guests);
-
-    if (
-      !Number.isInteger(guestCount) ||
-      guestCount < 1 ||
-      guestCount > 20
-    ) {
-      setError(
-        "Please enter a valid number of guests (1–20)."
-      );
-      return;
-    }
-
-    if (
-      form.checkIn &&
-      form.checkOut &&
-      new Date(form.checkOut) <=
-        new Date(form.checkIn)
-    ) {
-      setError(
-        "Check-out date must be after check-in date."
-      );
-      return;
-    }
-
-    setLoading(true);
-    setError("");
-    setSuccess(null);
-
-    try {
-      const response = await fetch(
-        "https://backpacker-gateways-2.onrender.com/api/bookings",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            room: room._id,
-            guestName: form.name,
-            email: form.email,
-            phone: form.phone,
-            guests: guestCount,
-            checkIn: form.checkIn,
-            checkOut: form.checkOut,
-          }),
-        }
-      );
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          result.message || "Booking request failed."
-        );
-      }
-
-      const bookingId =
-        result?.data?._id ||
-        result?.booking?._id ||
-        result?._id ||
-        result?.data?.bookingId ||
-        "";
-
-      setSuccess({
-        bookingId,
-        name: form.name,
-        phone: form.phone,
-        guests: guestCount,
-        checkIn: form.checkIn,
-        checkOut: form.checkOut,
-        nights: getNights(),
-        total: getTotal(),
-      });
-
-      setForm({
-        name: "",
-        email: "",
-        phone: "",
-        checkIn: "",
-        checkOut: "",
-        guests: 1,
-      });
-    } catch (err) {
-      console.error("Booking error:", err);
-
-      setError(
-        err.message ||
-          "Unable to submit booking. Please try again."
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+  // ==========================================
+  // LOADING
+  // ==========================================
 
   if (loadingRoom) {
     return (
-      <div className="booking-loading">
-        <div className="booking-loader-ring" />
+      <>
+        <style>{styles}</style>
 
-        <div>
-          <strong>Preparing your stay</strong>
-          <p>Loading your selected property...</p>
+        <div className="booking-page">
+          <header className="booking-header">
+            <div className="booking-header-inner">
+              <button
+                className="brand-button"
+                onClick={() => navigate("/")}
+              >
+                <span className="brand-mark">
+                  BG
+                </span>
+
+                <span>
+                  <strong>
+                    Backpacker Gateways
+                  </strong>
+                  <small>
+                    Explore Nepal
+                  </small>
+                </span>
+              </button>
+            </div>
+          </header>
+
+          <main className="booking-loading">
+            <div className="loading-spinner" />
+
+            <h2>
+              Preparing your booking
+            </h2>
+
+            <p>
+              We're securely loading the
+              selected property.
+            </p>
+          </main>
         </div>
-      </div>
+      </>
     );
   }
+
+  // ==========================================
+  // ROOM ERROR
+  // ==========================================
 
   if (roomError || !room) {
     return (
-      <div className="booking-error">
-        <div className="booking-error-card">
-          <div className="booking-error-icon">!</div>
+      <>
+        <style>{styles}</style>
 
-          <span className="error-eyebrow">
-            BOOKING
-          </span>
+        <div className="booking-page">
+          <header className="booking-header">
+            <div className="booking-header-inner">
+              <button
+                className="brand-button"
+                onClick={() => navigate("/")}
+              >
+                <span className="brand-mark">
+                  BG
+                </span>
 
-          <h2>No room selected</h2>
+                <span>
+                  <strong>
+                    Backpacker Gateways
+                  </strong>
+                  <small>
+                    Explore Nepal
+                  </small>
+                </span>
+              </button>
+            </div>
+          </header>
 
-          <p>
-            {roomError ||
-              "Please select a room before booking."}
-          </p>
+          <main className="booking-error-page">
+            <div className="error-icon">
+              !
+            </div>
 
-          <button
-            type="button"
-            onClick={() => navigate("/rooms")}
-          >
-            Back to Rooms
-          </button>
+            <h1>
+              Unable to load this room
+            </h1>
+
+            <p>
+              {roomError ||
+                "The selected property could not be found."}
+            </p>
+
+            <div className="error-actions">
+              <button
+                className="primary-button"
+                onClick={() =>
+                  window.location.reload()
+                }
+              >
+                Try Again
+              </button>
+
+              <button
+                className="secondary-button"
+                onClick={() =>
+                  navigate("/rooms")
+                }
+              >
+                Browse Rooms
+              </button>
+            </div>
+          </main>
         </div>
-      </div>
+      </>
     );
   }
 
-  const firstImage =
-    room.images?.[0] ||
-    "https://images.unsplash.com/photo-1566665797739-1674de7a421a?auto=format&fit=crop&w=1200&q=80";
+  // ==========================================
+  // CONFIRMATION
+  // ==========================================
 
-  const roomPrice = Number(room.price || 0);
+  if (confirmation) {
+    return (
+      <>
+        <style>{styles}</style>
 
-  return (
-    <div className="booking-page">
-      <div className="booking-shell">
+        <div className="booking-page">
+          <header className="booking-header">
+            <div className="booking-header-inner">
+              <button
+                className="brand-button"
+                onClick={() => navigate("/")}
+              >
+                <span className="brand-mark">
+                  BG
+                </span>
 
-        {/* HEADER */}
-        <header className="booking-header">
-          <button
-            type="button"
-            className="booking-back"
-            onClick={() => navigate(-1)}
-          >
-            <span className="back-arrow">←</span>
-            <span>Back</span>
-          </button>
-
-          <div className="booking-brand">
-            <span className="booking-brand-mark">
-              BG
-            </span>
-
-            <div>
-              <strong>Backpacker Gateways</strong>
-              <span>Stay · Trek · Connect</span>
+                <span>
+                  <strong>
+                    Backpacker Gateways
+                  </strong>
+                  <small>
+                    Explore Nepal
+                  </small>
+                </span>
+              </button>
             </div>
-          </div>
-        </header>
+          </header>
 
-        {/* =========================
-            SUCCESS / CONFIRMATION
-        ========================== */}
-
-        {success ? (
-          <main className="success-page">
-
+          <main className="confirmation-page">
             <section className="confirmation-card">
-
-              {/* Status */}
-              <div className="confirmation-status">
-                <div className="status-check">
-                  ✓
-                </div>
-
-                <div>
-                  <span className="status-label">
-                    REQUEST RECEIVED
-                  </span>
-
-                  <p>
-                    Your stay request has been
-                    successfully submitted.
-                  </p>
-                </div>
+              <div className="success-icon">
+                ✓
               </div>
 
               <div className="confirmation-heading">
+                <span className="eyebrow">
+                  BOOKING REQUEST RECEIVED
+                </span>
+
                 <h1>
-                  Your stay request is in.
+                  Thank you,{" "}
+                  {confirmation.guestName}.
                 </h1>
 
                 <p>
-                  We've received your booking details.
-                  Our team will check availability with
-                  the property and contact you through
-                  WhatsApp to confirm your stay.
+                  Your booking request has been
+                  successfully submitted. Our
+                  team will contact you to confirm
+                  the reservation.
                 </p>
               </div>
 
-              {/* Booking reference */}
-              {success.bookingId && (
-                <div className="reference-bar">
-                  <div>
-                    <span>BOOKING REFERENCE</span>
-                    <strong>
-                      {success.bookingId}
-                    </strong>
-                  </div>
-
-                  <span className="reference-status">
-                    REQUESTED
-                  </span>
-                </div>
-              )}
-
-              {/* Property */}
-              <div className="confirmation-property">
-
-                <img
-                  src={firstImage}
-                  alt={room.name || "Selected property"}
-                />
-
-                <div className="property-copy">
-                  <span>SELECTED PROPERTY</span>
-
-                  <h2>{room.name}</h2>
-
-                  <p>
-                    <span className="location-dot">
-                      ●
-                    </span>
-                    Kathmandu, Nepal
-                  </p>
-                </div>
-
-                <div className="property-price">
-                  <span>FROM</span>
-
-                  <strong>
-                    NPR{" "}
-                    {roomPrice.toLocaleString(
-                      "en-NP"
-                    )}
-                  </strong>
-
-                  <small>per night</small>
-                </div>
-
-              </div>
-
-              {/* Stay summary */}
-              <div className="stay-summary">
-
-                <div className="summary-heading">
-                  <span className="summary-number">
-                    01
-                  </span>
-
-                  <div>
-                    <h3>Your stay</h3>
-                    <p>
-                      Booking details you've submitted
-                    </p>
-                  </div>
-                </div>
-
-                <div className="stay-grid">
-
-                  <div className="stay-item">
-                    <span>CHECK-IN</span>
-                    <strong>
-                      {formatDate(success.checkIn)}
-                    </strong>
-                  </div>
-
-                  <div className="stay-item">
-                    <span>CHECK-OUT</span>
-                    <strong>
-                      {formatDate(success.checkOut)}
-                    </strong>
-                  </div>
-
-                  <div className="stay-item">
-                    <span>GUESTS</span>
-                    <strong>
-                      {success.guests}{" "}
-                      {success.guests === 1
-                        ? "Guest"
-                        : "Guests"}
-                    </strong>
-                  </div>
-
-                  <div className="stay-item">
-                    <span>DURATION</span>
-                    <strong>
-                      {success.nights}{" "}
-                      {success.nights === 1
-                        ? "Night"
-                        : "Nights"}
-                    </strong>
-                  </div>
-
-                </div>
-
-              </div>
-
-              {/* Guest */}
-              <div className="guest-summary">
-
-                <div className="summary-heading">
-                  <span className="summary-number">
-                    02
-                  </span>
-
-                  <div>
-                    <h3>Guest information</h3>
-                    <p>
-                      Contact details for this request
-                    </p>
-                  </div>
-                </div>
-
-                <div className="guest-grid">
-
-                  <div>
-                    <span>GUEST NAME</span>
-                    <strong>{success.name}</strong>
-                  </div>
-
-                  <div>
-                    <span>WHATSAPP</span>
-                    <strong>{success.phone}</strong>
-                  </div>
-
-                </div>
-
-              </div>
-
-              {/* Total */}
-              <div className="confirmation-total">
-
-                <div>
-                  <span>ESTIMATED STAY TOTAL</span>
-
-                  <strong>
-                    NPR{" "}
-                    {Number(
-                      success.total || 0
-                    ).toLocaleString("en-NP")}
-                  </strong>
-                </div>
-
-                <div className="total-note">
-                  <span>RATE BASIS</span>
-
-                  <p>
-                    NPR{" "}
-                    {roomPrice.toLocaleString(
-                      "en-NP"
-                    )}{" "}
-                    × {success.nights}{" "}
-                    {success.nights === 1
-                      ? "night"
-                      : "nights"}
-                  </p>
-                </div>
-
-              </div>
-
-              {/* Payment */}
-              <div className="payment-card">
-
-                <div className="payment-check">
-                  ✓
-                </div>
-
-                <div>
-                  <strong>
-                    Pay at the hotel
-                  </strong>
-
-                  <p>
-                    No online payment is required for
-                    this booking request. Payment can be
-                    made directly at the property after
-                    availability is confirmed.
-                  </p>
-                </div>
-
-              </div>
-
-              {/* Next step */}
-              <div className="next-step-card">
-
-                <div className="next-step-icon">
-                  →
-                </div>
-
-                <div>
-                  <span>NEXT STEP</span>
-
-                  <strong>
-                    Continue on WhatsApp
-                  </strong>
-
-                  <p>
-                    Send your booking reference to our
-                    team for faster confirmation.
-                  </p>
-                </div>
-
-              </div>
-
-              {/* Actions */}
-              <div className="confirmation-actions">
-
-                <button
-                  type="button"
-                  className="whatsapp-button"
-                  onClick={() =>
-                    openWhatsApp(
-                      success.bookingId
-                    )
-                  }
-                >
-                  <span className="whatsapp-symbol">
-                    ◉
-                  </span>
-
+              {confirmation.bookingId && (
+                <div className="booking-reference">
                   <span>
-                    Continue on WhatsApp
+                    Booking reference
                   </span>
 
-                  <span className="action-arrow">
-                    ↗
-                  </span>
-                </button>
-
-                <button
-                  type="button"
-                  className="secondary-button"
-                  onClick={() => navigate("/rooms")}
-                >
-                  Browse More Stays
-                </button>
-
-              </div>
-
-              <div className="confirmation-footer">
-                <span>
-                  ✓ Request securely submitted
-                </span>
-
-                <span>
-                  Backpacker Gateways
-                </span>
-              </div>
-
-            </section>
-
-          </main>
-        ) : (
-
-          /* =========================
-             BOOKING FORM
-          ========================== */
-
-          <main className="booking-layout">
-
-            <section className="booking-form-card">
-
-              <div className="booking-eyebrow">
-                YOUR STAY
-              </div>
-
-              <h1 className="booking-title">
-                Reserve Your Stay
-              </h1>
-
-              <p className="booking-description">
-                Share your details and we'll check
-                availability with the property.
-              </p>
-
-              {error && (
-                <div className="booking-message">
-                  <span>!</span>
-                  <p>{error}</p>
+                  <strong>
+                    {confirmation.bookingId}
+                  </strong>
                 </div>
               )}
 
-              <form onSubmit={handleSubmit}>
-
-                {/* DETAILS */}
-                <div className="form-section">
-
-                  <div className="form-section-heading">
-                    <span className="form-step">
-                      01
-                    </span>
-
-                    <div>
-                      <h2>Your details</h2>
-
-                      <p>
-                        How can we reach you?
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="form-grid">
-
-                    <div className="form-group form-full">
-                      <label htmlFor="name">
-                        Full Name
-                      </label>
-
-                      <input
-                        id="name"
-                        type="text"
-                        name="name"
-                        placeholder="Enter your full name"
-                        value={form.name}
-                        onChange={handleChange}
-                        autoComplete="name"
-                        required
-                      />
-                    </div>
-
-                    <div className="form-group">
-
-                      <label htmlFor="phone">
-                        WhatsApp Number
-                      </label>
-
-                      <div className="phone-input">
-                        <span>+977</span>
-
-                        <input
-                          id="phone"
-                          type="tel"
-                          name="phone"
-                          placeholder="98XXXXXXXX"
-                          value={form.phone.replace(
-                            /^\+977\s?/,
-                            ""
-                          )}
-                          onChange={(e) =>
-                            handleChange({
-                              target: {
-                                name: "phone",
-                                value:
-                                  e.target.value,
-                              },
-                            })
-                          }
-                          autoComplete="tel"
-                          required
-                        />
-                      </div>
-
-                      <small>
-                        We'll use WhatsApp to confirm
-                        your stay.
-                      </small>
-
-                    </div>
-
-                    <div className="form-group">
-
-                      <label htmlFor="email">
-                        Email Address
-                        <em>Optional</em>
-                      </label>
-
-                      <input
-                        id="email"
-                        type="email"
-                        name="email"
-                        placeholder="you@example.com"
-                        value={form.email}
-                        onChange={handleChange}
-                        autoComplete="email"
-                      />
-
-                    </div>
-
-                  </div>
-                </div>
-
-                {/* STAY */}
-                <div className="form-section">
-
-                  <div className="form-section-heading">
-                    <span className="form-step">
-                      02
-                    </span>
-
-                    <div>
-                      <h2>Your stay</h2>
-
-                      <p>
-                        When are you travelling?
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="form-grid">
-
-                    {/* GUESTS - UPDATED */}
-                    <div className="form-group">
-
-                      <label htmlFor="guests">
-                        Guests
-                      </label>
-
-                      <input
-                        id="guests"
-                        type="number"
-                        name="guests"
-                        min="1"
-                        max="20"
-                        step="1"
-                        value={form.guests}
-                        onChange={handleChange}
-                        placeholder="Number of guests"
-                        inputMode="numeric"
-                        required
-                      />
-
-                      <small>
-                        Enter the total number of guests
-                        travelling.
-                      </small>
-
-                    </div>
-
-                    <div className="form-group">
-
-                      <label htmlFor="checkIn">
-                        Check-in
-                      </label>
-
-                      <input
-                        id="checkIn"
-                        type="date"
-                        name="checkIn"
-                        value={form.checkIn}
-                        onChange={handleChange}
-                        required
-                      />
-
-                    </div>
-
-                    <div className="form-group">
-
-                      <label htmlFor="checkOut">
-                        Check-out
-                      </label>
-
-                      <input
-                        id="checkOut"
-                        type="date"
-                        name="checkOut"
-                        value={form.checkOut}
-                        onChange={handleChange}
-                        required
-                      />
-
-                    </div>
-
-                  </div>
-                </div>
-
-                {/* FOOTER */}
-                <div className="request-footer">
-
-                  <div className="request-note">
-
-                    <span>✓</span>
-
-                    <p>
-                      <strong>
-                        Pay at hotel
-                      </strong>
-
-                      <br />
-
-                      No online payment required.
-                    </p>
-
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="submit-booking"
-                    disabled={loading}
-                  >
-                    {loading ? (
-                      <>
-                        <span className="button-spinner" />
-                        Sending Request...
-                      </>
-                    ) : (
-                      <>
-                        Request Booking
-                        <span>→</span>
-                      </>
-                    )}
-                  </button>
-
-                </div>
-
-              </form>
-            </section>
-
-            {/* PROPERTY SUMMARY */}
-            <aside className="booking-summary">
-
-              <div className="summary-image-wrap">
-
-                <img
-                  className="summary-image"
-                  src={firstImage}
-                  alt={
-                    room.name ||
-                    "Selected room"
-                  }
-                />
-
-                {room.available && (
-                  <span className="summary-available">
-                    ● Available
-                  </span>
-                )}
-
-              </div>
-
-              <div className="summary-content">
-
-                <span className="summary-label">
-                  SELECTED PROPERTY
-                </span>
-
-                <h2 className="summary-title">
-                  {room.name}
-                </h2>
-
-                <p className="summary-location">
-                  Kathmandu, Nepal
-                </p>
-
-                <div className="summary-divider" />
-
-                <div className="summary-price-row">
+              <div className="confirmation-layout">
+                <div className="confirmation-property">
+                  <img
+                    src={propertyImage}
+                    alt={roomName}
+                  />
 
                   <div>
-                    <span>From</span>
+                    <span className="property-label">
+                      YOUR PROPERTY
+                    </span>
 
+                    <h2>{roomName}</h2>
+
+                    <p>
+                      {roomLocation}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="confirmation-details">
+                  <div className="detail-row">
+                    <span>Check-in</span>
                     <strong>
-                      NPR{" "}
-                      {roomPrice.toLocaleString(
-                        "en-NP"
+                      {formatDate(
+                        confirmation.checkIn
                       )}
                     </strong>
                   </div>
 
-                  <small>
-                    per night
-                  </small>
-
-                </div>
-
-                <div className="summary-facts">
-
-                  <div>
-                    <span>GUESTS</span>
-
+                  <div className="detail-row">
+                    <span>Check-out</span>
                     <strong>
-                      Up to{" "}
-                      {room.capacity || 1}
+                      {formatDate(
+                        confirmation.checkOut
+                      )}
                     </strong>
                   </div>
 
-                  <div>
-                    <span>BED</span>
-
+                  <div className="detail-row">
+                    <span>Guests</span>
                     <strong>
-                      {room.beds ||
-                        "Standard Bed"}
+                      {confirmation.guests}
                     </strong>
                   </div>
 
+                  <div className="detail-row">
+                    <span>Rooms</span>
+                    <strong>
+                      {confirmation.rooms}
+                    </strong>
+                  </div>
+
+                  <div className="detail-row">
+                    <span>Nights</span>
+                    <strong>
+                      {confirmation.nights}
+                    </strong>
+                  </div>
+
+                  <div className="detail-row total-row">
+                    <span>Total</span>
+                    <strong>
+                      {formatCurrency(
+                        confirmation.total
+                      )}
+                    </strong>
+                  </div>
+                </div>
+              </div>
+
+              <div className="confirmation-contact">
+                <div>
+                  <span>Email</span>
+                  <strong>
+                    {confirmation.email}
+                  </strong>
                 </div>
 
-                <div className="summary-policy">
+                <div>
+                  <span>Phone</span>
+                  <strong>
+                    {confirmation.phone}
+                  </strong>
+                </div>
+              </div>
 
+              <div className="confirmation-actions">
+                <button
+                  className="whatsapp-button"
+                  onClick={handleWhatsApp}
+                >
+                  <span className="whatsapp-icon">
+                    W
+                  </span>
+
+                  Continue on WhatsApp
+                </button>
+
+                <button
+                  className="secondary-button"
+                  onClick={() =>
+                    navigate("/rooms")
+                  }
+                >
+                  Browse More Hotels
+                </button>
+              </div>
+            </section>
+          </main>
+
+          <footer className="booking-footer">
+            <p>
+              © {new Date().getFullYear()}{" "}
+              Backpacker Gateways. All rights
+              reserved.
+            </p>
+          </footer>
+        </div>
+      </>
+    );
+  }
+
+  // ==========================================
+  // MAIN BOOKING PAGE
+  // ==========================================
+
+  return (
+    <>
+      <style>{styles}</style>
+
+      <div className="booking-page">
+        {/* HEADER */}
+        <header className="booking-header">
+          <div className="booking-header-inner">
+            <button
+              className="brand-button"
+              onClick={() => navigate("/")}
+              aria-label="Back to homepage"
+            >
+              <span className="brand-mark">
+                BG
+              </span>
+
+              <span className="brand-copy">
+                <strong>
+                  Backpacker Gateways
+                </strong>
+
+                <small>
+                  Explore Nepal
+                </small>
+              </span>
+            </button>
+
+            <div className="secure-label">
+              <span className="lock-icon">
+                ✓
+              </span>
+
+              <span>
+                Secure booking
+              </span>
+            </div>
+          </div>
+        </header>
+
+        {/* MAIN */}
+        <main className="booking-container">
+          {/* TOP */}
+          <section className="booking-intro">
+            <button
+              className="back-link"
+              onClick={() =>
+                navigate(-1)
+              }
+            >
+              <span>←</span>
+              Back to property
+            </button>
+
+            <div className="intro-content">
+              <span className="eyebrow">
+                RESERVE YOUR STAY
+              </span>
+
+              <h1>
+                Complete your booking
+              </h1>
+
+              <p>
+                Enter your details below to
+                secure your stay in Nepal.
+              </p>
+            </div>
+          </section>
+
+          <div className="booking-grid">
+            {/* LEFT FORM */}
+            <form
+              className="booking-form-card"
+              onSubmit={handleSubmit}
+            >
+              {/* PERSONAL DETAILS */}
+              <section className="form-section">
+                <div className="section-heading">
+                  <div className="section-number">
+                    01
+                  </div>
+
+                  <div>
+                    <h2>
+                      Guest details
+                    </h2>
+
+                    <p>
+                      Tell us who will be
+                      staying.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="form-grid two-columns">
+                  <div className="field">
+                    <label htmlFor="firstName">
+                      First name{" "}
+                      <span>*</span>
+                    </label>
+
+                    <input
+                      id="firstName"
+                      name="firstName"
+                      type="text"
+                      value={form.firstName}
+                      onChange={handleChange}
+                      placeholder="Michael"
+                      autoComplete="given-name"
+                    />
+                  </div>
+
+                  <div className="field">
+                    <label htmlFor="lastName">
+                      Last name{" "}
+                      <span>*</span>
+                    </label>
+
+                    <input
+                      id="lastName"
+                      name="lastName"
+                      type="text"
+                      value={form.lastName}
+                      onChange={handleChange}
+                      placeholder="Carter"
+                      autoComplete="family-name"
+                    />
+                  </div>
+                </div>
+
+                <div className="form-grid two-columns">
+                  <div className="field">
+                    <label htmlFor="email">
+                      Email address{" "}
+                      <span>*</span>
+                    </label>
+
+                    <input
+                      id="email"
+                      name="email"
+                      type="email"
+                      value={form.email}
+                      onChange={handleChange}
+                      placeholder="michael@example.com"
+                      autoComplete="email"
+                    />
+                  </div>
+
+                  <div className="field">
+                    <label htmlFor="phone">
+                      WhatsApp / phone{" "}
+                      <span>*</span>
+                    </label>
+
+                    <div className="phone-input">
+                      <select
+                        name="countryCode"
+                        value={
+                          form.countryCode
+                        }
+                        onChange={
+                          handleChange
+                        }
+                        aria-label="Country code"
+                      >
+                        {COUNTRY_CODES.map(
+                          (country) => (
+                            <option
+                              key={
+                                country.code
+                              }
+                              value={
+                                country.code
+                              }
+                            >
+                              {country.code}
+                            </option>
+                          )
+                        )}
+                      </select>
+
+                      <input
+                        id="phone"
+                        name="phone"
+                        type="tel"
+                        value={form.phone}
+                        onChange={handleChange}
+                        placeholder="9800000000"
+                        autoComplete="tel"
+                        inputMode="tel"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* TRAVEL DOCUMENTS */}
+              <section className="form-section">
+                <div className="section-heading">
+                  <div className="section-number">
+                    02
+                  </div>
+
+                  <div>
+                    <h2>
+                      Traveller information
+                    </h2>
+
+                    <p>
+                      Additional information
+                      for your reservation.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="form-grid two-columns">
+                  <div className="field">
+                    <label htmlFor="nationality">
+                      Nationality
+                    </label>
+
+                    <input
+                      id="nationality"
+                      name="nationality"
+                      type="text"
+                      value={
+                        form.nationality
+                      }
+                      onChange={handleChange}
+                      placeholder="American"
+                      autoComplete="country-name"
+                    />
+                  </div>
+
+                  <div className="field">
+                    <label htmlFor="city">
+                      City
+                    </label>
+
+                    <input
+                      id="city"
+                      name="city"
+                      type="text"
+                      value={form.city}
+                      onChange={handleChange}
+                      placeholder="New York"
+                      autoComplete="address-level2"
+                    />
+                  </div>
+                </div>
+
+                <div className="form-grid two-columns">
+                  <div className="field">
+                    <label htmlFor="passportNumber">
+                      Passport number
+                    </label>
+
+                    <input
+                      id="passportNumber"
+                      name="passportNumber"
+                      type="text"
+                      value={
+                        form.passportNumber
+                      }
+                      onChange={handleChange}
+                      placeholder="Passport number"
+                    />
+                  </div>
+
+                  <div className="field">
+                    <label htmlFor="citizenshipNumber">
+                      Citizenship number
+                    </label>
+
+                    <input
+                      id="citizenshipNumber"
+                      name="citizenshipNumber"
+                      type="text"
+                      value={
+                        form.citizenshipNumber
+                      }
+                      onChange={handleChange}
+                      placeholder="Citizenship number"
+                    />
+                  </div>
+                </div>
+
+                <div className="field">
+                  <label htmlFor="address">
+                    Address
+                  </label>
+
+                  <textarea
+                    id="address"
+                    name="address"
+                    value={form.address}
+                    onChange={handleChange}
+                    placeholder="Your residential address"
+                    rows="3"
+                    autoComplete="street-address"
+                  />
+                </div>
+              </section>
+
+              {/* STAY DETAILS */}
+              <section className="form-section">
+                <div className="section-heading">
+                  <div className="section-number">
+                    03
+                  </div>
+
+                  <div>
+                    <h2>
+                      Your stay
+                    </h2>
+
+                    <p>
+                      Select your dates and
+                      number of guests.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="form-grid two-columns">
+                  <div className="field">
+                    <label htmlFor="checkIn">
+                      Check-in{" "}
+                      <span>*</span>
+                    </label>
+
+                    <input
+                      id="checkIn"
+                      name="checkIn"
+                      type="date"
+                      value={form.checkIn}
+                      onChange={handleChange}
+                      min={
+                        new Date()
+                          .toISOString()
+                          .split("T")[0]
+                      }
+                    />
+                  </div>
+
+                  <div className="field">
+                    <label htmlFor="checkOut">
+                      Check-out{" "}
+                      <span>*</span>
+                    </label>
+
+                    <input
+                      id="checkOut"
+                      name="checkOut"
+                      type="date"
+                      value={form.checkOut}
+                      onChange={handleChange}
+                      min={
+                        form.checkIn ||
+                        new Date()
+                          .toISOString()
+                          .split("T")[0]
+                      }
+                    />
+                  </div>
+                </div>
+
+                <div className="form-grid two-columns">
+                  <div className="field">
+                    <label htmlFor="guests">
+                      Guests
+                    </label>
+
+                    <select
+                      id="guests"
+                      name="guests"
+                      value={form.guests}
+                      onChange={handleChange}
+                    >
+                      {Array.from(
+                        { length: 20 },
+                        (_, index) =>
+                          index + 1
+                      ).map((number) => (
+                        <option
+                          key={number}
+                          value={number}
+                        >
+                          {number}{" "}
+                          {number === 1
+                            ? "guest"
+                            : "guests"}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="field">
+                    <label htmlFor="rooms">
+                      Rooms
+                    </label>
+
+                    <select
+                      id="rooms"
+                      name="rooms"
+                      value={form.rooms}
+                      onChange={handleChange}
+                    >
+                      {Array.from(
+                        { length: 10 },
+                        (_, index) =>
+                          index + 1
+                      ).map((number) => (
+                        <option
+                          key={number}
+                          value={number}
+                        >
+                          {number}{" "}
+                          {number === 1
+                            ? "room"
+                            : "rooms"}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </section>
+
+              {/* PAYMENT */}
+              <section className="form-section payment-section">
+                <div className="section-heading">
+                  <div className="section-number">
+                    04
+                  </div>
+
+                  <div>
+                    <h2>
+                      Payment
+                    </h2>
+
+                    <p>
+                      No online payment is
+                      required now.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="payment-option active">
+                  <div className="payment-radio">
+                    <span />
+                  </div>
+
+                  <div className="payment-copy">
+                    <strong>
+                      Pay at hotel
+                    </strong>
+
+                    <span>
+                      Payment will be settled
+                      directly with the property.
+                    </span>
+                  </div>
+
+                  <div className="payment-badge">
+                    FREE
+                  </div>
+                </div>
+              </section>
+
+              {/* ERROR */}
+              {error && (
+                <div className="form-error">
+                  <span>!</span>
+
+                  <div>
+                    <strong>
+                      Booking could not be
+                      completed
+                    </strong>
+
+                    <p>{error}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* SUBMIT */}
+              <div className="submit-area">
+                <button
+                  type="submit"
+                  className="submit-button"
+                  disabled={submitting}
+                >
+                  {submitting ? (
+                    <>
+                      <span className="button-spinner" />
+                      Processing booking...
+                    </>
+                  ) : (
+                    <>
+                      Confirm booking
+                      <span>→</span>
+                    </>
+                  )}
+                </button>
+
+                <p className="submit-note">
+                  By continuing, you agree to
+                  our booking terms and property
+                  policies.
+                </p>
+              </div>
+            </form>
+
+            {/* RIGHT SIDEBAR */}
+            <aside className="booking-sidebar">
+              <div className="property-card">
+                <div className="property-image-wrap">
+                  <img
+                    src={propertyImage}
+                    alt={roomName}
+                    onError={(event) => {
+                      event.currentTarget.src =
+                        FALLBACK_IMAGE;
+                    }}
+                  />
+
+                  <span className="property-tag">
+                    PREMIUM STAY
+                  </span>
+                </div>
+
+                <div className="property-card-body">
+                  <span className="property-label">
+                    SELECTED PROPERTY
+                  </span>
+
+                  <h2>{roomName}</h2>
+
+                  <p className="property-location">
+                    <span>●</span>
+                    {roomLocation}
+                  </p>
+
+                  <div className="property-divider" />
+
+                  <div className="price-line">
+                    <div>
+                      <span>
+                        Nightly rate
+                      </span>
+
+                      <strong>
+                        {roomPrice > 0
+                          ? formatCurrency(
+                              roomPrice
+                            )
+                          : "Price unavailable"}
+                      </strong>
+                    </div>
+
+                    <small>
+                      per room / night
+                    </small>
+                  </div>
+                </div>
+              </div>
+
+              {/* PRICE SUMMARY */}
+              <div className="price-summary">
+                <div className="summary-heading">
+                  <h3>
+                    Price summary
+                  </h3>
+
+                  <span>
+                    {nights > 0
+                      ? `${nights} ${
+                          nights === 1
+                            ? "night"
+                            : "nights"
+                        }`
+                      : "Select dates"}
+                  </span>
+                </div>
+
+                {roomPrice > 0 &&
+                  nights > 0 && (
+                    <>
+                      <div className="summary-row">
+                        <span>
+                          {formatCurrency(
+                            roomPrice
+                          )}{" "}
+                          × {nights} nights
+                        </span>
+
+                        <strong>
+                          {formatCurrency(
+                            roomPrice *
+                              nights
+                          )}
+                        </strong>
+                      </div>
+
+                      {roomCount > 1 && (
+                        <div className="summary-row">
+                          <span>
+                            × {roomCount} rooms
+                          </span>
+
+                          <strong>
+                            {formatCurrency(
+                              roomPrice *
+                                nights *
+                                roomCount
+                            )}
+                          </strong>
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                <div className="summary-total">
+                  <span>
+                    Total
+                  </span>
+
+                  <strong>
+                    {total > 0
+                      ? formatCurrency(total)
+                      : "—"}
+                  </strong>
+                </div>
+
+                <p className="price-note">
+                  Taxes and property charges may
+                  be collected according to the
+                  property's policy.
+                </p>
+              </div>
+
+              {/* TRUST */}
+              <div className="trust-card">
+                <div className="trust-heading">
+                  <span className="shield">
+                    ✓
+                  </span>
+
+                  <strong>
+                    Book with confidence
+                  </strong>
+                </div>
+
+                <div className="trust-item">
                   <span>✓</span>
 
                   <div>
                     <strong>
-                      Simple booking
+                      Secure booking
                     </strong>
 
-                    <p>
-                      Request now and pay directly
-                      at the hotel.
-                    </p>
+                    <small>
+                      Your information is
+                      transmitted securely.
+                    </small>
                   </div>
-
                 </div>
 
+                <div className="trust-item">
+                  <span>✓</span>
+
+                  <div>
+                    <strong>
+                      Local support
+                    </strong>
+
+                    <small>
+                      Our Nepal-based team is
+                      here to help.
+                    </small>
+                  </div>
+                </div>
+
+                <div className="trust-item">
+                  <span>✓</span>
+
+                  <div>
+                    <strong>
+                      Pay at property
+                    </strong>
+
+                    <small>
+                      No online payment required
+                      for this booking.
+                    </small>
+                  </div>
+                </div>
               </div>
-
             </aside>
-
-          </main>
-        )}
+          </div>
+        </main>
 
         <footer className="booking-footer">
-          <span>
-            © Backpacker Gateways
-          </span>
+          <p>
+            © {new Date().getFullYear()}{" "}
+            Backpacker Gateways. All rights
+            reserved.
+          </p>
 
-          <span>
-            Explore · Stay · Trek · Connect
-          </span>
+          <div>
+            <span>
+              Nepal
+            </span>
+
+            <span>•</span>
+
+            <span>
+              Secure reservations
+            </span>
+          </div>
         </footer>
-
       </div>
-
-      <style>{`
-
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@500;600;700;800&display=swap');
-
-        * {
-          box-sizing: border-box;
-        }
-
-        .booking-page {
-          min-height: 100vh;
-          padding: 0 20px 40px;
-          background:
-            linear-gradient(
-              180deg,
-              #f8fafc 0%,
-              #f4f6f8 100%
-            );
-          color: #172033;
-          font-family:
-            Inter,
-            -apple-system,
-            BlinkMacSystemFont,
-            "Segoe UI",
-            sans-serif;
-        }
-
-        .booking-shell {
-          width: 100%;
-          max-width: 1180px;
-          margin: 0 auto;
-        }
-
-        /* HEADER */
-
-        .booking-header {
-          height: 82px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          margin-bottom: 38px;
-          border-bottom: 1px solid #e4e8ee;
-        }
-
-        .booking-back {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          padding: 8px 0;
-          border: 0;
-          background: transparent;
-          color: #475467;
-          font: inherit;
-          font-size: 13px;
-          font-weight: 700;
-          cursor: pointer;
-        }
-
-        .booking-back:hover {
-          color: #0b3d91;
-        }
-
-        .back-arrow {
-          font-size: 18px;
-          line-height: 1;
-        }
-
-        .booking-brand {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-        }
-
-        .booking-brand-mark {
-          width: 35px;
-          height: 35px;
-          display: grid;
-          place-items: center;
-          border-radius: 9px;
-          background: #0b3d91;
-          color: #fff;
-          font-size: 10px;
-          font-weight: 800;
-          letter-spacing: .5px;
-        }
-
-        .booking-brand div {
-          display: flex;
-          flex-direction: column;
-          gap: 2px;
-        }
-
-        .booking-brand strong {
-          color: #172033;
-          font-size: 13px;
-          font-weight: 800;
-        }
-
-        .booking-brand div span {
-          color: #98a2b3;
-          font-size: 9px;
-          letter-spacing: .4px;
-        }
-
-        /* FORM */
-
-        .booking-layout {
-          display: grid;
-          grid-template-columns:
-            minmax(0, 1fr)
-            370px;
-          gap: 28px;
-          align-items: start;
-        }
-
-        .booking-form-card,
-        .booking-summary,
-        .confirmation-card {
-          border: 1px solid #e1e6ed;
-          border-radius: 18px;
-          background: #fff;
-          box-shadow:
-            0 12px 35px
-            rgba(16, 24, 40, .055);
-        }
-
-        .booking-form-card {
-          padding: 38px;
-        }
-
-        .booking-eyebrow,
-        .summary-label {
-          color: #b7863b;
-          font-size: 10px;
-          font-weight: 800;
-          letter-spacing: 1.7px;
-        }
-
-        .booking-title {
-          margin: 9px 0 10px;
-          color: #172033;
-          font-family:
-            Manrope,
-            Inter,
-            sans-serif;
-          font-size: clamp(
-            34px,
-            4vw,
-            48px
-          );
-          line-height: 1.08;
-          letter-spacing: -1.8px;
-          font-weight: 800;
-        }
-
-        .booking-description {
-          max-width: 560px;
-          margin: 0 0 30px;
-          color: #667085;
-          font-size: 13px;
-          line-height: 1.7;
-        }
-
-        .form-section {
-          padding: 25px 0;
-          border-top: 1px solid #eaecf0;
-        }
-
-        .form-section-heading {
-          display: flex;
-          gap: 13px;
-          margin-bottom: 20px;
-        }
-
-        .form-step {
-          width: 32px;
-          height: 32px;
-          flex: 0 0 auto;
-          display: grid;
-          place-items: center;
-          border-radius: 9px;
-          background: #eef5ff;
-          color: #1668e3;
-          font-size: 10px;
-          font-weight: 800;
-        }
-
-        .form-section-heading h2 {
-          margin: 0 0 3px;
-          color: #1d2939;
-          font-family:
-            Manrope,
-            Inter,
-            sans-serif;
-          font-size: 16px;
-          font-weight: 700;
-        }
-
-        .form-section-heading p {
-          margin: 0;
-          color: #98a2b3;
-          font-size: 11px;
-        }
-
-        .form-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 18px;
-        }
-
-        .form-full {
-          grid-column: 1 / -1;
-        }
-
-        .form-group {
-          min-width: 0;
-          display: flex;
-          flex-direction: column;
-          gap: 7px;
-        }
-
-        .form-group label {
-          display: flex;
-          align-items: center;
-          gap: 7px;
-          color: #344054;
-          font-size: 11px;
-          font-weight: 700;
-        }
-
-        .form-group label em {
-          color: #98a2b3;
-          font-size: 9px;
-          font-style: normal;
-          font-weight: 500;
-        }
-
-        .form-group input,
-        .form-group select {
-          width: 100%;
-          min-height: 48px;
-          padding: 0 14px;
-          border: 1px solid #d8dee7;
-          border-radius: 10px;
-          outline: none;
-          background: #fff;
-          color: #1d2939;
-          font: inherit;
-          font-size: 13px;
-          font-weight: 500;
-          transition:
-            border-color .2s,
-            box-shadow .2s;
-        }
-
-        .form-group input::placeholder {
-          color: #98a2b3;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus {
-          border-color: #1668e3;
-          box-shadow:
-            0 0 0 3px
-            rgba(22, 104, 227, .10);
-        }
-
-        .form-group small {
-          color: #98a2b3;
-          font-size: 10px;
-          line-height: 1.45;
-        }
-
-        .phone-input {
-          min-height: 48px;
-          display: flex;
-          align-items: center;
-          overflow: hidden;
-          border: 1px solid #d8dee7;
-          border-radius: 10px;
-          background: #fff;
-          transition:
-            border-color .2s,
-            box-shadow .2s;
-        }
-
-        .phone-input:focus-within {
-          border-color: #1668e3;
-          box-shadow:
-            0 0 0 3px
-            rgba(22, 104, 227, .10);
-        }
-
-        .phone-input > span {
-          height: 48px;
-          display: flex;
-          align-items: center;
-          padding: 0 12px;
-          border-right: 1px solid #e4e7ec;
-          background: #f8fafc;
-          color: #344054;
-          font-size: 12px;
-          font-weight: 700;
-        }
-
-        .phone-input input {
-          min-height: 46px;
-          border: 0 !important;
-          box-shadow: none !important;
-          border-radius: 0;
-        }
-
-        .request-footer {
-          margin-top: 8px;
-          padding-top: 24px;
-          border-top: 1px solid #eaecf0;
-        }
-
-        .request-note {
-          display: flex;
-          gap: 10px;
-          margin-bottom: 17px;
-        }
-
-        .request-note > span {
-          width: 20px;
-          height: 20px;
-          flex: 0 0 auto;
-          display: grid;
-          place-items: center;
-          border-radius: 50%;
-          background: #ecfdf3;
-          color: #087443;
-          font-size: 10px;
-          font-weight: 800;
-        }
-
-        .request-note p {
-          margin: 0;
-          color: #667085;
-          font-size: 11px;
-          line-height: 1.5;
-        }
-
-        .request-note strong {
-          color: #344054;
-        }
-
-        .submit-booking {
-          width: 100%;
-          min-height: 52px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 10px;
-          border: 0;
-          border-radius: 10px;
-          background: #0b3d91;
-          color: #fff;
-          font: inherit;
-          font-size: 13px;
-          font-weight: 700;
-          cursor: pointer;
-          transition:
-            transform .2s,
-            background .2s;
-        }
-
-        .submit-booking:hover:not(:disabled) {
-          background: #092f70;
-          transform: translateY(-1px);
-        }
-
-        .submit-booking:disabled {
-          opacity: .65;
-          cursor: not-allowed;
-        }
-
-        .button-spinner {
-          width: 16px;
-          height: 16px;
-          border: 2px solid
-            rgba(255,255,255,.35);
-          border-top-color: #fff;
-          border-radius: 50%;
-          animation:
-            bookingSpin .7s linear infinite;
-        }
-
-        /* SUMMARY */
-
-        .booking-summary {
-          position: sticky;
-          top: 22px;
-          overflow: hidden;
-        }
-
-        .summary-image-wrap {
-          position: relative;
-        }
-
-        .summary-image {
-          width: 100%;
-          height: 225px;
-          display: block;
-          object-fit: cover;
-        }
-
-        .summary-available {
-          position: absolute;
-          left: 14px;
-          bottom: 14px;
-          padding: 7px 10px;
-          border-radius: 7px;
-          background:
-            rgba(255,255,255,.95);
-          color: #087443;
-          font-size: 10px;
-          font-weight: 700;
-          box-shadow:
-            0 3px 12px
-            rgba(0,0,0,.08);
-        }
-
-        .summary-content {
-          padding: 24px;
-        }
-
-        .summary-title {
-          margin: 7px 0 4px;
-          color: #172033;
-          font-family:
-            Manrope,
-            Inter,
-            sans-serif;
-          font-size: 21px;
-          line-height: 1.25;
-          font-weight: 800;
-        }
-
-        .summary-location {
-          margin: 0;
-          color: #667085;
-          font-size: 11px;
-        }
-
-        .summary-divider {
-          height: 1px;
-          margin: 20px 0;
-          background: #eaecf0;
-        }
-
-        .summary-price-row {
-          display: flex;
-          align-items: flex-end;
-          justify-content: space-between;
-        }
-
-        .summary-price-row > div {
-          display: flex;
-          flex-direction: column;
-          gap: 3px;
-        }
-
-        .summary-price-row span {
-          color: #98a2b3;
-          font-size: 10px;
-        }
-
-        .summary-price-row strong {
-          color: #0b3d91;
-          font-size: 23px;
-          font-weight: 800;
-        }
-
-        .summary-price-row small {
-          padding-bottom: 3px;
-          color: #667085;
-          font-size: 10px;
-        }
-
-        .summary-facts {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 10px;
-          margin-top: 20px;
-        }
-
-        .summary-facts > div {
-          padding: 12px;
-          border: 1px solid #eaecf0;
-          border-radius: 9px;
-          background: #fafbfc;
-        }
-
-        .summary-facts span {
-          display: block;
-          margin-bottom: 4px;
-          color: #98a2b3;
-          font-size: 8px;
-          font-weight: 800;
-          letter-spacing: 1px;
-        }
-
-        .summary-facts strong {
-          display: block;
-          color: #344054;
-          font-size: 11px;
-          line-height: 1.4;
-        }
-
-        .summary-policy {
-          display: flex;
-          gap: 10px;
-          margin-top: 18px;
-          padding: 14px;
-          border-radius: 10px;
-          background: #f7faf8;
-        }
-
-        .summary-policy > span {
-          color: #087443;
-          font-weight: 800;
-        }
-
-        .summary-policy strong {
-          color: #344054;
-          font-size: 11px;
-        }
-
-        .summary-policy p {
-          margin: 3px 0 0;
-          color: #667085;
-          font-size: 10px;
-          line-height: 1.5;
-        }
-
-        /* ERROR */
-
-        .booking-message {
-          display: flex;
-          gap: 9px;
-          margin-bottom: 20px;
-          padding: 13px 14px;
-          border: 1px solid #fecdca;
-          border-radius: 10px;
-          background: #fef3f2;
-          color: #b42318;
-        }
-
-        .booking-message span {
-          font-weight: 800;
-        }
-
-        .booking-message p {
-          margin: 0;
-          font-size: 12px;
-        }
-
-        /* =========================
-           CONFIRMATION
-        ========================== */
-
-        .success-page {
-          display: flex;
-          justify-content: center;
-        }
-
-        .confirmation-card {
-          width: 100%;
-          max-width: 820px;
-          padding: 40px;
-        }
-
-        .confirmation-status {
-          display: flex;
-          align-items: center;
-          gap: 13px;
-          margin-bottom: 25px;
-        }
-
-        .status-check {
-          width: 46px;
-          height: 46px;
-          display: grid;
-          place-items: center;
-          flex: 0 0 auto;
-          border: 5px solid #f0faf4;
-          border-radius: 50%;
-          background: #087443;
-          color: #fff;
-          font-size: 18px;
-          font-weight: 800;
-        }
-
-        .status-label {
-          display: block;
-          margin-bottom: 3px;
-          color: #087443;
-          font-size: 10px;
-          font-weight: 800;
-          letter-spacing: 1.6px;
-        }
-
-        .confirmation-status p {
-          margin: 0;
-          color: #667085;
-          font-size: 11px;
-        }
-
-        .confirmation-heading {
-          padding-bottom: 26px;
-        }
-
-        .confirmation-heading h1 {
-          margin: 0 0 10px;
-          color: #172033;
-          font-family:
-            Manrope,
-            Inter,
-            sans-serif;
-          font-size: clamp(
-            32px,
-            4vw,
-            43px
-          );
-          line-height: 1.12;
-          letter-spacing: -1.5px;
-          font-weight: 800;
-        }
-
-        .confirmation-heading p {
-          max-width: 650px;
-          margin: 0;
-          color: #667085;
-          font-size: 13px;
-          line-height: 1.7;
-        }
-
-        /* REFERENCE */
-
-        .reference-bar {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 15px;
-          margin-bottom: 16px;
-          padding: 13px 15px;
-          border: 1px solid #e4e7ec;
-          border-radius: 10px;
-          background: #f8fafc;
-        }
-
-        .reference-bar > div {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-        }
-
-        .reference-bar span:first-child {
-          color: #98a2b3;
-          font-size: 8px;
-          font-weight: 800;
-          letter-spacing: 1px;
-        }
-
-        .reference-bar strong {
-          color: #344054;
-          font-size: 11px;
-          font-weight: 800;
-          word-break: break-all;
-        }
-
-        .reference-status {
-          padding: 5px 8px;
-          border-radius: 6px;
-          background: #fff7e8;
-          color: #9a671f;
-          font-size: 8px !important;
-          font-weight: 800;
-          letter-spacing: .8px;
-        }
-
-        /* PROPERTY */
-
-        .confirmation-property {
-          display: grid;
-          grid-template-columns:
-            92px
-            minmax(0, 1fr)
-            auto;
-          gap: 15px;
-          align-items: center;
-          padding: 13px;
-          border: 1px solid #e2e6ec;
-          border-radius: 13px;
-          background: #fafbfc;
-        }
-
-        .confirmation-property img {
-          width: 92px;
-          height: 76px;
-          display: block;
-          object-fit: cover;
-          border-radius: 9px;
-        }
-
-        .property-copy {
-          min-width: 0;
-        }
-
-        .property-copy > span {
-          color: #98a2b3;
-          font-size: 8px;
-          font-weight: 800;
-          letter-spacing: 1.1px;
-        }
-
-        .property-copy h2 {
-          overflow: hidden;
-          margin: 4px 0 4px;
-          color: #172033;
-          font-family:
-            Manrope,
-            Inter,
-            sans-serif;
-          font-size: 17px;
-          font-weight: 800;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-
-        .property-copy p {
-          margin: 0;
-          color: #667085;
-          font-size: 10px;
-        }
-
-        .location-dot {
-          margin-right: 4px;
-          color: #b7863b;
-          font-size: 8px;
-        }
-
-        .property-price {
-          min-width: 105px;
-          padding-left: 15px;
-          border-left: 1px solid #e4e7ec;
-          text-align: right;
-        }
-
-        .property-price span {
-          display: block;
-          color: #98a2b3;
-          font-size: 8px;
-          font-weight: 800;
-          letter-spacing: 1px;
-        }
-
-        .property-price strong {
-          display: block;
-          margin-top: 3px;
-          color: #0b3d91;
-          font-size: 15px;
-          font-weight: 800;
-        }
-
-        .property-price small {
-          color: #98a2b3;
-          font-size: 9px;
-        }
-
-        /* SUMMARY HEADINGS */
-
-        .stay-summary,
-        .guest-summary {
-          margin-top: 25px;
-          padding-top: 23px;
-          border-top: 1px solid #eaecf0;
-        }
-
-        .summary-heading {
-          display: flex;
-          gap: 11px;
-          align-items: flex-start;
-          margin-bottom: 17px;
-        }
-
-        .summary-number {
-          width: 28px;
-          height: 28px;
-          display: grid;
-          place-items: center;
-          flex: 0 0 auto;
-          border-radius: 8px;
-          background: #eef5ff;
-          color: #1668e3;
-          font-size: 9px;
-          font-weight: 800;
-        }
-
-        .summary-heading h3 {
-          margin: 0 0 2px;
-          color: #1d2939;
-          font-family:
-            Manrope,
-            Inter,
-            sans-serif;
-          font-size: 14px;
-          font-weight: 800;
-        }
-
-        .summary-heading p {
-          margin: 0;
-          color: #98a2b3;
-          font-size: 10px;
-        }
-
-        /* STAY GRID */
-
-        .stay-grid {
-          display: grid;
-          grid-template-columns:
-            repeat(4, 1fr);
-          border-top: 1px solid #eaecf0;
-          border-left: 1px solid #eaecf0;
-        }
-
-        .stay-item {
-          min-width: 0;
-          padding: 14px 13px;
-          border-right: 1px solid #eaecf0;
-          border-bottom: 1px solid #eaecf0;
-        }
-
-        .stay-item span,
-        .guest-grid span,
-        .confirmation-total > div > span,
-        .total-note > span {
-          display: block;
-          margin-bottom: 5px;
-          color: #98a2b3;
-          font-size: 8px;
-          font-weight: 800;
-          letter-spacing: 1px;
-        }
-
-        .stay-item strong,
-        .guest-grid strong {
-          display: block;
-          overflow: hidden;
-          color: #344054;
-          font-size: 11px;
-          font-weight: 700;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-
-        /* GUEST */
-
-        .guest-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 10px;
-        }
-
-        .guest-grid > div {
-          padding: 14px;
-          border: 1px solid #eaecf0;
-          border-radius: 9px;
-          background: #fafbfc;
-        }
-
-        /* TOTAL */
-
-        .confirmation-total {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 20px;
-          margin-top: 20px;
-          padding: 18px;
-          border-radius: 11px;
-          background: #f4f7fc;
-        }
-
-        .confirmation-total > div:first-child strong {
-          color: #0b3d91;
-          font-size: 26px;
-          font-weight: 800;
-        }
-
-        .total-note {
-          text-align: right;
-        }
-
-        .total-note p {
-          margin: 0;
-          color: #667085;
-          font-size: 10px;
-        }
-
-        /* PAYMENT */
-
-        .payment-card {
-          display: flex;
-          gap: 11px;
-          margin-top: 12px;
-          padding: 15px;
-          border: 1px solid #d8eee0;
-          border-radius: 10px;
-          background: #f7faf8;
-        }
-
-        .payment-check {
-          width: 24px;
-          height: 24px;
-          display: grid;
-          place-items: center;
-          flex: 0 0 auto;
-          border-radius: 50%;
-          background: #087443;
-          color: #fff;
-          font-size: 10px;
-          font-weight: 800;
-        }
-
-        .payment-card strong {
-          color: #344054;
-          font-size: 11px;
-        }
-
-        .payment-card p {
-          max-width: 620px;
-          margin: 3px 0 0;
-          color: #667085;
-          font-size: 10px;
-          line-height: 1.55;
-        }
-
-        /* NEXT STEP */
-
-        .next-step-card {
-          display: flex;
-          gap: 12px;
-          margin-top: 14px;
-          padding: 15px;
-          border: 1px solid #e4e7ec;
-          border-radius: 10px;
-          background: #fff;
-        }
-
-        .next-step-icon {
-          width: 29px;
-          height: 29px;
-          display: grid;
-          place-items: center;
-          flex: 0 0 auto;
-          border-radius: 8px;
-          background: #eef5ff;
-          color: #1668e3;
-          font-size: 14px;
-          font-weight: 800;
-        }
-
-        .next-step-card span {
-          display: block;
-          margin-bottom: 2px;
-          color: #98a2b3;
-          font-size: 8px;
-          font-weight: 800;
-          letter-spacing: 1px;
-        }
-
-        .next-step-card strong {
-          color: #344054;
-          font-size: 11px;
-        }
-
-        .next-step-card p {
-          margin: 3px 0 0;
-          color: #667085;
-          font-size: 10px;
-          line-height: 1.45;
-        }
-
-        /* ACTIONS */
-
-        .confirmation-actions {
-          display: grid;
-          grid-template-columns: 1.4fr 1fr;
-          gap: 10px;
-          margin-top: 20px;
-        }
-
-        .whatsapp-button,
-        .secondary-button {
-          min-height: 49px;
-          border-radius: 9px;
-          font: inherit;
-          font-size: 11px;
-          font-weight: 700;
-          cursor: pointer;
-          transition:
-            transform .2s,
-            background .2s,
-            border-color .2s;
-        }
-
-        .whatsapp-button {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 9px;
-          border: 0;
-          background: #087443;
-          color: #fff;
-        }
-
-        .whatsapp-button:hover {
-          background: #075f37;
-          transform: translateY(-1px);
-        }
-
-        .whatsapp-symbol {
-          font-size: 13px;
-        }
-
-        .action-arrow {
-          font-size: 15px;
-        }
-
-        .secondary-button {
-          border: 1px solid #d8dee7;
-          background: #fff;
-          color: #344054;
-        }
-
-        .secondary-button:hover {
-          border-color: #1668e3;
-          color: #1668e3;
-        }
-
-        .confirmation-footer {
-          display: flex;
-          justify-content: space-between;
-          gap: 10px;
-          margin-top: 20px;
-          padding-top: 17px;
-          border-top: 1px solid #eaecf0;
-          color: #98a2b3;
-          font-size: 9px;
-        }
-
-        .confirmation-footer span:first-child {
-          color: #087443;
-        }
-
-        /* FOOTER */
-
-        .booking-footer {
-          display: flex;
-          justify-content: space-between;
-          gap: 15px;
-          padding: 27px 4px 0;
-          color: #98a2b3;
-          font-size: 9px;
-        }
-
-        /* LOADING */
-
-        .booking-loading {
-          min-height: 70vh;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 14px;
-          padding: 30px;
-          background: #f7f8fa;
-          color: #344054;
-          font-family: Inter, sans-serif;
-        }
-
-        .booking-loading strong {
-          display: block;
-          margin-bottom: 3px;
-          font-size: 13px;
-        }
-
-        .booking-loading p {
-          margin: 0;
-          color: #98a2b3;
-          font-size: 10px;
-        }
-
-        .booking-loader-ring {
-          width: 34px;
-          height: 34px;
-          border: 3px solid #e4e7ec;
-          border-top-color: #0b3d91;
-          border-radius: 50%;
-          animation:
-            bookingSpin .7s linear infinite;
-        }
-
-        /* ERROR */
-
-        .booking-error {
-          min-height: 70vh;
-          display: grid;
-          place-items: center;
-          padding: 30px;
-          background: #f7f8fa;
-          font-family: Inter, sans-serif;
-        }
-
-        .booking-error-card {
-          width: min(100%, 430px);
-          padding: 35px;
-          text-align: center;
-          border: 1px solid #e4e7ec;
-          border-radius: 16px;
-          background: #fff;
-          box-shadow:
-            0 8px 28px
-            rgba(16, 24, 40, .06);
-        }
-
-        .booking-error-icon {
-          width: 42px;
-          height: 42px;
-          display: grid;
-          place-items: center;
-          margin: 0 auto 12px;
-          border-radius: 50%;
-          background: #fef3f2;
-          color: #b42318;
-          font-weight: 800;
-        }
-
-        .error-eyebrow {
-          color: #98a2b3;
-          font-size: 9px;
-          font-weight: 800;
-          letter-spacing: 1.4px;
-        }
-
-        .booking-error-card h2 {
-          margin: 7px 0;
-          color: #172033;
-          font-family: Manrope, Inter, sans-serif;
-          font-size: 22px;
-        }
-
-        .booking-error-card p {
-          margin: 0;
-          color: #667085;
-          font-size: 12px;
-        }
-
-        .booking-error-card button {
-          min-height: 44px;
-          margin-top: 22px;
-          padding: 0 20px;
-          border: 0;
-          border-radius: 9px;
-          background: #0b3d91;
-          color: #fff;
-          font: inherit;
-          font-size: 12px;
-          font-weight: 700;
-          cursor: pointer;
-        }
-
-        @keyframes bookingSpin {
-          to {
-            transform: rotate(360deg);
-          }
-        }
-
-        /* TABLET */
-
-        @media (max-width: 900px) {
-
-          .booking-layout {
-            grid-template-columns: 1fr;
-          }
-
-          .booking-summary {
-            position: static;
-            order: -1;
-          }
-
-          .summary-image {
-            height: 240px;
-          }
-
-          .confirmation-card {
-            max-width: 100%;
-          }
-
-        }
-
-        /* MOBILE */
-
-        @media (max-width: 600px) {
-
-          .booking-page {
-            padding:
-              0
-              10px
-              28px;
-          }
-
-          .booking-header {
-            height: 66px;
-            margin-bottom: 20px;
-          }
-
-          .booking-brand strong {
-            font-size: 11px;
-          }
-
-          .booking-brand div span {
-            display: none;
-          }
-
-          .booking-brand-mark {
-            width: 30px;
-            height: 30px;
-          }
-
-          .booking-form-card,
-          .confirmation-card {
-            padding: 23px 17px;
-            border-radius: 14px;
-          }
-
-          .booking-title {
-            font-size: 31px;
-            letter-spacing: -1.2px;
-          }
-
-          .form-grid {
-            grid-template-columns: 1fr;
-            gap: 16px;
-          }
-
-          .form-full {
-            grid-column: auto;
-          }
-
-          .summary-image {
-            height: 215px;
-          }
-
-          .summary-content {
-            padding: 21px;
-          }
-
-          .confirmation-heading h1 {
-            font-size: 31px;
-          }
-
-          .confirmation-status {
-            align-items: flex-start;
-          }
-
-          .confirmation-property {
-            grid-template-columns:
-              70px
-              minmax(0, 1fr);
-            align-items: center;
-          }
-
-          .confirmation-property img {
-            width: 70px;
-            height: 62px;
-          }
-
-          .property-price {
-            grid-column: 1 / -1;
-            padding: 11px 0 0;
-            border-top: 1px solid #e4e7ec;
-            border-left: 0;
-            text-align: left;
-          }
-
-          .property-price strong {
-            display: inline;
-            margin-right: 4px;
-          }
-
-          .stay-grid {
-            grid-template-columns: 1fr 1fr;
-          }
-
-          .confirmation-total {
-            align-items: flex-start;
-            flex-direction: column;
-          }
-
-          .total-note {
-            text-align: left;
-          }
-
-          .confirmation-actions {
-            grid-template-columns: 1fr;
-          }
-
-          .reference-bar {
-            align-items: flex-start;
-            flex-direction: column;
-          }
-
-          .reference-bar > div {
-            align-items: flex-start;
-            flex-direction: column;
-            gap: 4px;
-          }
-
-          .confirmation-footer {
-            flex-direction: column;
-          }
-
-          .booking-footer {
-            flex-direction: column;
-            gap: 6px;
-          }
-
-        }
-
-        /* SMALL MOBILE */
-
-        @media (max-width: 360px) {
-
-          .booking-page {
-            padding-left: 7px;
-            padding-right: 7px;
-          }
-
-          .booking-form-card,
-          .confirmation-card {
-            padding: 19px 13px;
-          }
-
-          .booking-back {
-            font-size: 11px;
-          }
-
-          .booking-brand {
-            gap: 7px;
-          }
-
-          .booking-brand strong {
-            font-size: 10px;
-          }
-
-          .booking-brand-mark {
-            width: 27px;
-            height: 27px;
-            font-size: 9px;
-          }
-
-          .booking-title {
-            font-size: 28px;
-          }
-
-          .confirmation-heading h1 {
-            font-size: 28px;
-          }
-
-          .confirmation-heading p {
-            font-size: 11px;
-          }
-
-          .confirmation-property {
-            grid-template-columns:
-              60px
-              minmax(0, 1fr);
-            gap: 10px;
-          }
-
-          .confirmation-property img {
-            width: 60px;
-            height: 55px;
-          }
-
-          .property-copy h2 {
-            font-size: 13px;
-          }
-
-          .stay-item {
-            padding:
-              12px 9px;
-          }
-
-          .stay-item strong,
-          .guest-grid strong {
-            font-size: 10px;
-          }
-
-          .confirmation-total
-            > div:first-child
-            strong {
-            font-size: 22px;
-          }
-
-          .payment-card,
-          .next-step-card {
-            padding: 12px;
-          }
-
-        }
-
-      `}</style>
-    </div>
+    </>
   );
 };
+
+// ==========================================
+// STYLES
+// ==========================================
+
+const styles = `
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap');
+
+  * {
+    box-sizing: border-box;
+  }
+
+  .booking-page {
+    min-height: 100vh;
+    background: #f5f7fa;
+    color: #172b4d;
+    font-family:
+      Inter,
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      sans-serif;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  /* ========================================
+     HEADER
+  ======================================== */
+
+  .booking-header {
+    background: #ffffff;
+    border-bottom: 1px solid #e6eaf0;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+
+  .booking-header-inner {
+    width: min(1240px, calc(100% - 40px));
+    margin: 0 auto;
+    min-height: 76px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .brand-button {
+    border: 0;
+    background: transparent;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #102a43;
+    text-align: left;
+  }
+
+  .brand-mark {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    background: #102a43;
+    color: #ffffff;
+    display: grid;
+    place-items: center;
+    font-family: Manrope, sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+
+  .brand-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .brand-copy strong {
+    font-family: Manrope, sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: -0.25px;
+  }
+
+  .brand-copy small {
+    color: #728197;
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  .secure-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #637083;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .lock-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #e8f5ef;
+    color: #23855f;
+    display: grid;
+    place-items: center;
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  /* ========================================
+     CONTAINER
+  ======================================== */
+
+  .booking-container {
+    width: min(1240px, calc(100% - 40px));
+    margin: 0 auto;
+    padding: 34px 0 70px;
+  }
+
+  .booking-intro {
+    margin-bottom: 28px;
+  }
+
+  .back-link {
+    border: 0;
+    background: transparent;
+    padding: 0;
+    color: #52657d;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 24px;
+  }
+
+  .back-link:hover {
+    color: #2167d5;
+  }
+
+  .back-link span {
+    font-size: 18px;
+    line-height: 1;
+  }
+
+  .eyebrow {
+    color: #b98a48;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+  }
+
+  .intro-content h1 {
+    margin: 7px 0 7px;
+    color: #102a43;
+    font-family: Manrope, sans-serif;
+    font-size: clamp(28px, 4vw, 38px);
+    line-height: 1.15;
+    letter-spacing: -1.2px;
+    font-weight: 800;
+  }
+
+  .intro-content p {
+    margin: 0;
+    color: #718096;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* ========================================
+     GRID
+  ======================================== */
+
+  .booking-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 390px;
+    gap: 26px;
+    align-items: start;
+  }
+
+  /* ========================================
+     FORM CARD
+  ======================================== */
+
+  .booking-form-card {
+    background: #ffffff;
+    border: 1px solid #e5e9ef;
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(16, 42, 67, 0.05);
+    overflow: hidden;
+  }
+
+  .form-section {
+    padding: 30px;
+    border-bottom: 1px solid #edf0f4;
+  }
+
+  .section-heading {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    margin-bottom: 25px;
+  }
+
+  .section-number {
+    flex: 0 0 auto;
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    background: #edf4ff;
+    color: #2167d5;
+    display: grid;
+    place-items: center;
+    font-size: 11px;
+    font-weight: 800;
+  }
+
+  .section-heading h2 {
+    margin: 0 0 4px;
+    color: #172b4d;
+    font-family: Manrope, sans-serif;
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+  }
+
+  .section-heading p {
+    margin: 0;
+    color: #8491a3;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .form-grid {
+    display: grid;
+    gap: 18px;
+    margin-bottom: 18px;
+  }
+
+  .two-columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .field {
+    min-width: 0;
+  }
+
+  .field label {
+    display: block;
+    margin-bottom: 7px;
+    color: #334e68;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .field label span {
+    color: #c54b4b;
+  }
+
+  .field input,
+  .field select,
+  .field textarea {
+    width: 100%;
+    border: 1px solid #d9e0e8;
+    border-radius: 9px;
+    background: #ffffff;
+    color: #172b4d;
+    outline: none;
+    transition:
+      border-color 0.18s ease,
+      box-shadow 0.18s ease;
+  }
+
+  .field input,
+  .field select {
+    min-height: 46px;
+    padding: 0 13px;
+    font-size: 13px;
+  }
+
+  .field textarea {
+    min-height: 88px;
+    resize: vertical;
+    padding: 12px 13px;
+    line-height: 1.5;
+    font-size: 13px;
+  }
+
+  .field input::placeholder,
+  .field textarea::placeholder {
+    color: #a4afbd;
+  }
+
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus {
+    border-color: #6e9ee8;
+    box-shadow:
+      0 0 0 3px rgba(33, 103, 213, 0.09);
+  }
+
+  .phone-input {
+    display: grid;
+    grid-template-columns: 86px minmax(0, 1fr);
+    gap: 7px;
+  }
+
+  .phone-input select {
+    padding: 0 8px;
+  }
+
+  /* ========================================
+     PAYMENT
+  ======================================== */
+
+  .payment-section {
+    border-bottom: 0;
+  }
+
+  .payment-option {
+    min-height: 74px;
+    border: 1px solid #dbe3ec;
+    border-radius: 11px;
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 14px 15px;
+  }
+
+  .payment-option.active {
+    border-color: #8bb1ed;
+    background: #f7faff;
+  }
+
+  .payment-radio {
+    width: 19px;
+    height: 19px;
+    border: 2px solid #2167d5;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+  }
+
+  .payment-radio span {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #2167d5;
+  }
+
+  .payment-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .payment-copy strong {
+    color: #243b53;
+    font-size: 13px;
+  }
+
+  .payment-copy span {
+    color: #8190a3;
+    font-size: 11px;
+    line-height: 1.45;
+  }
+
+  .payment-badge {
+    margin-left: auto;
+    color: #24835e;
+    background: #eaf7f1;
+    border-radius: 6px;
+    padding: 5px 8px;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.7px;
+  }
+
+  /* ========================================
+     ERROR
+  ======================================== */
+
+  .form-error {
+    margin: 0 30px 22px;
+    padding: 13px 15px;
+    border: 1px solid #f0caca;
+    background: #fff7f7;
+    border-radius: 9px;
+    display: flex;
+    gap: 11px;
+    color: #8f3434;
+  }
+
+  .form-error > span {
+    width: 22px;
+    height: 22px;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    background: #f4d8d8;
+    display: grid;
+    place-items: center;
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  .form-error strong {
+    font-size: 12px;
+  }
+
+  .form-error p {
+    margin: 3px 0 0;
+    font-size: 11px;
+    line-height: 1.5;
+  }
+
+  /* ========================================
+     SUBMIT
+  ======================================== */
+
+  .submit-area {
+    padding: 0 30px 30px;
+  }
+
+  .submit-button {
+    width: 100%;
+    min-height: 52px;
+    border: 0;
+    border-radius: 9px;
+    background: #2167d5;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    font-size: 13px;
+    font-weight: 800;
+    transition:
+      transform 0.18s ease,
+      background 0.18s ease,
+      box-shadow 0.18s ease;
+  }
+
+  .submit-button:hover:not(:disabled) {
+    background: #1758bd;
+    box-shadow: 0 7px 18px rgba(33, 103, 213, 0.2);
+    transform: translateY(-1px);
+  }
+
+  .submit-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
+  }
+
+  .submit-button > span:last-child {
+    font-size: 18px;
+  }
+
+  .button-spinner,
+  .loading-spinner {
+    border: 3px solid rgba(255,255,255,0.35);
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  .button-spinner {
+    width: 16px;
+    height: 16px;
+  }
+
+  .submit-note {
+    margin: 10px 0 0;
+    color: #8b98a8;
+    text-align: center;
+    font-size: 10px;
+    line-height: 1.5;
+  }
+
+  /* ========================================
+     SIDEBAR
+  ======================================== */
+
+  .booking-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    position: sticky;
+    top: 98px;
+  }
+
+  .property-card,
+  .price-summary,
+  .trust-card {
+    background: #ffffff;
+    border: 1px solid #e5e9ef;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 7px 25px rgba(16, 42, 67, 0.045);
+  }
+
+  .property-image-wrap {
+    height: 205px;
+    position: relative;
+    overflow: hidden;
+    background: #e8edf3;
+  }
+
+  .property-image-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .property-tag {
+    position: absolute;
+    left: 14px;
+    bottom: 14px;
+    padding: 6px 9px;
+    border-radius: 6px;
+    background: rgba(16, 42, 67, 0.88);
+    color: #ffffff;
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: 1px;
+  }
+
+  .property-card-body {
+    padding: 20px;
+  }
+
+  .property-label {
+    color: #b98a48;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+  }
+
+  .property-card-body h2 {
+    margin: 7px 0 7px;
+    color: #172b4d;
+    font-family: Manrope, sans-serif;
+    font-size: 18px;
+    line-height: 1.25;
+    letter-spacing: -0.4px;
+  }
+
+  .property-location {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #758398;
+    font-size: 11px;
+  }
+
+  .property-location span {
+    color: #b98a48;
+    font-size: 8px;
+  }
+
+  .property-divider {
+    height: 1px;
+    background: #edf0f4;
+    margin: 17px 0;
+  }
+
+  .price-line {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .price-line > div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .price-line span {
+    color: #8290a2;
+    font-size: 10px;
+  }
+
+  .price-line strong {
+    color: #102a43;
+    font-family: Manrope, sans-serif;
+    font-size: 19px;
+    font-weight: 800;
+  }
+
+  .price-line small {
+    color: #8d99a8;
+    font-size: 9px;
+    padding-bottom: 2px;
+  }
+
+  /* ========================================
+     PRICE SUMMARY
+  ======================================== */
+
+  .price-summary {
+    padding: 20px;
+  }
+
+  .summary-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #edf0f4;
+  }
+
+  .summary-heading h3 {
+    margin: 0;
+    color: #243b53;
+    font-family: Manrope, sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+  }
+
+  .summary-heading span {
+    color: #8794a5;
+    font-size: 10px;
+  }
+
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    padding: 13px 0 0;
+    color: #748195;
+    font-size: 11px;
+  }
+
+  .summary-row strong {
+    color: #42556e;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  .summary-total {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #edf0f4;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .summary-total span {
+    color: #344e68;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .summary-total strong {
+    color: #102a43;
+    font-family: Manrope, sans-serif;
+    font-size: 21px;
+    font-weight: 800;
+  }
+
+  .price-note {
+    margin: 11px 0 0;
+    color: #929dac;
+    font-size: 9px;
+    line-height: 1.5;
+  }
+
+  /* ========================================
+     TRUST
+  ======================================== */
+
+  .trust-card {
+    padding: 20px;
+  }
+
+  .trust-heading {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 17px;
+    color: #243b53;
+    font-size: 12px;
+  }
+
+  .shield {
+    width: 27px;
+    height: 27px;
+    border-radius: 8px;
+    background: #e9f6f0;
+    color: #24835e;
+    display: grid;
+    place-items: center;
+    font-size: 11px;
+    font-weight: 800;
+  }
+
+  .trust-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 11px 0;
+    border-top: 1px solid #f0f2f5;
+  }
+
+  .trust-item > span {
+    color: #268566;
+    font-size: 11px;
+    font-weight: 800;
+    padding-top: 1px;
+  }
+
+  .trust-item div {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .trust-item strong {
+    color: #42556e;
+    font-size: 10px;
+  }
+
+  .trust-item small {
+    color: #8a97a7;
+    font-size: 9px;
+    line-height: 1.45;
+  }
+
+  /* ========================================
+     FOOTER
+  ======================================== */
+
+  .booking-footer {
+    min-height: 65px;
+    border-top: 1px solid #e2e7ed;
+    background: #ffffff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    padding: 0 max(20px, calc((100% - 1240px) / 2));
+    color: #8a97a7;
+    font-size: 10px;
+  }
+
+  .booking-footer p {
+    margin: 0;
+  }
+
+  .booking-footer div {
+    display: flex;
+    gap: 8px;
+  }
+
+  /* ========================================
+     LOADING / ERROR
+  ======================================== */
+
+  .booking-loading,
+  .booking-error-page {
+    min-height: calc(100vh - 141px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    text-align: center;
+  }
+
+  .loading-spinner {
+    width: 38px;
+    height: 38px;
+    border-color: #dce7f8;
+    border-top-color: #2167d5;
+    margin-bottom: 20px;
+  }
+
+  .booking-loading h2,
+  .booking-error-page h1 {
+    margin: 0 0 8px;
+    color: #102a43;
+    font-family: Manrope, sans-serif;
+    font-size: 23px;
+  }
+
+  .booking-loading p,
+  .booking-error-page p {
+    max-width: 450px;
+    margin: 0;
+    color: #7d8a9b;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .error-icon {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: #fff0f0;
+    color: #b44343;
+    display: grid;
+    place-items: center;
+    font-size: 23px;
+    font-weight: 800;
+    margin-bottom: 20px;
+  }
+
+  .error-actions {
+    margin-top: 22px;
+    display: flex;
+    gap: 10px;
+  }
+
+  .primary-button,
+  .secondary-button {
+    min-height: 44px;
+    padding: 0 17px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .primary-button {
+    border: 0;
+    background: #2167d5;
+    color: #ffffff;
+  }
+
+  .secondary-button {
+    border: 1px solid #d8e0e9;
+    background: #ffffff;
+    color: #344e68;
+  }
+
+  /* ========================================
+     CONFIRMATION
+  ======================================== */
+
+  .confirmation-page {
+    width: min(920px, calc(100% - 40px));
+    margin: 0 auto;
+    padding: 55px 0 70px;
+  }
+
+  .confirmation-card {
+    background: #ffffff;
+    border: 1px solid #e2e8ef;
+    border-radius: 18px;
+    padding: 42px;
+    box-shadow: 0 12px 40px rgba(16, 42, 67, 0.06);
+  }
+
+  .success-icon {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: #e8f6ef;
+    color: #268566;
+    display: grid;
+    place-items: center;
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 20px;
+  }
+
+  .confirmation-heading h1 {
+    margin: 7px 0 9px;
+    color: #102a43;
+    font-family: Manrope, sans-serif;
+    font-size: 30px;
+    letter-spacing: -0.8px;
+  }
+
+  .confirmation-heading p {
+    max-width: 650px;
+    margin: 0;
+    color: #758398;
+    font-size: 13px;
+    line-height: 1.7;
+  }
+
+  .booking-reference {
+    margin-top: 25px;
+    padding: 14px 16px;
+    background: #f5f8fc;
+    border: 1px solid #e2e8f0;
+    border-radius: 9px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .booking-reference span {
+    color: #8090a3;
+    font-size: 10px;
+    font-weight: 600;
+  }
+
+  .booking-reference strong {
+    color: #2167d5;
+    font-size: 12px;
+    font-family: monospace;
+  }
+
+  .confirmation-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 280px;
+    gap: 25px;
+    margin-top: 28px;
+    padding-top: 28px;
+    border-top: 1px solid #edf0f4;
+  }
+
+  .confirmation-property {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+  }
+
+  .confirmation-property img {
+    width: 125px;
+    height: 100px;
+    border-radius: 9px;
+    object-fit: cover;
+    flex: 0 0 auto;
+  }
+
+  .confirmation-property h2 {
+    margin: 6px 0 5px;
+    color: #243b53;
+    font-family: Manrope, sans-serif;
+    font-size: 17px;
+  }
+
+  .confirmation-property p {
+    margin: 0;
+    color: #8290a2;
+    font-size: 11px;
+  }
+
+  .confirmation-details {
+    border-left: 1px solid #edf0f4;
+    padding-left: 25px;
+  }
+
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    padding: 8px 0;
+  }
+
+  .detail-row span {
+    color: #8390a0;
+    font-size: 10px;
+  }
+
+  .detail-row strong {
+    color: #344e68;
+    font-size: 10px;
+    text-align: right;
+  }
+
+  .detail-row.total-row {
+    margin-top: 6px;
+    padding-top: 13px;
+    border-top: 1px solid #edf0f4;
+  }
+
+  .detail-row.total-row span {
+    color: #344e68;
+    font-weight: 700;
+  }
+
+  .detail-row.total-row strong {
+    color: #102a43;
+    font-family: Manrope, sans-serif;
+    font-size: 17px;
+  }
+
+  .confirmation-contact {
+    margin-top: 28px;
+    padding: 18px;
+    border-radius: 10px;
+    background: #f8fafc;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .confirmation-contact div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .confirmation-contact span {
+    color: #8794a5;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+
+  .confirmation-contact strong {
+    color: #42556e;
+    font-size: 11px;
+    word-break: break-word;
+  }
+
+  .confirmation-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 28px;
+  }
+
+  .whatsapp-button {
+    min-height: 48px;
+    padding: 0 18px;
+    border: 0;
+    border-radius: 8px;
+    background: #24835e;
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  .whatsapp-icon {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.85);
+    display: grid;
+    place-items: center;
+    font-size: 8px;
+  }
+
+  /* ========================================
+     ANIMATION
+  ======================================== */
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* ========================================
+     TABLET
+  ======================================== */
+
+  @media (max-width: 1050px) {
+    .booking-grid {
+      grid-template-columns: minmax(0, 1fr) 330px;
+      gap: 18px;
+    }
+
+    .booking-sidebar {
+      top: 92px;
+    }
+
+    .property-image-wrap {
+      height: 180px;
+    }
+  }
+
+  /* ========================================
+     SMALL TABLET
+  ======================================== */
+
+  @media (max-width: 850px) {
+    .booking-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .booking-sidebar {
+      position: static;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: start;
+    }
+
+    .property-card {
+      grid-column: 1 / -1;
+    }
+
+    .trust-card {
+      grid-column: 1 / -1;
+    }
+
+    .property-image-wrap {
+      height: 240px;
+    }
+
+    .confirmation-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .confirmation-details {
+      border-left: 0;
+      border-top: 1px solid #edf0f4;
+      padding: 20px 0 0;
+    }
+  }
+
+  /* ========================================
+     MOBILE
+  ======================================== */
+
+  @media (max-width: 620px) {
+    .booking-header-inner {
+      width: calc(100% - 28px);
+      min-height: 68px;
+    }
+
+    .secure-label span:last-child {
+      display: none;
+    }
+
+    .booking-container {
+      width: calc(100% - 24px);
+      padding-top: 24px;
+    }
+
+    .booking-intro {
+      margin-bottom: 20px;
+    }
+
+    .back-link {
+      margin-bottom: 18px;
+    }
+
+    .intro-content h1 {
+      font-size: 28px;
+    }
+
+    .form-section {
+      padding: 23px 18px;
+    }
+
+    .two-columns {
+      grid-template-columns: 1fr;
+      gap: 15px;
+    }
+
+    .form-grid {
+      margin-bottom: 15px;
+    }
+
+    .form-error {
+      margin: 0 18px 18px;
+    }
+
+    .submit-area {
+      padding: 0 18px 22px;
+    }
+
+    .booking-sidebar {
+      display: flex;
+    }
+
+    .property-image-wrap {
+      height: 220px;
+    }
+
+    .confirmation-page {
+      width: calc(100% - 24px);
+      padding: 30px 0 45px;
+    }
+
+    .confirmation-card {
+      padding: 25px 18px;
+      border-radius: 14px;
+    }
+
+    .confirmation-heading h1 {
+      font-size: 25px;
+    }
+
+    .confirmation-property {
+      align-items: flex-start;
+    }
+
+    .confirmation-property img {
+      width: 95px;
+      height: 80px;
+    }
+
+    .confirmation-contact {
+      grid-template-columns: 1fr;
+      gap: 13px;
+    }
+
+    .confirmation-actions {
+      flex-direction: column;
+    }
+
+    .whatsapp-button,
+    .confirmation-actions .secondary-button {
+      width: 100%;
+    }
+
+    .booking-footer {
+      min-height: auto;
+      padding: 18px 14px;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 7px;
+    }
+  }
+
+  /* ========================================
+     SMALL MOBILE
+  ======================================== */
+
+  @media (max-width: 390px) {
+    .booking-container {
+      width: calc(100% - 18px);
+    }
+
+    .booking-header-inner {
+      width: calc(100% - 18px);
+    }
+
+    .brand-mark {
+      width: 37px;
+      height: 37px;
+      border-radius: 8px;
+    }
+
+    .brand-copy strong {
+      font-size: 13px;
+    }
+
+    .brand-copy small {
+      font-size: 9px;
+    }
+
+    .intro-content h1 {
+      font-size: 25px;
+    }
+
+    .form-section {
+      padding: 20px 14px;
+    }
+
+    .section-heading {
+      gap: 10px;
+    }
+
+    .section-number {
+      width: 30px;
+      height: 30px;
+    }
+
+    .section-heading h2 {
+      font-size: 15px;
+    }
+
+    .field input,
+    .field select {
+      min-height: 44px;
+    }
+
+    .form-error {
+      margin-left: 14px;
+      margin-right: 14px;
+    }
+
+    .submit-area {
+      padding-left: 14px;
+      padding-right: 14px;
+    }
+
+    .property-card-body,
+    .price-summary,
+    .trust-card {
+      padding: 17px;
+    }
+
+    .property-image-wrap {
+      height: 190px;
+    }
+
+    .phone-input {
+      grid-template-columns: 78px minmax(0, 1fr);
+    }
+  }
+
+  /* ========================================
+     320px
+  ======================================== */
+
+  @media (max-width: 330px) {
+    .booking-header-inner {
+      width: calc(100% - 14px);
+    }
+
+    .booking-container {
+      width: calc(100% - 14px);
+    }
+
+    .brand-copy {
+      display: none;
+    }
+
+    .intro-content h1 {
+      font-size: 23px;
+    }
+
+    .form-section {
+      padding: 18px 12px;
+    }
+
+    .submit-area {
+      padding-left: 12px;
+      padding-right: 12px;
+    }
+
+    .form-error {
+      margin-left: 12px;
+      margin-right: 12px;
+    }
+
+    .summary-heading {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .confirmation-page {
+      width: calc(100% - 14px);
+    }
+  }
+`;
 
 export default Booking;
