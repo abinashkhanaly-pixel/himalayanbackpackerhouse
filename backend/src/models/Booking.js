@@ -86,9 +86,9 @@ const bookingSchema = new mongoose.Schema(
   BG-905
 */
 
-bookingSchema.pre("validate", async function (next) {
+bookingSchema.pre("validate", async function () {
   if (!this.isNew || this.bookingReference) {
-    return next();
+    return;
   }
 
   let reference;
@@ -96,6 +96,7 @@ bookingSchema.pre("validate", async function (next) {
 
   while (exists) {
     const number = Math.floor(100 + Math.random() * 900);
+
     reference = `BG-${number}`;
 
     exists = await mongoose.models.Booking.exists({
@@ -104,8 +105,6 @@ bookingSchema.pre("validate", async function (next) {
   }
 
   this.bookingReference = reference;
-
-  next();
 });
 
 module.exports = mongoose.model("Booking", bookingSchema);
