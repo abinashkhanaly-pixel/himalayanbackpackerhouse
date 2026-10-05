@@ -2,6 +2,13 @@ const mongoose = require("mongoose");
 
 const bookingSchema = new mongoose.Schema(
   {
+    bookingReference: {
+      type: String,
+      unique: true,
+      required: true,
+      trim: true,
+    },
+
     room: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Room",
@@ -69,5 +76,36 @@ const bookingSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+/*
+  Generate a short customer-facing booking reference.
+
+  Example:
+  BG-638
+  BG-421
+  BG-905
+*/
+
+bookingSchema.pre("validate", async function (next) {
+  if (!this.isNew || this.bookingReference) {
+    return next();
+  }
+
+  let reference;
+  let exists = true;
+
+  while (exists) {
+    const number = Math.floor(100 + Math.random() * 900);
+    reference = `BG-${number}`;
+
+    exists = await mongoose.models.Booking.exists({
+      bookingReference: reference,
+    });
+  }
+
+  this.bookingReference = reference;
+
+  next();
+});
 
 module.exports = mongoose.model("Booking", bookingSchema);

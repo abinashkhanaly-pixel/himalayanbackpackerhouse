@@ -80,6 +80,8 @@ const createBooking = async (req, res) => {
       selectedRoom.price * totalNights;
 
     // Save booking
+    // bookingReference is automatically generated
+    // by the Booking model, for example: BG-638
     const booking = await Booking.create({
       room: selectedRoom._id,
       guestName,
@@ -96,6 +98,11 @@ const createBooking = async (req, res) => {
     res.status(201).json({
       success: true,
       message: "Booking created successfully",
+
+      // Short customer-facing reference
+      bookingReference: booking.bookingReference,
+
+      // Complete booking data
       data: booking,
     });
   } catch (error) {
