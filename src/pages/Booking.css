@@ -186,9 +186,8 @@
   width: 100%;
   min-height: 48px;
   padding: 12px 13px;
-  box-sizing: border-box;
   color: #111827;
-  background: #ffffff;
+  background: #fff;
   border: 1px solid var(--booking-border);
   border-radius: 9px;
   outline: none;
@@ -198,6 +197,7 @@
     border-color 0.2s ease,
     box-shadow 0.2s ease,
     background 0.2s ease;
+  box-sizing: border-box;
 }
 
 .booking-field textarea {
@@ -310,7 +310,7 @@
   min-height: 52px;
   margin-top: 25px;
   padding: 14px 22px;
-  color: #ffffff;
+  color: #fff;
   background: var(--booking-blue);
   border: 0;
   border-radius: 9px;
@@ -550,7 +550,7 @@
 
 .confirmation-card {
   padding: 42px;
-  background: #ffffff;
+  background: #fff;
   border: 1px solid #e5e7eb;
   border-radius: 18px;
   box-shadow: var(--booking-shadow);
@@ -590,10 +590,7 @@
   letter-spacing: -0.025em;
 }
 
-/* =========================================================
-   CONFIRMATION INTRO
-   ========================================================= */
-
+/* FIXED CSS SELECTOR */
 .confirmation-intro {
   max-width: 590px;
   margin: 14px 0 25px;
@@ -612,9 +609,9 @@
   gap: 5px;
   margin: 0 0 22px;
   padding: 14px 16px;
-  background: #fffbf5;
   border-left: 3px solid var(--booking-gold);
   border-radius: 0 10px 10px 0;
+  background: #fffbf5;
 }
 
 .confirmation-contact-note strong {
@@ -737,7 +734,6 @@
   justify-content: center;
   gap: 8px;
   padding: 12px 18px;
-  color: inherit;
   border-radius: 8px;
   text-decoration: none;
   cursor: pointer;
@@ -756,30 +752,28 @@
 }
 
 .confirmation-button-primary {
-  color: #ffffff;
+  color: #fff;
   background: var(--booking-blue);
   border: 1px solid var(--booking-blue);
 }
 
 .confirmation-button-primary:hover {
-  color: #ffffff;
   background: var(--booking-blue-dark);
   border-color: var(--booking-blue-dark);
 }
 
 .confirmation-button-secondary {
   color: #344054;
-  background: #ffffff;
+  background: #fff;
   border: 1px solid #d0d5dd;
 }
 
 .confirmation-button-secondary:hover {
-  color: #344054;
   background: #f9fafb;
 }
 
 /* =========================================================
-   MOBILE - 900px
+   MOBILE
    ========================================================= */
 
 @media (max-width: 900px) {
@@ -795,10 +789,6 @@
     max-width: 100%;
   }
 }
-
-/* =========================================================
-   MOBILE - 700px
-   ========================================================= */
 
 @media (max-width: 700px) {
   .booking-main {
@@ -841,10 +831,6 @@
   }
 }
 
-/* =========================================================
-   MOBILE - 520px
-   ========================================================= */
-
 @media (max-width: 520px) {
   .booking-title {
     font-size: 31px;
@@ -884,10 +870,6 @@
     width: 100%;
   }
 }
-
-/* =========================================================
-   MOBILE - 380px
-   ========================================================= */
 
 @media (max-width: 380px) {
   .booking-main {
@@ -932,7 +914,7 @@
   }
 
   .confirmation-contact-note {
-    padding: 13px;
+    padding: 13px 13px;
   }
 
   .confirmation-detail {
