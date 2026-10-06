@@ -4,7 +4,7 @@
 
 .booking-page {
   min-height: 100vh;
-  background: #f6f7f9;
+  background: #2f343b;
   color: #1f2937;
   font-family:
     Inter,
@@ -84,35 +84,45 @@
 
 .booking-intro {
   padding: 52px 0 32px;
+  text-align: left;
 }
 
 .intro-content {
   max-width: 760px;
+  margin-left: 0;
+  margin-right: auto;
+  text-align: left;
 }
 
 .intro-eyebrow {
   margin: 0 0 12px;
-  color: #8b6f47;
+  color: #d0a15c;
   font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 1.8px;
+  font-weight: 700;
+  letter-spacing: 2px;
   text-transform: uppercase;
+  text-align: left;
+  font-style: italic;
 }
 
 .booking-intro h1 {
   margin: 0;
-  color: #172033;
+  color: #f1f3f5;
   font-size: clamp(32px, 4vw, 48px);
   line-height: 1.08;
-  font-weight: 800;
-  letter-spacing: -1.5px;
+  font-weight: 750;
+  letter-spacing: -1.2px;
+  text-align: left;
+  font-style: italic;
 }
 
 .booking-intro p {
   margin: 14px 0 0;
-  color: #64748b;
+  color: #c1c6cd;
   font-size: 16px;
   line-height: 1.7;
+  text-align: left;
+  font-weight: 450;
 }
 
 /* =========================================================
@@ -141,37 +151,47 @@
   border-radius: 18px;
   padding: 30px;
   margin-bottom: 20px;
-  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.035);
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.08);
 }
+
+/* =========================================================
+   SECTION HEADINGS
+   ========================================================= */
 
 .section-heading {
   margin-bottom: 24px;
+  text-align: left;
 }
 
 .section-eyebrow {
   display: block;
   margin-bottom: 7px;
-  color: #8b6f47;
+  color: #8f6f48;
   font-size: 11px;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 1.5px;
   text-transform: uppercase;
+  text-align: left;
+  font-style: italic;
 }
 
 .section-heading h2 {
   margin: 0;
-  color: #172033;
+  color: #202733;
   font-size: 21px;
   line-height: 1.3;
-  font-weight: 750;
-  letter-spacing: -0.4px;
+  font-weight: 700;
+  letter-spacing: -0.45px;
+  text-align: left;
+  font-style: italic;
 }
 
 .section-heading p {
   margin: 7px 0 0;
-  color: #64748b;
+  color: #707985;
   font-size: 14px;
   line-height: 1.6;
+  text-align: left;
 }
 
 /* =========================================================
@@ -202,9 +222,10 @@
 .field label {
   display: block;
   margin-bottom: 8px;
-  color: #334155;
+  color: #596270;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 650;
+  text-align: left;
 }
 
 .field input,
@@ -215,7 +236,7 @@
   border: 1px solid #d7dce3;
   border-radius: 10px;
   background: #ffffff;
-  color: #172033;
+  color: #343b46;
   font-family: inherit;
   font-size: 14px;
   outline: none;
@@ -239,7 +260,7 @@
 
 .field input::placeholder,
 .field textarea::placeholder {
-  color: #9aa3af;
+  color: #9aa1aa;
 }
 
 .field input:hover,
@@ -283,6 +304,44 @@
 }
 
 /* =========================================================
+   ROOM TYPE SELECT
+   ========================================================= */
+
+.room-type-select {
+  color: #1d5fa7;
+  font-weight: 700;
+}
+
+.room-type-select option {
+  color: #1d5fa7;
+  font-weight: 600;
+}
+
+.room-type-select option[value=""] {
+  color: #e53935;
+  font-weight: 700;
+}
+
+/* =========================================================
+   OPTIONAL LABEL
+   ========================================================= */
+
+.optional-label {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 6px;
+  padding: 3px 7px;
+  border-radius: 5px;
+  background: #fff3c4;
+  color: #1d5fa7;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.35px;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+
+/* =========================================================
    PAYMENT
    ========================================================= */
 
@@ -322,14 +381,14 @@
 
 .payment-content strong {
   display: block;
-  color: #172033;
+  color: #343c47;
   font-size: 14px;
   font-weight: 750;
 }
 
 .payment-content p {
   margin: 5px 0 0;
-  color: #6b7280;
+  color: #747c87;
   font-size: 13px;
   line-height: 1.55;
 }
@@ -374,7 +433,7 @@
   color: #ffffff;
   font-family: inherit;
   font-size: 15px;
-  font-weight: 750;
+  font-weight: 700;
   cursor: pointer;
   box-shadow: 0 7px 18px rgba(22, 104, 227, 0.18);
   transition:
@@ -419,13 +478,18 @@
 }
 
 /* =========================================================
-   SIDEBAR
+   SIDEBAR BASE
    ========================================================= */
 
 .booking-sidebar {
   position: sticky;
   top: 94px;
+  align-self: start;
 }
+
+/* =========================================================
+   PROPERTY / PRICE / TRUST BASE
+   ========================================================= */
 
 .property-card,
 .price-card,
@@ -434,7 +498,7 @@
   border: 1px solid #e5e7eb;
   border-radius: 18px;
   background: #ffffff;
-  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.04);
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.08);
   margin-bottom: 18px;
 }
 
@@ -476,18 +540,21 @@
 
 .property-card-content h2 {
   margin: 0;
-  color: #172033;
+  color: #252c36;
   font-size: 20px;
   line-height: 1.3;
-  font-weight: 750;
-  letter-spacing: -0.4px;
+  font-weight: 700;
+  letter-spacing: -0.45px;
+  text-align: left;
+  font-style: italic;
 }
 
 .property-location {
   margin-top: 7px;
-  color: #64748b;
+  color: #737b86;
   font-size: 13px;
   line-height: 1.5;
+  text-align: left;
 }
 
 .property-divider {
@@ -514,7 +581,7 @@
 .stay-preview-label {
   display: block;
   margin-bottom: 5px;
-  color: #7b8491;
+  color: #8a919a;
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.8px;
@@ -522,7 +589,7 @@
 }
 
 .stay-preview-value {
-  color: #172033;
+  color: #414955;
   font-size: 13px;
   font-weight: 700;
   line-height: 1.4;
@@ -543,9 +610,11 @@
 
 .price-card-header {
   margin-bottom: 18px;
-  color: #172033;
+  color: #252c36;
   font-size: 17px;
-  font-weight: 750;
+  font-weight: 700;
+  text-align: left;
+  font-style: italic;
 }
 
 .price-row {
@@ -554,12 +623,12 @@
   justify-content: space-between;
   gap: 15px;
   padding: 8px 0;
-  color: #5f6b7a;
+  color: #707883;
   font-size: 13px;
 }
 
 .price-row span:last-child {
-  color: #334155;
+  color: #4b535e;
   font-weight: 650;
   text-align: right;
 }
@@ -579,13 +648,13 @@
 }
 
 .total-row span:first-child {
-  color: #172033;
+  color: #303741;
   font-size: 15px;
   font-weight: 750;
 }
 
 .total-row span:last-child {
-  color: #172033;
+  color: #202733;
   font-size: 23px;
   font-weight: 800;
   letter-spacing: -0.5px;
@@ -596,44 +665,53 @@
    ========================================================= */
 
 .trust-card {
-  padding: 20px;
+  padding: 4px 18px;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  background: #fafafa;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
 }
 
 .trust-item {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 12px;
-  padding: 10px 0;
+  padding: 15px 0;
+  border-bottom: 1px solid #eeeeee;
 }
 
-.trust-item + .trust-item {
-  border-top: 1px solid #edf0f3;
+.trust-item:last-child {
+  border-bottom: none;
 }
 
 .trust-icon {
-  width: 32px;
-  height: 32px;
-  flex: 0 0 32px;
-  display: grid;
-  place-items: center;
-  border-radius: 8px;
-  background: #f1f6ff;
-  color: #1668e3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  border-radius: 50%;
+  background: #e9f6ed;
+  color: #218739;
   font-size: 14px;
+  font-weight: 900;
 }
 
 .trust-item strong {
   display: block;
-  color: #273244;
+  color: #39414c;
   font-size: 13px;
-  font-weight: 750;
+  font-weight: 700;
+  line-height: 1.3;
 }
 
 .trust-item p {
   margin: 3px 0 0;
-  color: #7b8491;
+  color: #7b838d;
   font-size: 11px;
-  line-height: 1.5;
+  font-weight: 500;
+  line-height: 1.45;
 }
 
 /* =========================================================
@@ -646,6 +724,7 @@
   display: grid;
   place-items: center;
   padding: 40px 20px;
+  background: #2f343b;
 }
 
 .booking-loading-card,
@@ -656,7 +735,7 @@
   border-radius: 18px;
   background: #ffffff;
   text-align: center;
-  box-shadow: 0 5px 25px rgba(15, 23, 42, 0.05);
+  box-shadow: 0 5px 25px rgba(15, 23, 42, 0.08);
 }
 
 .loading-spinner {
@@ -728,7 +807,7 @@
 .confirmation-page {
   min-height: 100vh;
   padding: 50px 20px 70px;
-  background: #f6f7f9;
+  background: #2f343b;
 }
 
 .confirmation-card {
@@ -738,7 +817,7 @@
   border: 1px solid #e5e7eb;
   border-radius: 20px;
   background: #ffffff;
-  box-shadow: 0 8px 35px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 8px 35px rgba(15, 23, 42, 0.1);
 }
 
 .success-icon {
@@ -1005,18 +1084,17 @@
   }
 
   .booking-sidebar {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 18px;
+    display: block;
   }
 
-  .property-card {
-    grid-column: 1 / -1;
-  }
-
+  .property-card,
   .price-card,
   .trust-card {
     margin-bottom: 0;
+  }
+
+  .confirmation-page {
+    padding-top: 40px;
   }
 }
 
@@ -1044,10 +1122,11 @@
 
   .booking-intro {
     padding: 30px 0 22px;
+    text-align: left;
   }
 
   .booking-intro h1 {
-    font-size: 32px;
+    font-size: 31px;
     letter-spacing: -1px;
   }
 
@@ -1068,10 +1147,16 @@
 
   .section-heading {
     margin-bottom: 20px;
+    text-align: left;
   }
 
   .section-heading h2 {
     font-size: 19px;
+    text-align: left;
+  }
+
+  .section-heading p {
+    text-align: left;
   }
 
   .form-grid.two-columns {
@@ -1090,17 +1175,20 @@
   .property-card,
   .price-card,
   .trust-card {
-    border-radius: 14px;
-    margin-bottom: 15px;
+    border-radius: 0;
+    margin-bottom: 0;
   }
 
   .property-image-wrapper {
     height: 220px;
   }
 
-  .price-card,
-  .trust-card {
+  .price-card {
     padding: 18px;
+  }
+
+  .trust-card {
+    padding: 3px 14px;
   }
 
   .confirmation-page {
@@ -1285,4 +1373,604 @@
   .confirmation-intro h1 {
     font-size: 24px;
   }
+}
+
+/* =========================================================
+   RIGHT SIDEBAR — ONE SINGLE STICKY BOX
+   IMPORTANT: KEEP THIS AT THE VERY END
+   ========================================================= */
+
+.booking-sidebar {
+  position: sticky !important;
+  top: 94px !important;
+  align-self: start !important;
+
+  display: block !important;
+
+  width: 100%;
+  height: fit-content;
+
+  background: #ffffff !important;
+  border: 1px solid #dfe3e8 !important;
+  border-radius: 18px !important;
+  overflow: hidden !important;
+
+  padding: 0 !important;
+  margin: 0 !important;
+
+  box-shadow:
+    0 10px 30px rgba(15, 23, 42, 0.12),
+    0 2px 6px rgba(15, 23, 42, 0.04) !important;
+}
+
+/* Remove separate-card appearance */
+.booking-sidebar > .property-card,
+.booking-sidebar > .price-card,
+.booking-sidebar > .trust-card {
+  width: 100% !important;
+
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+
+  background: #ffffff !important;
+}
+
+/* =========================================================
+   PROPERTY INSIDE UNIFIED BOX
+   ========================================================= */
+
+.booking-sidebar > .property-card {
+  overflow: hidden !important;
+}
+
+.booking-sidebar .property-image-wrapper {
+  width: 100%;
+  height: 230px;
+}
+
+.booking-sidebar .property-card-content {
+  padding: 22px;
+}
+
+/* =========================================================
+   SECTION DIVIDERS
+   ========================================================= */
+
+.booking-sidebar > .price-card,
+.booking-sidebar > .trust-card {
+  border-top: 1px solid #e5e7eb !important;
+}
+
+/* =========================================================
+   PRICE SUMMARY
+   ========================================================= */
+
+.booking-sidebar > .price-card {
+  padding: 22px !important;
+}
+
+.booking-sidebar .price-card-header {
+  margin-bottom: 16px;
+  color: #252c36;
+  text-align: left;
+  font-style: italic;
+}
+
+/* =========================================================
+   TRUST SECTION
+   ========================================================= */
+
+.booking-sidebar > .trust-card {
+  padding: 4px 22px !important;
+  background: #ffffff !important;
+}
+
+.booking-sidebar .trust-item {
+  padding: 15px 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid #edf0f3;
+}
+
+.booking-sidebar .trust-item:last-child {
+  border-bottom: none;
+}
+
+/* =========================================================
+   TRUST ICON
+   ========================================================= */
+
+.booking-sidebar .trust-icon {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+  background: #e9f6ed;
+  color: #218739;
+
+  font-size: 14px;
+  font-weight: 900;
+}
+
+/* =========================================================
+   TRUST TEXT
+   ========================================================= */
+
+.booking-sidebar .trust-item strong {
+  color: #39414c;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.booking-sidebar .trust-item p {
+  margin: 3px 0 0;
+  color: #7b838d;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+/* =========================================================
+   SIDEBAR TYPOGRAPHY
+   ========================================================= */
+
+.booking-sidebar .property-card-content h2,
+.booking-sidebar .price-card-header {
+  font-style: italic;
+  font-weight: 700;
+}
+
+.booking-sidebar .property-location {
+  color: #737b86;
+}
+
+.booking-sidebar .stay-preview-label {
+  color: #8a919a;
+}
+
+.booking-sidebar .stay-preview-value {
+  color: #414955;
+}
+
+.booking-sidebar .price-row {
+  color: #707883;
+}
+
+.booking-sidebar .price-row span:last-child {
+  color: #4b535e;
+}
+
+.booking-sidebar .total-row span:first-child {
+  color: #303741;
+}
+
+.booking-sidebar .total-row span:last-child {
+  color: #202733;
+}
+
+/* =========================================================
+   TABLET — STILL ONE BOX
+   ========================================================= */
+
+@media (max-width: 850px) {
+  .booking-sidebar {
+    position: static !important;
+    display: block !important;
+    width: 100% !important;
+  }
+
+  .booking-sidebar > .property-card,
+  .booking-sidebar > .price-card,
+  .booking-sidebar > .trust-card {
+    width: 100% !important;
+    margin: 0 !important;
+  }
+
+  .booking-sidebar > .property-card {
+    grid-column: auto !important;
+  }
+
+  .booking-sidebar > .price-card,
+  .booking-sidebar > .trust-card {
+    border-top: 1px solid #e5e7eb !important;
+  }
+}
+
+/* =========================================================
+   MOBILE — ONE FULL-WIDTH BOX
+   ========================================================= */
+
+@media (max-width: 650px) {
+  .booking-sidebar {
+    display: block !important;
+    border-radius: 14px !important;
+  }
+
+  .booking-sidebar .property-image-wrapper {
+    height: 220px;
+  }
+
+  .booking-sidebar .property-card-content {
+    padding: 18px;
+  }
+
+  .booking-sidebar > .price-card {
+    padding: 18px !important;
+  }
+
+  .booking-sidebar > .trust-card {
+    padding: 3px 14px !important;
+  }
+
+  .booking-sidebar .trust-item {
+    padding: 14px 0;
+  }
+}
+
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 430px) {
+  .booking-sidebar {
+    border-radius: 13px !important;
+  }
+
+  .booking-sidebar .property-image-wrapper {
+    height: 195px;
+  }
+
+  .booking-sidebar .property-card-content {
+    padding: 18px;
+  }
+
+  .booking-sidebar > .price-card {
+    padding: 18px !important;
+  }
+
+  .booking-sidebar > .trust-card {
+    padding: 3px 14px !important;
+  }
+}
+
+/* =========================================================
+   320px
+   ========================================================= */
+
+@media (max-width: 350px) {
+  .booking-sidebar {
+    border-radius: 12px !important;
+  }
+
+  .booking-sidebar .property-image-wrapper {
+    height: 175px;
+  }
+
+  .booking-sidebar .property-card-content {
+    padding: 15px;
+  }
+
+  .booking-sidebar > .price-card {
+    padding: 16px 14px !important;
+  }
+
+  .booking-sidebar > .trust-card {
+    padding: 3px 12px !important;
+  }
+}
+/* =========================================
+   STICKY SIDEBAR — WIDTH + TEXT FIX
+========================================= */
+
+.booking-sidebar {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+/* All sections stay inside ONE sticky box */
+.booking-sidebar > .property-card,
+.booking-sidebar > .price-card,
+.booking-sidebar > .trust-card {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+/* Prevent text from being cut */
+.booking-sidebar h2,
+.booking-sidebar p,
+.booking-sidebar span,
+.booking-sidebar strong {
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
+/* Property title */
+.property-card-content h2 {
+  white-space: normal;
+  line-height: 1.3;
+}
+
+/* Price rows */
+.price-row {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.price-row span,
+.price-row strong {
+  min-width: 0;
+}
+
+.price-row span {
+  overflow-wrap: anywhere;
+}
+
+/* Trust section */
+.trust-item {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.trust-item-content {
+  min-width: 0;
+  flex: 1;
+}
+
+.trust-item strong,
+.trust-item p {
+  display: block;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
+/* Local support sentence */
+.trust-item p {
+  line-height: 1.45;
+}
+
+/* =========================================
+   DESKTOP — GIVE SIDEBAR MORE SPACE
+========================================= */
+
+@media (min-width: 851px) {
+
+  .booking-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(360px, 400px);
+    gap: 28px;
+  }
+
+  .booking-sidebar {
+    width: 100%;
+  }
+
+}
+
+/* =========================================
+   TABLET
+========================================= */
+
+@media (max-width: 850px) {
+
+  .booking-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .booking-sidebar {
+    width: 100%;
+    max-width: 100%;
+  }
+
+}
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 650px) {
+
+  .booking-sidebar {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .booking-sidebar > .property-card,
+  .booking-sidebar > .price-card,
+  .booking-sidebar > .trust-card {
+    width: 100%;
+  }
+
+  .price-row {
+    gap: 10px;
+  }
+
+  .trust-item {
+    gap: 12px;
+  }
+
+}
+/* =========================================
+   STICKY SIDEBAR — COMPACT VERTICAL SPACING
+========================================= */
+
+/* Property section */
+.booking-sidebar .property-card-content {
+  padding: 16px 20px 18px;
+}
+
+.booking-sidebar .property-card-content h2 {
+  margin: 4px 0 12px;
+  line-height: 1.25;
+}
+
+.booking-sidebar .property-location {
+  margin-bottom: 8px;
+}
+
+/* Check-in / Check-out */
+.booking-sidebar .stay-preview {
+  margin-top: 8px;
+}
+
+.booking-sidebar .stay-preview > div {
+  gap: 4px;
+}
+
+.booking-sidebar .stay-preview strong {
+  margin-bottom: 2px;
+}
+
+/* Price summary */
+.booking-sidebar .price-card {
+  padding: 17px 20px;
+}
+
+.booking-sidebar .price-card-header {
+  margin-bottom: 12px;
+}
+
+.booking-sidebar .price-row {
+  margin-bottom: 8px;
+  line-height: 1.35;
+}
+
+.booking-sidebar .price-total {
+  margin-top: 10px;
+  padding-top: 10px;
+}
+
+/* Trust section */
+.booking-sidebar .trust-card {
+  padding: 7px 20px 10px;
+}
+
+.booking-sidebar .trust-item {
+  padding: 10px 0;
+  gap: 10px;
+}
+
+.booking-sidebar .trust-item strong {
+  margin-bottom: 2px;
+  line-height: 1.25;
+}
+
+.booking-sidebar .trust-item p {
+  margin: 0;
+  line-height: 1.35;
+}
+
+/* Smaller gap between trust items */
+.booking-sidebar .trust-item + .trust-item {
+  margin-top: 0;
+}
+
+/* Mobile */
+@media (max-width: 650px) {
+
+  .booking-sidebar .property-card-content {
+    padding: 15px 17px;
+  }
+
+  .booking-sidebar .price-card {
+    padding: 15px 17px;
+  }
+
+  .booking-sidebar .trust-card {
+    padding: 5px 17px 8px;
+  }
+
+  .booking-sidebar .trust-item {
+    padding: 9px 0;
+  }
+}
+/* =========================================
+   PAYMENT METHOD — PAY AT HOTEL EMPHASIS
+========================================= */
+
+.payment-method-card strong,
+.payment-method-card .payment-method-title,
+.payment-method-card h3 {
+  color: #b84a4a;
+  font-weight: 750;
+}
+
+/* If "Pay at hotel" is inside a label/option */
+.payment-option strong,
+.payment-option-title {
+  color: #b84a4a;
+  font-weight: 750;
+}
+
+/* Description stays muted */
+.payment-method-card p,
+.payment-option p {
+  color: #6b7280;
+}
+ /* =========================================
+    TRUST ITEMS — LEFT ALIGNED
+ ========================================= */
+
+.booking-sidebar .trust-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  text-align: left;
+  gap: 10px;
+  width: 100%;
+}
+
+.booking-sidebar .trust-item > * {
+  text-align: left;
+}
+
+/* Check icon stays on the left */
+.booking-sidebar .trust-item-icon,
+.booking-sidebar .trust-item svg,
+.booking-sidebar .trust-item .trust-icon {
+  flex: 0 0 auto;
+  margin: 2px 0 0 0;
+}
+
+/* Text stays attached to icon */
+.booking-sidebar .trust-item-content {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+}
+
+/* Title */
+.booking-sidebar .trust-item strong {
+  display: block;
+  text-align: left;
+  margin: 0 0 2px;
+  line-height: 1.3;
+}
+
+/* Description */
+.booking-sidebar .trust-item p {
+  display: block;
+  text-align: left;
+  margin: 0;
+  line-height: 1.35;
+}
+
+/* Remove unwanted centering */
+.booking-sidebar .trust-card {
+  text-align: left;
 }

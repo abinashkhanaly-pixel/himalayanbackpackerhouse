@@ -50,6 +50,7 @@ const INITIAL_FORM = {
   checkOut: "",
   guests: 2,
   rooms: 1,
+  roomType: "",
 };
 
 function normalizeRoomResponse(response) {
@@ -332,6 +333,11 @@ export default function Booking() {
       return;
     }
 
+    if (!form.roomType) {
+      setSubmitError("Please select a room type.");
+      return;
+    }
+
     try {
       setSubmitting(true);
 
@@ -352,6 +358,7 @@ export default function Booking() {
         city: form.city.trim(),
         address: form.address.trim(),
         rooms: roomCount,
+        roomType: form.roomType,
         paymentMethod: "pay_at_hotel",
       };
 
@@ -384,19 +391,6 @@ export default function Booking() {
         );
       }
 
-      /*
-        Backend response can contain bookingReference:
-        
-        {
-          success: true,
-          bookingReference: "BG-638",
-          data: {
-            bookingReference: "BG-638",
-            ...
-          }
-        }
-      */
-
       const booking =
         data?.booking ||
         data?.data ||
@@ -404,7 +398,6 @@ export default function Booking() {
         data ||
         {};
 
-      // Use short customer-facing reference instead of MongoDB _id
       const bookingReference =
         booking?.bookingReference ||
         data?.bookingReference ||
@@ -421,6 +414,7 @@ export default function Booking() {
         checkOut: form.checkOut,
         guests: guestCount,
         rooms: roomCount,
+        roomType: form.roomType,
         nights,
         total,
       });
@@ -452,6 +446,7 @@ Phone: ${confirmation.phone}
 Property: ${roomName}
 Location: ${roomLocation}
 
+Room type: ${confirmation.roomType}
 Check-in: ${formatDate(confirmation.checkIn)}
 Check-out: ${formatDate(confirmation.checkOut)}
 Guests: ${confirmation.guests}
@@ -597,6 +592,16 @@ Thank you.
                 <div>
                   <span>Rooms</span>
                   <strong>{confirmation.rooms}</strong>
+                </div>
+
+                <div>
+                  <span>Room type</span>
+                  <strong>
+                    {confirmation.roomType
+                      ? confirmation.roomType.charAt(0).toUpperCase() +
+                        confirmation.roomType.slice(1)
+                      : "—"}
+                  </strong>
                 </div>
               </div>
 
@@ -772,7 +777,8 @@ Thank you.
               <div className="form-grid two-columns">
                 <div className="field">
                   <label htmlFor="passportNumber">
-                    Passport number
+                    Passport number{" "}
+                    <span className="optional-label">Optional</span>
                   </label>
 
                   <input
@@ -788,7 +794,8 @@ Thank you.
 
                 <div className="field">
                   <label htmlFor="citizenshipNumber">
-                    Citizenship number
+                    Citizenship number{" "}
+                    <span className="optional-label">Optional</span>
                   </label>
 
                   <input
@@ -889,6 +896,25 @@ Thank you.
                     }
                   />
                 </div>
+              </div>
+
+              {/* ROOM TYPE */}
+              <div className="field full-width">
+                <label htmlFor="roomType">
+                  Room type <span>*</span>
+                </label>
+
+                <select
+                  id="roomType"
+                  name="roomType"
+                  value={form.roomType}
+                  onChange={handleChange}
+                >
+                  <option value="">Select room type</option>
+                  <option value="single">Single</option>
+                  <option value="double">Double</option>
+                  <option value="twin">Twin</option>
+                </select>
               </div>
 
               <div className="form-grid two-columns">
