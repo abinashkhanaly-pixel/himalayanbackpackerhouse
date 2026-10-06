@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { PhoneInput } from "react-international-phone";
+import "react-international-phone/style.css";
 import { getRoom } from "../services/roomApi";
 import "./Booking.css";
 
@@ -12,33 +14,9 @@ const WHATSAPP_NUMBER =
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80";
 
-const COUNTRY_CODES = [
-  { code: "+977", name: "Nepal" },
-  { code: "+1", name: "USA / Canada" },
-  { code: "+44", name: "United Kingdom" },
-  { code: "+61", name: "Australia" },
-  { code: "+81", name: "Japan" },
-  { code: "+82", name: "South Korea" },
-  { code: "+86", name: "China" },
-  { code: "+91", name: "India" },
-  { code: "+33", name: "France" },
-  { code: "+49", name: "Germany" },
-  { code: "+39", name: "Italy" },
-  { code: "+34", name: "Spain" },
-  { code: "+31", name: "Netherlands" },
-  { code: "+41", name: "Switzerland" },
-  { code: "+65", name: "Singapore" },
-  { code: "+971", name: "UAE" },
-  { code: "+974", name: "Qatar" },
-  { code: "+966", name: "Saudi Arabia" },
-  { code: "+27", name: "South Africa" },
-  { code: "+64", name: "New Zealand" },
-];
-
 const INITIAL_FORM = {
   firstName: "",
   lastName: "",
-  countryCode: "+977",
   phone: "",
   email: "",
   passportNumber: "",
@@ -273,6 +251,17 @@ export default function Booking() {
     }
   }
 
+  function handlePhoneChange(phone) {
+    setForm((previous) => ({
+      ...previous,
+      phone,
+    }));
+
+    if (submitError) {
+      setSubmitError("");
+    }
+  }
+
   async function handleSubmit(event) {
     event.preventDefault();
 
@@ -345,13 +334,12 @@ export default function Booking() {
         room: roomId,
         guestName: `${form.firstName.trim()} ${form.lastName.trim()}`,
         email: form.email.trim(),
-        phone: `${form.countryCode}${form.phone.trim()}`,
+        phone: form.phone.trim(),
         guests: guestCount,
         checkIn: form.checkIn,
         checkOut: form.checkOut,
         firstName: form.firstName.trim(),
         lastName: form.lastName.trim(),
-        countryCode: form.countryCode,
         passportNumber: form.passportNumber.trim(),
         citizenshipNumber: form.citizenshipNumber.trim(),
         nationality: form.nationality.trim(),
@@ -409,7 +397,7 @@ export default function Booking() {
         bookingReference,
         guestName: `${form.firstName.trim()} ${form.lastName.trim()}`,
         email: form.email.trim(),
-        phone: `${form.countryCode}${form.phone.trim()}`,
+        phone: form.phone.trim(),
         checkIn: form.checkIn,
         checkOut: form.checkOut,
         guests: guestCount,
@@ -433,7 +421,7 @@ export default function Booking() {
   function handleWhatsAppConfirmation() {
     if (!confirmation) return;
 
-       const message = `
+    const message = `
 Hello Backpacker Gateways,
 
 I have made a booking through Backpacker Gateways and would like to proceed with the next steps to secure my reservation.
@@ -463,6 +451,7 @@ Please let me know the next steps to confirm and secure my booking.
 Thank you,
 ${confirmation.guestName}
 `.trim();
+
     const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
       message
     )}`;
@@ -505,7 +494,9 @@ ${confirmation.guestName}
         <main className="booking-error-page">
           <div className="booking-error-card">
             <div className="error-icon">!</div>
+
             <h1>Unable to load this property</h1>
+
             <p>{roomError}</p>
 
             <button
@@ -561,6 +552,7 @@ ${confirmation.guestName}
 
             <div className="confirmation-id">
               <span>Booking reference</span>
+
               <strong>
                 {confirmation.bookingReference || "Pending"}
               </strong>
@@ -599,6 +591,7 @@ ${confirmation.guestName}
 
                 <div>
                   <span>Room type</span>
+
                   <strong>
                     {confirmation.roomType
                       ? confirmation.roomType.charAt(0).toUpperCase() +
@@ -610,7 +603,10 @@ ${confirmation.guestName}
 
               <div className="confirmation-total">
                 <span>Total stay</span>
-                <strong>{formatCurrency(confirmation.total)}</strong>
+
+                <strong>
+                  {formatCurrency(confirmation.total)}
+                </strong>
               </div>
             </div>
 
@@ -679,6 +675,7 @@ ${confirmation.guestName}
               <div className="section-heading">
                 <div>
                   <span className="section-eyebrow">GUEST DETAILS</span>
+
                   <h2>Tell us who will be staying</h2>
                 </div>
               </div>
@@ -740,27 +737,16 @@ ${confirmation.guestName}
                   </label>
 
                   <div className="phone-input">
-                    <select
-                      name="countryCode"
-                      value={form.countryCode}
-                      onChange={handleChange}
-                      aria-label="Country code"
-                    >
-                      {COUNTRY_CODES.map((country) => (
-                        <option key={country.code} value={country.code}>
-                          {country.code}
-                        </option>
-                      ))}
-                    </select>
-
-                    <input
-                      id="phone"
-                      name="phone"
-                      type="tel"
+                    <PhoneInput
+                      defaultCountry="np"
                       value={form.phone}
-                      onChange={handleChange}
-                      placeholder="Phone number"
-                      autoComplete="tel"
+                      onChange={handlePhoneChange}
+                      inputProps={{
+                        id: "phone",
+                        name: "phone",
+                        autoComplete: "tel",
+                        "aria-label": "WhatsApp / phone",
+                      }}
                     />
                   </div>
                 </div>
@@ -773,6 +759,7 @@ ${confirmation.guestName}
                   <span className="section-eyebrow">
                     TRAVELLER INFORMATION
                   </span>
+
                   <h2>Travel document details</h2>
                 </div>
               </div>
@@ -862,6 +849,7 @@ ${confirmation.guestName}
               <div className="section-heading">
                 <div>
                   <span className="section-eyebrow">YOUR STAY</span>
+
                   <h2>Choose your dates and guests</h2>
                 </div>
               </div>
@@ -901,7 +889,6 @@ ${confirmation.guestName}
                 </div>
               </div>
 
-              {/* ROOM TYPE */}
               <div className="field full-width">
                 <label htmlFor="roomType">
                   Room type <span>*</span>
@@ -963,6 +950,7 @@ ${confirmation.guestName}
               <div className="section-heading">
                 <div>
                   <span className="section-eyebrow">PAYMENT</span>
+
                   <h2>Payment method</h2>
                 </div>
               </div>
@@ -1042,6 +1030,7 @@ ${confirmation.guestName}
                 <div className="stay-preview">
                   <div>
                     <span>Check-in</span>
+
                     <strong>
                       {formatDate(form.checkIn)}
                     </strong>
@@ -1051,6 +1040,7 @@ ${confirmation.guestName}
 
                   <div>
                     <span>Check-out</span>
+
                     <strong>
                       {formatDate(form.checkOut)}
                     </strong>
@@ -1077,7 +1067,8 @@ ${confirmation.guestName}
 
               <div className="price-row">
                 <span>
-                  {roomCount} {roomCount === 1 ? "room" : "rooms"}
+                  {roomCount}{" "}
+                  {roomCount === 1 ? "room" : "rooms"}
                 </span>
 
                 <strong>
