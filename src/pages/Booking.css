@@ -1974,3 +1974,397 @@
 .booking-sidebar .trust-card {
   text-align: left;
 }
+
+/* =========================================================
+   CONFIRMATION STATE — PROFESSIONAL HOTEL OTA
+   ========================================================= */
+
+/* Main confirmation area */
+.confirmation-page {
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 46px 24px 70px;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+/* Confirmation card */
+.confirmation-page .confirmation-card {
+  width: 100%;
+  max-width: 920px;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  text-align: left;
+}
+
+/* Success icon */
+.confirmation-page .success-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 38px;
+  height: 38px;
+  margin: 0 0 12px;
+
+  border-radius: 50%;
+  background: #7652c7;
+  color: #ffffff;
+
+  font-size: 18px;
+  font-weight: 800;
+}
+
+/* RESERVATION RECEIVED */
+.confirmation-page .confirmation-eyebrow {
+  display: block;
+  margin: 0 0 7px;
+
+  color: #7652c7;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.8px;
+  line-height: 1.3;
+  text-align: left;
+}
+
+/* Main heading */
+.confirmation-page h1 {
+  margin: 0 0 9px;
+
+  color: #f1f3f5;
+  font-size: 30px;
+  line-height: 1.18;
+  font-weight: 750;
+  font-style: italic;
+  letter-spacing: -0.6px;
+
+  text-align: left;
+}
+
+/* Thank-you text */
+.confirmation-page .confirmation-intro {
+  max-width: 680px;
+  margin: 0 0 12px;
+
+  color: #c1c6cd;
+  font-size: 13px;
+  line-height: 1.5;
+
+  text-align: left;
+}
+
+/* Customer operations message */
+.confirmation-page .confirmation-contact-note {
+  max-width: 700px;
+  margin: 0 0 15px;
+
+  text-align: left;
+}
+
+.confirmation-page .confirmation-contact-note strong {
+  display: block;
+  margin: 0 0 3px;
+
+  color: #e1e4e8;
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 750;
+
+  text-align: left;
+}
+
+.confirmation-page .confirmation-contact-note span {
+  display: block;
+
+  color: #aeb5bd;
+  font-size: 11px;
+  line-height: 1.45;
+
+  text-align: left;
+}
+
+/* Booking reference */
+.confirmation-page .confirmation-id {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  margin: 0 0 18px;
+  padding: 6px 10px;
+
+  border: 1px solid rgba(118, 82, 199, 0.25);
+  border-radius: 7px;
+
+  background: rgba(118, 82, 199, 0.08);
+
+  text-align: left;
+}
+
+.confirmation-page .confirmation-id span {
+  color: #8f959d;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.confirmation-page .confirmation-id strong {
+  color: #7652c7;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+/* =========================================================
+   HOTEL SUMMARY
+   ========================================================= */
+
+.confirmation-page .confirmation-summary {
+  width: 100%;
+  max-width: 920px;
+
+  overflow: hidden;
+
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+
+  box-shadow: 0 7px 24px rgba(15, 23, 42, 0.08);
+
+  text-align: left;
+}
+
+/* Property */
+.confirmation-page .confirmation-property {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  padding: 17px 20px;
+
+  text-align: left;
+}
+
+.confirmation-page .confirmation-property img {
+  width: 105px;
+  height: 75px;
+
+  flex: 0 0 105px;
+
+  object-fit: cover;
+  border-radius: 9px;
+}
+
+.confirmation-page .confirmation-property h2 {
+  margin: 0 0 3px;
+
+  color: #202733;
+  font-size: 18px;
+  line-height: 1.25;
+  font-weight: 750;
+  font-style: italic;
+
+  text-align: left;
+}
+
+.confirmation-page .confirmation-property p {
+  margin: 0;
+
+  color: #707985;
+  font-size: 11px;
+
+  text-align: left;
+}
+
+/* =========================================================
+   BOOKING DETAILS
+   ========================================================= */
+
+.confirmation-page .confirmation-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+
+  border-top: 1px solid #edf0f3;
+
+  text-align: left;
+}
+
+.confirmation-page .confirmation-grid > div {
+  min-width: 0;
+  padding: 13px 15px;
+
+  border-right: 1px solid #edf0f3;
+
+  text-align: left;
+}
+
+.confirmation-page .confirmation-grid > div:last-child {
+  border-right: 0;
+}
+
+.confirmation-page .confirmation-grid span {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: #8b929b;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+
+  text-align: left;
+}
+
+.confirmation-page .confirmation-grid strong {
+  display: block;
+
+  color: #303741;
+  font-size: 12px;
+  line-height: 1.35;
+  font-weight: 700;
+
+  text-align: left;
+
+  overflow-wrap: break-word;
+}
+
+/* Total */
+.confirmation-page .confirmation-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+
+  padding: 13px 20px;
+
+  border-top: 1px solid #edf0f3;
+
+  text-align: left;
+}
+
+.confirmation-page .confirmation-total span {
+  color: #596270;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.confirmation-page .confirmation-total strong {
+  color: #202733;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+/* =========================================================
+   ACTIONS
+   ========================================================= */
+
+.confirmation-page .confirmation-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+
+  margin-top: 17px;
+
+  text-align: left;
+}
+
+.confirmation-page .whatsapp-button,
+.confirmation-page .secondary-action {
+  min-height: 42px;
+  padding: 0 17px;
+
+  border-radius: 8px;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+/* Payment */
+.confirmation-page .confirmation-note {
+  margin: 10px 0 0;
+
+  color: #7a818b;
+  font-size: 11px;
+  line-height: 1.4;
+
+  text-align: left;
+}
+
+.confirmation-page .confirmation-note strong {
+  color: #b84a4a;
+  font-weight: 800;
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+  .confirmation-page {
+    padding: 30px 16px 50px;
+  }
+
+  .confirmation-page .confirmation-card {
+    max-width: none;
+  }
+
+  .confirmation-page h1 {
+    font-size: 27px;
+  }
+
+  .confirmation-page .confirmation-intro {
+    font-size: 12px;
+  }
+
+  .confirmation-page .confirmation-contact-note strong {
+    font-size: 11px;
+  }
+
+  .confirmation-page .confirmation-contact-note span {
+    font-size: 10px;
+  }
+
+  .confirmation-page .confirmation-property {
+    padding: 15px;
+    gap: 12px;
+  }
+
+  .confirmation-page .confirmation-property img {
+    width: 88px;
+    height: 66px;
+    flex-basis: 88px;
+  }
+
+  .confirmation-page .confirmation-property h2 {
+    font-size: 16px;
+  }
+
+  .confirmation-page .confirmation-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .confirmation-page .confirmation-grid > div:nth-child(2n) {
+    border-right: 0;
+  }
+
+  .confirmation-page .confirmation-grid > div {
+    border-bottom: 1px solid #edf0f3;
+  }
+
+  .confirmation-page .confirmation-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .confirmation-page .whatsapp-button,
+  .confirmation-page .secondary-action {
+    width: 100%;
+  }
+}

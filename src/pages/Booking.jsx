@@ -7,7 +7,7 @@ const BOOKINGS_API =
   "https://backpacker-gateways-2.onrender.com/api/bookings";
 
 const WHATSAPP_NUMBER =
-  import.meta.env.VITE_BOOKING_WHATSAPP || "9779800000000";
+  import.meta.env.VITE_BOOKING_WHATSAPP || "9779851181005";
 
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80";
@@ -433,20 +433,21 @@ export default function Booking() {
   function handleWhatsAppConfirmation() {
     if (!confirmation) return;
 
-    const message = `
+       const message = `
 Hello Backpacker Gateways,
 
-I have completed a booking.
+I have made a booking through Backpacker Gateways and would like to proceed with the next steps to secure my reservation.
 
-Booking reference: ${confirmation.bookingReference || "Pending"}
-Guest: ${confirmation.guestName}
+Booking Reference: ${confirmation.bookingReference || "Pending"}
+
+Guest Name: ${confirmation.guestName}
 Email: ${confirmation.email}
 Phone: ${confirmation.phone}
 
 Property: ${roomName}
 Location: ${roomLocation}
 
-Room type: ${confirmation.roomType}
+Room Type: ${confirmation.roomType}
 Check-in: ${formatDate(confirmation.checkIn)}
 Check-out: ${formatDate(confirmation.checkOut)}
 Guests: ${confirmation.guests}
@@ -455,11 +456,13 @@ Nights: ${confirmation.nights}
 
 Total: ${formatCurrency(confirmation.total)}
 
-Payment method: Pay at hotel.
+Payment Method: Pay at hotel.
 
-Thank you.
-    `.trim();
+Please let me know the next steps to confirm and secure my booking.
 
+Thank you,
+${confirmation.guestName}
+`.trim();
     const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
       message
     )}`;
