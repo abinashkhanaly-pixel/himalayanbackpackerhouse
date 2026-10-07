@@ -48,11 +48,18 @@ const createBooking = async (req, res) => {
       });
     }
 
-    // Check guest capacity
-    if (Number(guests) > selectedRoom.capacity) {
+    // Validate guest count
+    // Room capacity is NOT used as a booking restriction.
+    const guestCount = Number(guests);
+
+    if (
+      !Number.isInteger(guestCount) ||
+      guestCount < 1 ||
+      guestCount > 300
+    ) {
       return res.status(400).json({
         success: false,
-        message: `Maximum capacity is ${selectedRoom.capacity} guests`,
+        message: "Guests must be between 1 and 300",
       });
     }
 
@@ -87,7 +94,7 @@ const createBooking = async (req, res) => {
       guestName,
       email,
       phone,
-      guests: Number(guests),
+      guests: guestCount,
       checkIn: startDate,
       checkOut: endDate,
       pricePerNight: selectedRoom.price,
