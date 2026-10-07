@@ -285,22 +285,79 @@
 }
 
 /* =========================================================
-   PHONE
+   PHONE — react-international-phone
    ========================================================= */
 
 .phone-input {
-  display: flex;
-  gap: 8px;
-}
-
-.phone-input select {
-  width: 105px;
-  flex: 0 0 105px;
-}
-
-.phone-input input {
+  width: 100%;
   min-width: 0;
+}
+
+.phone-input .react-international-phone-input-container {
+  width: 100%;
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+}
+
+.phone-input .react-international-phone-country-selector-button {
+  width: 105px;
+  min-width: 105px;
+  height: 48px;
+  padding: 0 10px;
+  box-sizing: border-box;
+  border: 1px solid #d7dce3;
+  border-right: 0;
+  border-radius: 10px 0 0 10px;
+  background: #ffffff;
+  color: #343b46;
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.phone-input .react-international-phone-input {
+  height: 48px;
   flex: 1;
+  min-width: 0;
+  width: 100%;
+  padding: 0 14px;
+  box-sizing: border-box;
+  border: 1px solid #d7dce3;
+  border-left: 0;
+  border-radius: 0 10px 10px 0;
+  background: #ffffff;
+  color: #343b46;
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+}
+
+.phone-input .react-international-phone-input:hover {
+  border-color: #b8c0cc;
+}
+
+.phone-input .react-international-phone-input:focus {
+  border-color: #1668e3;
+  box-shadow: 0 0 0 3px rgba(22, 104, 227, 0.1);
+}
+
+.phone-input .react-international-phone-country-selector-button:hover {
+  border-color: #b8c0cc;
+}
+
+.phone-input
+  .react-international-phone-input-container:focus-within
+  .react-international-phone-country-selector-button {
+  border-color: #1668e3;
+}
+
+.phone-input .react-international-phone-country-selector-dropdown {
+  z-index: 9999;
+  max-width: min(320px, calc(100vw - 24px));
+  border: 1px solid #d7dce3;
+  border-radius: 10px;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.16);
+  background: #ffffff;
 }
 
 /* =========================================================
@@ -1275,15 +1332,17 @@
     height: 46px;
   }
 
-  .phone-input {
-    gap: 6px;
-  }
-
-  .phone-input select {
+  /* PHONE — MOBILE */
+  .phone-input .react-international-phone-country-selector-button {
     width: 92px;
-    flex-basis: 92px;
+    min-width: 92px;
+    height: 46px;
     padding-left: 8px;
     padding-right: 5px;
+  }
+
+  .phone-input .react-international-phone-input {
+    height: 46px;
   }
 
   .payment-option {
@@ -1345,10 +1404,19 @@
     font-size: 18px;
   }
 
-  .phone-input select {
+  /* PHONE — 320px */
+  .phone-input .react-international-phone-country-selector-button {
     width: 82px;
-    flex-basis: 82px;
+    min-width: 82px;
+    height: 46px;
+    padding-left: 7px;
+    padding-right: 4px;
     font-size: 12px;
+  }
+
+  .phone-input .react-international-phone-input {
+    height: 46px;
+    font-size: 13px;
   }
 
   .field input,
@@ -1375,10 +1443,10 @@
   }
 }
 
-/* =========================================================
+/* =========================================
    RIGHT SIDEBAR — ONE SINGLE STICKY BOX
    IMPORTANT: KEEP THIS AT THE VERY END
-   ========================================================= */
+========================================= */
 
 .booking-sidebar {
   position: sticky !important;
@@ -1404,6 +1472,7 @@
 }
 
 /* Remove separate-card appearance */
+
 .booking-sidebar > .property-card,
 .booking-sidebar > .price-card,
 .booking-sidebar > .trust-card {
@@ -1610,8 +1679,9 @@
     padding: 3px 14px !important;
   }
 
-  .booking-sidebar .trust-item {
-    padding: 14px 0;
+  /* PHONE */
+  .phone-input .react-international-phone-country-selector-button {
+    min-width: 92px;
   }
 }
 
@@ -1639,6 +1709,11 @@
   .booking-sidebar > .trust-card {
     padding: 3px 14px !important;
   }
+
+  /* PHONE */
+  .phone-input .react-international-phone-country-selector-button {
+    min-width: 92px;
+  }
 }
 
 /* =========================================================
@@ -1665,7 +1740,13 @@
   .booking-sidebar > .trust-card {
     padding: 3px 12px !important;
   }
+
+  /* PHONE */
+  .phone-input .react-international-phone-country-selector-button {
+    min-width: 82px;
+  }
 }
+
 /* =========================================
    STICKY SIDEBAR — WIDTH + TEXT FIX
 ========================================= */
@@ -1677,6 +1758,7 @@
 }
 
 /* All sections stay inside ONE sticky box */
+
 .booking-sidebar > .property-card,
 .booking-sidebar > .price-card,
 .booking-sidebar > .trust-card {
@@ -1686,6 +1768,7 @@
 }
 
 /* Prevent text from being cut */
+
 .booking-sidebar h2,
 .booking-sidebar p,
 .booking-sidebar span,
@@ -1696,12 +1779,14 @@
 }
 
 /* Property title */
+
 .property-card-content h2 {
   white-space: normal;
   line-height: 1.3;
 }
 
 /* Price rows */
+
 .price-row {
   width: 100%;
   min-width: 0;
@@ -1720,6 +1805,7 @@
 }
 
 /* Trust section */
+
 .trust-item {
   width: 100%;
   min-width: 0;
@@ -1741,6 +1827,7 @@
 }
 
 /* Local support sentence */
+
 .trust-item p {
   line-height: 1.45;
 }
@@ -1750,7 +1837,6 @@
 ========================================= */
 
 @media (min-width: 851px) {
-
   .booking-grid {
     grid-template-columns: minmax(0, 1fr) minmax(360px, 400px);
     gap: 28px;
@@ -1759,7 +1845,6 @@
   .booking-sidebar {
     width: 100%;
   }
-
 }
 
 /* =========================================
@@ -1767,7 +1852,6 @@
 ========================================= */
 
 @media (max-width: 850px) {
-
   .booking-grid {
     grid-template-columns: 1fr;
   }
@@ -1776,7 +1860,6 @@
     width: 100%;
     max-width: 100%;
   }
-
 }
 
 /* =========================================
@@ -1784,7 +1867,6 @@
 ========================================= */
 
 @media (max-width: 650px) {
-
   .booking-sidebar {
     width: 100%;
     max-width: 100%;
@@ -1803,13 +1885,14 @@
   .trust-item {
     gap: 12px;
   }
-
 }
+
 /* =========================================
    STICKY SIDEBAR — COMPACT VERTICAL SPACING
 ========================================= */
 
 /* Property section */
+
 .booking-sidebar .property-card-content {
   padding: 16px 20px 18px;
 }
@@ -1824,6 +1907,7 @@
 }
 
 /* Check-in / Check-out */
+
 .booking-sidebar .stay-preview {
   margin-top: 8px;
 }
@@ -1837,6 +1921,7 @@
 }
 
 /* Price summary */
+
 .booking-sidebar .price-card {
   padding: 17px 20px;
 }
@@ -1856,6 +1941,7 @@
 }
 
 /* Trust section */
+
 .booking-sidebar .trust-card {
   padding: 7px 20px 10px;
 }
@@ -1876,13 +1962,14 @@
 }
 
 /* Smaller gap between trust items */
+
 .booking-sidebar .trust-item + .trust-item {
   margin-top: 0;
 }
 
 /* Mobile */
-@media (max-width: 650px) {
 
+@media (max-width: 650px) {
   .booking-sidebar .property-card-content {
     padding: 15px 17px;
   }
@@ -1899,6 +1986,7 @@
     padding: 9px 0;
   }
 }
+
 /* =========================================
    PAYMENT METHOD — PAY AT HOTEL EMPHASIS
 ========================================= */
@@ -1911,6 +1999,7 @@
 }
 
 /* If "Pay at hotel" is inside a label/option */
+
 .payment-option strong,
 .payment-option-title {
   color: #b84a4a;
@@ -1918,13 +2007,15 @@
 }
 
 /* Description stays muted */
+
 .payment-method-card p,
 .payment-option p {
   color: #6b7280;
 }
- /* =========================================
-    TRUST ITEMS — LEFT ALIGNED
- ========================================= */
+
+/* =========================================
+   TRUST ITEMS — LEFT ALIGNED
+========================================= */
 
 .booking-sidebar .trust-item {
   display: flex;
@@ -1940,6 +2031,7 @@
 }
 
 /* Check icon stays on the left */
+
 .booking-sidebar .trust-item-icon,
 .booking-sidebar .trust-item svg,
 .booking-sidebar .trust-item .trust-icon {
@@ -1948,6 +2040,7 @@
 }
 
 /* Text stays attached to icon */
+
 .booking-sidebar .trust-item-content {
   flex: 1;
   min-width: 0;
@@ -1955,6 +2048,7 @@
 }
 
 /* Title */
+
 .booking-sidebar .trust-item strong {
   display: block;
   text-align: left;
@@ -1963,6 +2057,7 @@
 }
 
 /* Description */
+
 .booking-sidebar .trust-item p {
   display: block;
   text-align: left;
@@ -1971,6 +2066,7 @@
 }
 
 /* Remove unwanted centering */
+
 .booking-sidebar .trust-card {
   text-align: left;
 }
@@ -1980,6 +2076,7 @@
    ========================================================= */
 
 /* Main confirmation area */
+
 .confirmation-page {
   width: 100%;
   max-width: 1240px;
@@ -1989,10 +2086,13 @@
   text-align: left;
 }
 
-/* Confirmation card */
+/* =========================================================
+   CONFIRMATION CARD — WIDER
+   ========================================================= */
+
 .confirmation-page .confirmation-card {
   width: 100%;
-  max-width: 920px;
+  max-width: 1120px;
   margin: 0;
   padding: 0;
   background: transparent;
@@ -2002,6 +2102,7 @@
 }
 
 /* Success icon */
+
 .confirmation-page .success-icon {
   display: flex;
   align-items: center;
@@ -2020,6 +2121,7 @@
 }
 
 /* RESERVATION RECEIVED */
+
 .confirmation-page .confirmation-eyebrow {
   display: block;
   margin: 0 0 7px;
@@ -2033,6 +2135,7 @@
 }
 
 /* Main heading */
+
 .confirmation-page h1 {
   margin: 0 0 9px;
 
@@ -2047,6 +2150,7 @@
 }
 
 /* Thank-you text */
+
 .confirmation-page .confirmation-intro {
   max-width: 680px;
   margin: 0 0 12px;
@@ -2059,6 +2163,7 @@
 }
 
 /* Customer operations message */
+
 .confirmation-page .confirmation-contact-note {
   max-width: 700px;
   margin: 0 0 15px;
@@ -2089,6 +2194,7 @@
 }
 
 /* Booking reference */
+
 .confirmation-page .confirmation-id {
   display: inline-flex;
   align-items: center;
@@ -2118,12 +2224,13 @@
 }
 
 /* =========================================================
-   HOTEL SUMMARY
+   HOTEL SUMMARY — WIDE + COMPACT
    ========================================================= */
 
 .confirmation-page .confirmation-summary {
   width: 100%;
-  max-width: 920px;
+  max-width: 1120px;
+  min-width: 0;
 
   overflow: hidden;
 
@@ -2134,57 +2241,88 @@
   box-shadow: 0 7px 24px rgba(15, 23, 42, 0.08);
 
   text-align: left;
+  box-sizing: border-box;
 }
 
-/* Property */
+/* =========================================================
+   HOTEL PROPERTY ROW
+   ========================================================= */
+
 .confirmation-page .confirmation-property {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
 
-  padding: 17px 20px;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+
+  padding: 13px 17px;
 
   text-align: left;
 }
 
 .confirmation-page .confirmation-property img {
-  width: 105px;
-  height: 75px;
+  width: 108px;
+  height: 70px;
 
-  flex: 0 0 105px;
+  flex: 0 0 108px;
 
   object-fit: cover;
-  border-radius: 9px;
+  border-radius: 8px;
+}
+
+.confirmation-page .confirmation-property > div {
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
 }
 
 .confirmation-page .confirmation-property h2 {
-  margin: 0 0 3px;
+  margin: 0 0 2px;
+
+  max-width: 100%;
 
   color: #202733;
-  font-size: 18px;
-  line-height: 1.25;
+  font-size: 16px;
+  line-height: 1.2;
   font-weight: 750;
   font-style: italic;
 
   text-align: left;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .confirmation-page .confirmation-property p {
   margin: 0;
 
   color: #707985;
-  font-size: 11px;
+  font-size: 10px;
+  line-height: 1.25;
 
   text-align: left;
 }
 
 /* =========================================================
-   BOOKING DETAILS
+   BOOKING DETAILS — COMPACT + FLEXIBLE
    ========================================================= */
 
 .confirmation-page .confirmation-grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+
+  grid-template-columns:
+    minmax(125px, 1.15fr)
+    minmax(125px, 1.15fr)
+    minmax(75px, 0.65fr)
+    minmax(75px, 0.65fr)
+    minmax(110px, 0.9fr);
+
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 
   border-top: 1px solid #edf0f3;
 
@@ -2193,7 +2331,10 @@
 
 .confirmation-page .confirmation-grid > div {
   min-width: 0;
-  padding: 13px 15px;
+  width: 100%;
+  box-sizing: border-box;
+
+  padding: 8px 9px;
 
   border-right: 1px solid #edf0f3;
 
@@ -2207,54 +2348,91 @@
 .confirmation-page .confirmation-grid span {
   display: block;
 
-  margin-bottom: 4px;
+  margin-bottom: 3px;
 
   color: #8b929b;
-  font-size: 9px;
+  font-size: 8px;
   font-weight: 700;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.35px;
   text-transform: uppercase;
 
   text-align: left;
+
+  white-space: nowrap;
 }
 
 .confirmation-page .confirmation-grid strong {
   display: block;
 
+  max-width: 100%;
+  min-width: 0;
+
   color: #303741;
-  font-size: 12px;
-  line-height: 1.35;
+  font-size: 11px;
+  line-height: 1.25;
   font-weight: 700;
 
   text-align: left;
 
-  overflow-wrap: break-word;
+  overflow-wrap: anywhere;
+  word-break: normal;
 }
 
-/* Total */
+/* =========================================================
+   TOTAL — CENTERED + LARGE AMOUNT PROTECTION
+   ========================================================= */
+
 .confirmation-page .confirmation-total {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 15px;
+  justify-content: center;
 
-  padding: 13px 20px;
+  gap: 10px;
+
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+
+  padding: 10px 14px;
 
   border-top: 1px solid #edf0f3;
 
-  text-align: left;
+  background: #fafbfc;
+
+  text-align: center;
+
+  flex-wrap: nowrap;
 }
 
-.confirmation-page .confirmation-total span {
+.confirmation-page .confirmation-total span:first-child {
+  flex: 0 0 auto;
+
   color: #596270;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 650;
+
+  white-space: nowrap;
 }
 
+.confirmation-page .confirmation-total span:last-child,
 .confirmation-page .confirmation-total strong {
+  flex: 0 0 auto;
+
+  min-width: max-content;
+
   color: #202733;
   font-size: 16px;
   font-weight: 800;
+  line-height: 1.2;
+
+  text-align: center;
+
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: clip;
+
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.2px;
 }
 
 /* =========================================================
@@ -2286,6 +2464,7 @@
 }
 
 /* Payment */
+
 .confirmation-page .confirmation-note {
   margin: 10px 0 0;
 
@@ -2302,16 +2481,21 @@
 }
 
 /* =========================================================
-   MOBILE
+   CONFIRMATION MOBILE
    ========================================================= */
 
 @media (max-width: 700px) {
-
   .confirmation-page {
     padding: 30px 16px 50px;
   }
 
   .confirmation-page .confirmation-card {
+    width: 100%;
+    max-width: none;
+  }
+
+  .confirmation-page .confirmation-summary {
+    width: 100%;
     max-width: none;
   }
 
@@ -2332,22 +2516,30 @@
   }
 
   .confirmation-page .confirmation-property {
-    padding: 15px;
-    gap: 12px;
+    padding: 13px;
+    gap: 11px;
   }
 
   .confirmation-page .confirmation-property img {
     width: 88px;
-    height: 66px;
+    height: 64px;
     flex-basis: 88px;
   }
 
   .confirmation-page .confirmation-property h2 {
-    font-size: 16px;
+    font-size: 15px;
+  }
+
+  .confirmation-page .confirmation-property p {
+    font-size: 9px;
   }
 
   .confirmation-page .confirmation-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .confirmation-page .confirmation-grid > div {
+    padding: 9px 10px;
   }
 
   .confirmation-page .confirmation-grid > div:nth-child(2n) {
@@ -2358,6 +2550,14 @@
     border-bottom: 1px solid #edf0f3;
   }
 
+  .confirmation-page .confirmation-grid span {
+    font-size: 8px;
+  }
+
+  .confirmation-page .confirmation-grid strong {
+    font-size: 11px;
+  }
+
   .confirmation-page .confirmation-actions {
     flex-direction: column;
     align-items: stretch;
@@ -2366,5 +2566,143 @@
   .confirmation-page .whatsapp-button,
   .confirmation-page .secondary-action {
     width: 100%;
+  }
+
+  /* TOTAL — MOBILE */
+  .confirmation-page .confirmation-total {
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 10px;
+  }
+
+  .confirmation-page .confirmation-total span:first-child {
+    font-size: 10px;
+  }
+
+  .confirmation-page .confirmation-total span:last-child,
+  .confirmation-page .confirmation-total strong {
+    font-size: 15px;
+    min-width: max-content;
+    white-space: nowrap;
+  }
+}
+
+/* =========================================================
+   EXTRA SMALL MOBILE — LARGE AMOUNT PROTECTION
+   ========================================================= */
+
+@media (max-width: 430px) {
+  .confirmation-page .confirmation-summary {
+    width: 100%;
+  }
+
+  .confirmation-page .confirmation-property {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .confirmation-page .confirmation-property img {
+    width: 78px;
+    height: 59px;
+    flex-basis: 78px;
+  }
+
+  .confirmation-page .confirmation-property h2 {
+    font-size: 15px;
+  }
+
+  .confirmation-page .confirmation-property p {
+    font-size: 9px;
+  }
+
+  .confirmation-page .confirmation-grid > div {
+    padding: 9px 9px;
+  }
+
+  .confirmation-page .confirmation-grid span {
+    font-size: 8px;
+    letter-spacing: 0.3px;
+  }
+
+  .confirmation-page .confirmation-grid strong {
+    font-size: 10px;
+  }
+
+  .confirmation-page .confirmation-total {
+    justify-content: center;
+    gap: 7px;
+    padding: 10px 9px;
+  }
+
+  .confirmation-page .confirmation-total span:first-child {
+    font-size: 9px;
+  }
+
+  .confirmation-page .confirmation-total span:last-child,
+  .confirmation-page .confirmation-total strong {
+    font-size: 14px;
+    min-width: max-content;
+    white-space: nowrap;
+    letter-spacing: -0.3px;
+  }
+}
+
+/* =========================================================
+   VERY SMALL — 320px
+   ========================================================= */
+
+@media (max-width: 350px) {
+  .confirmation-page {
+    padding-left: 9px;
+    padding-right: 9px;
+  }
+
+  .confirmation-page .confirmation-property {
+    padding: 11px;
+    gap: 9px;
+  }
+
+  .confirmation-page .confirmation-property img {
+    width: 70px;
+    height: 54px;
+    flex-basis: 70px;
+  }
+
+  .confirmation-page .confirmation-property h2 {
+    font-size: 14px;
+  }
+
+  .confirmation-page .confirmation-property p {
+    font-size: 9px;
+  }
+
+  .confirmation-page .confirmation-grid > div {
+    padding: 8px 7px;
+  }
+
+  .confirmation-page .confirmation-grid span {
+    font-size: 7px;
+  }
+
+  .confirmation-page .confirmation-grid strong {
+    font-size: 10px;
+  }
+
+  .confirmation-page .confirmation-total {
+    justify-content: center;
+    gap: 6px;
+    padding: 9px 8px;
+  }
+
+  .confirmation-page .confirmation-total span:first-child {
+    font-size: 8px;
+  }
+
+  .confirmation-page .confirmation-total span:last-child,
+  .confirmation-page .confirmation-total strong {
+    font-size: 13px;
+    min-width: max-content;
+    white-space: nowrap;
+    letter-spacing: -0.35px;
   }
 }
