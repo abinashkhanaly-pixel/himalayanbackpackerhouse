@@ -28,6 +28,7 @@ const DEFAULT_FORM = {
   beds: "",
   amenities: "",
   images: [],
+  roomImage: "",
   available: true,
 
   // Property
@@ -361,6 +362,11 @@ export default function AdminRooms() {
           .map((image) => image.trim())
           .filter(Boolean),
 
+         roomImage: form.images.includes(form.roomImage)
+         ? form.roomImage
+         : form.images[0] || "",
+
+
         available: form.available,
 
         // PROPERTY
@@ -461,6 +467,7 @@ export default function AdminRooms() {
       images: Array.isArray(room.images)
         ? room.images
         : [],
+      roomImage: room.roomImage || "",
 
       available: room.available ?? true,
 
@@ -1139,121 +1146,133 @@ export default function AdminRooms() {
 
                     {/* IMAGES */}
 
-                    <div className="field full">
-                      <label>
-                        Room Images
-                      </label>
+                    
 
-                      <div className="image-upload-modern">
-                        <div className="upload-icon">
-                          ↑
-                        </div>
+<div className="field full">
+  <label>
+    Room Images
+  </label>
 
-                        <h4>
-                          Upload room images
-                        </h4>
+  <div className="image-upload-modern">
+    <div className="upload-icon">
+      ↑
+    </div>
 
-                        <p>
-                          JPG, JPEG, PNG or WebP
-                        </p>
+    <h4>
+      Upload room images
+    </h4>
 
-                        <input
-                          type="file"
-                          accept="image/jpeg,image/jpg,image/png,image/webp"
-                          multiple
-                          onChange={
-                            handleImageUpload
-                          }
-                          disabled={
-                            uploadingImages
-                          }
-                        />
+    <p>
+      JPG, JPEG, PNG or WebP
+    </p>
 
-                        {uploadStatus && (
-                          <div
-                            className={
-                              uploadingImages
-                                ? "upload-message uploading"
-                                : "upload-message"
-                            }
-                          >
-                            {uploadStatus}
-                          </div>
-                        )}
-                      </div>
+    <input
+      type="file"
+      accept="image/jpeg,image/jpg,image/png,image/webp"
+      multiple
+      onChange={handleImageUpload}
+      disabled={uploadingImages}
+    />
 
-                      <div className="url-image-row">
-                        <input
-                          type="url"
-                          value={imageUrlInput}
-                          onChange={(e) =>
-                            setImageUrlInput(
-                              e.target.value
-                            )
-                          }
-                          placeholder="Add Existing Image URL"
-                        />
+    {uploadStatus && (
+      <div
+        className={
+          uploadingImages
+            ? "upload-message uploading"
+            : "upload-message"
+        }
+      >
+        {uploadStatus}
+      </div>
+    )}
+  </div>
 
-                        <button
-                          type="button"
-                          onClick={addImageUrl}
-                        >
-                          + Add URL
-                        </button>
-                      </div>
+  <div className="url-image-row">
+    <input
+      type="url"
+      value={imageUrlInput}
+      onChange={(e) =>
+        setImageUrlInput(e.target.value)
+      }
+      placeholder="Add Existing Image URL"
+    />
 
-                      <small>
-                        Existing external image
-                        URLs can still be used.
-                      </small>
+    <button
+      type="button"
+      onClick={addImageUrl}
+    >
+      + Add URL
+    </button>
+  </div>
 
-                      {form.images.length > 0 && (
-                        <div className="image-preview-grid-modern">
-                          {form.images.map(
-                            (image, index) => (
-                              <div
-                                className="modern-image-card"
-                                key={`${image}-${index}`}
-                              >
-                                <img
-                                  src={image}
-                                  alt={`Room ${
-                                    index + 1
-                                  }`}
-                                  onError={(e) => {
-                                    e.currentTarget.style.opacity =
-                                      "0.35";
-                                  }}
-                                />
+  <small>
+    Existing external image URLs can still be used.
+  </small>
 
-                                {index === 0 && (
-                                  <span className="main-badge">
-                                    MAIN
-                                  </span>
-                                )}
+  {form.images.length > 0 && (
+    <div className="image-preview-grid-modern">
+      {form.images.map((image, index) => (
+        <div
+          className="modern-image-card"
+          key={`${image}-${index}`}
+        >
+          <img
+            src={image}
+            alt={`Room ${index + 1}`}
+            onError={(e) => {
+              e.currentTarget.style.opacity = "0.35";
+            }}
+          />
 
-                                <button
-                                  type="button"
-                                  className="image-delete"
-                                  onClick={() =>
-                                    removeImage(
-                                      index
-                                    )
-                                  }
-                                >
-                                  ×
-                                </button>
+          {index === 0 && (
+            <span className="main-badge">
+              MAIN
+            </span>
+          )}
 
-                                <div className="image-index">
-                                  Image{" "}
-                                  {index + 1}
-                                </div>
-                              </div>
-                            )
-                          )}
-                        </div>
-                      )}
-                    </div>
+          <button
+  type="button"
+  className={
+    form.roomImage === image
+      ? "room-image-select selected"
+      : "room-image-select"
+  }
+  onClick={() =>
+    setForm((previous) => ({
+      ...previous,
+      roomImage: image,
+      images: [
+        image,
+        ...previous.images.filter(
+          (item) => item !== image
+        ),
+      ],
+    }))
+  }
+>
+  {form.roomImage === image
+    ? "✓ YOUR ROOM • MAIN"
+    : "Use for Your Room"}
+</button>
+          <button
+            type="button"
+            className="image-delete"
+            onClick={() =>
+              removeImage(index)
+            }
+          >
+            ×
+          </button>
+
+          <div className="image-index">
+            Image {index + 1}
+          </div>
+        </div>
+      ))}
+    </div>
+  )}
+</div>
+                               
 
                     {/* DESCRIPTION */}
 
