@@ -59,7 +59,8 @@ const RecommendedStays = () => {
   }
 
   return (
-    <section className="recommended-stays">
+    
+<section id="recommended-stays" className="recommended-stays">
       <div className="recommended-stays-container">
 
         {/* SECTION HEADER */}

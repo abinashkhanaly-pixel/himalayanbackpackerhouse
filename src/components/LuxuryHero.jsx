@@ -96,6 +96,32 @@ function LuxuryHero() {
 
   const [activeTab, setActiveTab] = useState("hotel");
 
+const handleTabClick = (tabId) => {
+  setActiveTab(tabId);
+  setTravelerOpen(false);
+  setLocationOpen(false);
+
+  if (tabId === "hotel") {
+    navigate("/rooms");
+    return;
+  }
+
+  if (tabId === "trek") {
+    navigate("/trekking");
+    return;
+  }
+
+  if (tabId === "vehicle") {
+    navigate("/vehicles");
+    return;
+  }
+
+  if (tabId === "packages") {
+    navigate("/packages");
+    return;
+  }
+};  
+    
   const [destination, setDestination] = useState("");
 
   /* =========================================================
@@ -394,12 +420,7 @@ function LuxuryHero() {
                 className={`luxury-tab ${
                   activeTab === tab.id ? "active" : ""
                 }`}
-                onClick={() => {
-                  setActiveTab(tab.id);
-                  setTravelerOpen(false);
-                  setLocationOpen(false);
-                }}
-              >
+               onClick={() => handleTabClick(tab.id)}              >
                 <span className="luxury-tab-icon">
                   {tab.icon}
                 </span>

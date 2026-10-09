@@ -5,7 +5,8 @@ import "react-international-phone/style.css";
 import { getRoom } from "../services/roomApi";
 import "./Booking.css";
 
-const BOOKINGS_API =
+
+ const BOOKINGS_API =
   "https://backpacker-gateways-2.onrender.com/api/bookings";
 
 const WHATSAPP_NUMBER =
@@ -292,8 +293,8 @@ export default function Booking() {
       return;
     }
 
-    if (guestCount < 1 || guestCount > 20) {
-      setSubmitError("Guests must be between 1 and 20.");
+    if (guestCount < 1 || guestCount > 300) {
+      setSubmitError("Guests must be between 1 and 300.");
       return;
     }
 
@@ -918,12 +919,12 @@ ${confirmation.guestName}
                     name="guests"
                     type="number"
                     min="1"
-                    max="20"
+                    max="300"
                     value={form.guests}
                     onChange={handleChange}
                   />
 
-                  <small>Maximum 20 guests</small>
+                  <small>Maximum 300 guests</small>
                 </div>
 
                 <div className="field">

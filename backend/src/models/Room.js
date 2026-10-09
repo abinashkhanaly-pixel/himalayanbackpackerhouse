@@ -120,9 +120,11 @@ const roomSchema = new mongoose.Schema(
     },
 
     // ==========================================
-    // ROOM IMAGES
+    // ROOM IMAGES / GALLERY
     // Example:
     // ["https://...", "https://..."]
+    //
+    // These are all images used by the gallery.
     // ==========================================
     images: {
       type: [String],
@@ -134,6 +136,24 @@ const roomSchema = new mongoose.Schema(
           .map((item) => String(item).trim())
           .filter((item) => item.length > 0);
       },
+    },
+
+    // ==========================================
+    // YOUR ROOM IMAGE
+    //
+    // Dedicated image for the "Your Room"
+    // section on the room details page.
+    //
+    // This is intentionally separate from
+    // the active gallery image.
+    //
+    // Existing rooms can leave this empty.
+    // Frontend will fall back to images[0].
+    // ==========================================
+    roomImage: {
+      type: String,
+      trim: true,
+      default: "",
     },
 
     // ==========================================
@@ -162,4 +182,3 @@ roomSchema.set("toJSON", {
 });
 
 module.exports = mongoose.model("Room", roomSchema);
-

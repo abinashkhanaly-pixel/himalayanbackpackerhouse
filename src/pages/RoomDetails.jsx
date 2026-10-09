@@ -403,6 +403,10 @@ const RoomDetails = () => {
     totalImages > 0
       ? images[activeImage] || images[0]
       : "";
+   const roomImage =
+  room.roomImage ||
+  images[0] ||
+  "";
 
   const sideImages =
     images.slice(1, 5);
@@ -1157,12 +1161,12 @@ const RoomDetails = () => {
 
               <div className="room-summary-card">
 
-                {mainImage && (
+                {roomImage && (
 
                   <div className="room-summary-image">
 
                     <img
-                      src={mainImage}
+                      src={roomImage}
                       alt={roomName}
                       loading="lazy"
                     />
