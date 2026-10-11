@@ -58,13 +58,17 @@ const getUniqueRooms = (items) => {
   });
 };
 
-// Match retreat sections using hotel destination/location.
-// Admin homepageSections checkboxes are not required.
+// Match locations using destination and location fields.
 const getLocationText = (stay) =>
   `${stay.destination || ""} ${stay.location || ""}`.toLowerCase();
 
 const belongsToLocation = (stay, locationName) =>
   getLocationText(stay).includes(locationName.toLowerCase());
+
+// Exclude both retreat destinations from the 5-Star Hotels section.
+const isKathmanduAreaRetreat = (stay) =>
+  belongsToLocation(stay, "dhulikhel") ||
+  belongsToLocation(stay, "nagarkot");
 
 const RecommendedStays = () => {
   const [stays, setStays] = useState([]);
@@ -86,6 +90,7 @@ const RecommendedStays = () => {
           roomList.map((room) => ({
             name: room.name,
             starCategory: room.starCategory,
+            starRating: room.starRating,
             destination: room.destination,
             location: room.location,
           }))
@@ -114,32 +119,32 @@ const RecommendedStays = () => {
     };
   }, []);
 
-  // 5-Star Hotels: based on star category.
+  // 5-Star Hotels: only 5-star properties outside Dhulikhel and Nagarkot.
   const fiveStar = sortByName(
     getUniqueRooms(
-      stays.filter((stay) => getStars(stay) === 5)
+      stays.filter(
+        (stay) =>
+          getStars(stay) === 5 &&
+          !isKathmanduAreaRetreat(stay)
+      )
     )
   ).slice(0, 15);
 
-  // 4-Star Hotels: based on star category.
+  // 4-Star Hotels: all 4-star properties, independent of location.
   const fourStar = sortByName(
     getUniqueRooms(
       stays.filter((stay) => getStars(stay) === 4)
     )
   ).slice(0, 9);
 
-  // Himalayan retreats include properties from both locations.
+  // Himalayan retreats from Dhulikhel and Nagarkot.
   const himalayanRetreats = sortByName(
     getUniqueRooms(
-      stays.filter(
-        (stay) =>
-          belongsToLocation(stay, "dhulikhel") ||
-          belongsToLocation(stay, "nagarkot")
-      )
+      stays.filter((stay) => isKathmanduAreaRetreat(stay))
     )
   ).slice(0, 12);
 
-  // Dhulikhel: based on destination/location.
+  // Dhulikhel section: determined by destination/location.
   const dhulikhel = sortByName(
     getUniqueRooms(
       stays.filter((stay) =>
@@ -148,7 +153,7 @@ const RecommendedStays = () => {
     )
   ).slice(0, 6);
 
-  // Nagarkot: based on destination/location.
+  // Nagarkot section: determined by destination/location.
   const nagarkot = sortByName(
     getUniqueRooms(
       stays.filter((stay) =>
