@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getRooms } from "../services/roomApi";
@@ -5,6 +6,70 @@ import "./RecommendedStays.css";
 
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80";
+
+const getRoomList = (result) => {
+  if (Array.isArray(result)) return result;
+  if (Array.isArray(result?.data)) return result.data;
+  if (Array.isArray(result?.rooms)) return result.rooms;
+  if (Array.isArray(result?.data?.rooms)) return result.data.rooms;
+  return [];
+};
+
+const getStars = (stay) => {
+  const value =
+    stay.starCategory ??
+    stay.starRating ??
+    stay.stars ??
+    stay.star ??
+    stay.hotelStar ??
+    stay.hotelStars;
+
+  if (value === null || value === undefined || value === "") {
+    return 0;
+  }
+
+  const text = String(value).trim();
+  const match = text.match(/\b([1-5])\s*-?\s*Star\b/i);
+
+  if (match) return Number(match[1]);
+
+  if (/^[1-5]$/.test(text)) {
+    return Number(text);
+  }
+
+  return 0;
+};
+
+const getLocationText = (stay) =>
+  [
+    stay.destination,
+    stay.location,
+    stay.address,
+    stay.city,
+    stay.name,
+    stay.propertyName,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+const sortByName = (items) =>
+  [...items].sort((a, b) =>
+    String(a.name || "").localeCompare(String(b.name || ""))
+  );
+
+const getUniqueRooms = (items) => {
+  const seen = new Set();
+
+  return items.filter((stay) => {
+    const id = stay._id || stay.seoSlug || stay.name;
+
+    if (!id || seen.has(id)) return false;
+
+    seen.add(id);
+    return true;
+  });
+};
 
 const RecommendedStays = () => {
   const [stays, setStays] = useState([]);
@@ -18,22 +83,23 @@ const RecommendedStays = () => {
         setLoading(true);
 
         const result = await getRooms();
+        const roomList = getRoomList(result);
 
-        if (cancelled) return;
+        console.log("RECOMMENDED ROOMS RESPONSE:", result);
+        console.table(
+          roomList.map((room) => ({
+            name: room.name,
+            starCategory: room.starCategory,
+            destination: room.destination,
+            location: room.location,
+            address: room.address,
+            city: room.city,
+          }))
+        );
 
-        let roomData = [];
-
-        if (Array.isArray(result)) {
-          roomData = result;
-        } else if (Array.isArray(result?.data)) {
-          roomData = result.data;
-        } else if (Array.isArray(result?.rooms)) {
-          roomData = result.rooms;
-        } else if (Array.isArray(result?.data?.rooms)) {
-          roomData = result.data.rooms;
+        if (!cancelled) {
+          setStays(roomList);
         }
-
-        setStays(roomData.slice(0, 6));
       } catch (error) {
         console.error("RECOMMENDED STAYS ERROR:", error);
 
@@ -54,36 +120,147 @@ const RecommendedStays = () => {
     };
   }, []);
 
+  const fiveStar = sortByName(
+    getUniqueRooms(stays.filter((stay) => getStars(stay) === 5))
+  ).slice(0, 15);
+
+  const fourStar = sortByName(
+    getUniqueRooms(stays.filter((stay) => getStars(stay) === 4))
+  ).slice(0, 9);
+
+  const dhulikhel = sortByName(
+    getUniqueRooms(
+      stays.filter((stay) =>
+        getLocationText(stay).includes("dhulikhel")
+      )
+    )
+  ).slice(0, 6);
+
+  const nagarkot = sortByName(
+    getUniqueRooms(
+      stays.filter((stay) =>
+        getLocationText(stay).includes("nagarkot")
+      )
+    )
+  ).slice(0, 6);
+
   if (!loading && stays.length === 0) {
     return null;
   }
 
-  return (
-    
-<section id="recommended-stays" className="recommended-stays">
-      <div className="recommended-stays-container">
+  const renderHotelGrid = (items, sectionName) => (
+    <div className="recommended-stays-grid">
+      {items.map((stay, index) => {
+        const image =
+          Array.isArray(stay.images) && stay.images.length > 0
+            ? stay.images[0]
+            : FALLBACK_IMAGE;
 
-        {/* SECTION HEADER */}
-        <div className="recommended-stays-header">
-          <div>
-            <span className="recommended-eyebrow">
-              PREMIUM STAYS • NEPAL
-            </span>
+        const amenities = Array.isArray(stay.amenities)
+          ? stay.amenities.slice(0, 3)
+          : [];
 
-            <h2>Recommended Stays</h2>
+        const detailsUrl = `/rooms/${stay.seoSlug || stay._id}`;
 
-            <p>
-              Handpicked places to stay for an unforgettable Nepal journey.
-            </p>
-          </div>
+        return (
+          <article
+            className="recommended-stay-card"
+            key={`${sectionName}-${stay._id || stay.seoSlug || index}`}
+          >
+            <Link to={detailsUrl} className="stay-image-wrapper">
+              <img
+                src={image}
+                alt={stay.name || "Hotel in Nepal"}
+                loading={index === 0 ? "eager" : "lazy"}
+                decoding="async"
+                fetchPriority={index === 0 ? "high" : "auto"}
+                width="1200"
+                height="800"
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = FALLBACK_IMAGE;
+                }}
+              />
 
-          <Link to="/rooms" className="view-all-stays">
-            View All Stays
-            <span>→</span>
-          </Link>
+              <span className="stay-badge">
+                {getStars(stay) > 0
+                  ? `${getStars(stay)} STAR`
+                  : "PREMIUM STAY"}
+              </span>
+
+              <span className="stay-image-arrow">↗</span>
+            </Link>
+
+            <div className="stay-card-content">
+              <div className="stay-location">
+                <span>⌖</span>
+                {stay.destination || stay.location || "Nepal"}
+              </div>
+
+              <Link to={detailsUrl} className="stay-name">
+                {stay.name || "Hotel in Nepal"}
+              </Link>
+
+              {stay.description && (
+                <p className="stay-description">
+                  {String(stay.description).replace(/\n/g, " ").slice(0, 105)}
+                  {String(stay.description).length > 105 ? "..." : ""}
+                </p>
+              )}
+
+              {amenities.length > 0 && (
+                <div className="stay-amenities">
+                  {amenities.map((amenity, amenityIndex) => (
+                    <span key={amenityIndex}>{amenity}</span>
+                  ))}
+                </div>
+              )}
+
+              <div className="stay-card-footer">
+                <div className="stay-price">
+                  <small>From</small>
+                  <strong>
+                    NPR {Number(stay.price || 0).toLocaleString()}
+                  </strong>
+                  <span>/ night</span>
+                </div>
+
+                <Link to={detailsUrl} className="stay-view-button">
+                  View Stay <span>→</span>
+                </Link>
+              </div>
+            </div>
+          </article>
+        );
+      })}
+    </div>
+  );
+
+  const renderSection = (
+    title,
+    items,
+    sectionName,
+    headingLevel = "h3"
+  ) => {
+    const Heading = headingLevel;
+
+    if (!loading && items.length === 0) {
+      return null;
+    }
+
+    return (
+      <section
+        className="recommended-stays-section"
+        key={sectionName}
+      >
+        <div className="recommended-stays-section-header">
+          <Heading>{title}</Heading>
+
+          {!loading && (
+            <p>{items.length} {items.length === 1 ? "stay" : "stays"}</p>
+          )}
         </div>
 
-        {/* LOADING */}
         {loading ? (
           <div className="recommended-loading">
             <div className="stay-skeleton" />
@@ -91,114 +268,46 @@ const RecommendedStays = () => {
             <div className="stay-skeleton" />
           </div>
         ) : (
-          <div className="recommended-stays-grid">
-            {stays.map((stay, index) => {
-              const image =
-                Array.isArray(stay.images) && stay.images.length > 0
-                  ? stay.images[0]
-                  : FALLBACK_IMAGE;
-
-              const amenities = Array.isArray(stay.amenities)
-                ? stay.amenities.slice(0, 3)
-                : [];
-
-              return (
-                <article
-                  className="recommended-stay-card"
-                  key={stay._id}
-                >
-                  {/* IMAGE */}
-                  <Link
-                    to={`/rooms/${stay.seoSlug || stay._id}`}
-                    className="stay-image-wrapper"
-                  >
-                    <img
-                      src={image}
-                      alt={stay.name || "Luxury stay in Nepal"}
-                      loading={index === 0 ? "eager" : "lazy"}
-                      decoding="async"
-                      fetchPriority={index === 0 ? "high" : "auto"}
-                      width="1200"
-                      height="800"
-                      onError={(e) => {
-                        e.currentTarget.onerror = null;
-                        e.currentTarget.src = FALLBACK_IMAGE;
-                      }}
-                    />
-
-                    <span className="stay-badge">
-                      PREMIUM STAY
-                    </span>
-
-                    <span className="stay-image-arrow">
-                      ↗
-                    </span>
-                  </Link>
-
-                  {/* CONTENT */}
-                  <div className="stay-card-content">
-
-                    <div className="stay-location">
-                      <span>⌖</span>
-                      {stay.destination || "Nepal"}
-                    </div>
-
-                    <Link
-                      to={`/rooms/${stay.seoSlug || stay._id}`}
-                      className="stay-name"
-                    >
-                      {stay.name || "Luxury Stay"}
-                    </Link>
-
-                    {stay.description && (
-                      <p className="stay-description">
-                        {stay.description
-                          .replace(/\n/g, " ")
-                          .slice(0, 105)}
-                        {stay.description.length > 105 ? "..." : ""}
-                      </p>
-                    )}
-
-                    {amenities.length > 0 && (
-                      <div className="stay-amenities">
-                        {amenities.map((amenity, amenityIndex) => (
-                          <span key={amenityIndex}>
-                            {amenity}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-
-                    <div className="stay-card-footer">
-                      <div className="stay-price">
-                        <small>From</small>
-
-                        <strong>
-                          NPR{" "}
-                          {Number(
-                            stay.price || 0
-                          ).toLocaleString()}
-                        </strong>
-
-                        <span>/ night</span>
-                      </div>
-
-                      <Link
-                        to={`/rooms/${stay.seoSlug || stay._id}`}
-                        className="stay-view-button"
-                      >
-                        View Stay
-                        <span>→</span>
-                      </Link>
-                    </div>
-
-                  </div>
-                </article>
-              );
-            })}
-          </div>
+          renderHotelGrid(items, sectionName)
         )}
+      </section>
+    );
+  };
 
+  return (
+    <section id="recommended-stays" className="recommended-stays">
+      <div className="recommended-stays-container">
+        <div className="recommended-stays-header">
+          <div>
+            <span className="recommended-eyebrow">
+              PREMIUM STAYS • NEPAL
+            </span>
+
+            <h2>Recommended Stays in Nepal</h2>
+
+            <p>
+              Handpicked hotels and Himalayan retreats for your next journey.
+            </p>
+          </div>
+
+          <Link to="/rooms" className="view-all-stays">
+            View All Stays <span>→</span>
+          </Link>
+        </div>
+
+        {renderSection("5-Star Hotels", fiveStar, "five-star")}
+
+        {renderSection("4-Star Hotels", fourStar, "four-star")}
+
+        <section className="recommended-retreats">
+          <div className="recommended-stays-section-header">
+            <h3>Himalayan Retreats Near Kathmandu</h3>
+          </div>
+
+          {renderSection("Dhulikhel", dhulikhel, "dhulikhel", "h4")}
+
+          {renderSection("Nagarkot", nagarkot, "nagarkot", "h4")}
+        </section>
       </div>
     </section>
   );

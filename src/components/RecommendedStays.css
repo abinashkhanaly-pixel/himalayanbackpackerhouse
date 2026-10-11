@@ -718,3 +718,354 @@
     animation: none;
   }
 }
+/* =========================================================
+   HOTEL GROUPS — STAR CATEGORIES & HIMALAYAN RETREATS
+========================================================= */
+
+/* Individual sections: 5-Star, 4-Star, Dhulikhel, Nagarkot */
+.recommended-stays-section {
+  width: 100%;
+  margin-top: 54px;
+}
+
+.recommended-stays-section:first-child {
+  margin-top: 0;
+}
+
+/* Section heading */
+.recommended-stays-section-header {
+  margin-bottom: 24px;
+}
+
+.recommended-stays-section-header h3 {
+  margin: 0;
+
+  color: #111827;
+
+  font-family: "Inter", "Manrope", sans-serif;
+  font-size: clamp(25px, 3vw, 34px);
+  font-weight: 750;
+  line-height: 1.2;
+  letter-spacing: -0.9px;
+}
+
+.recommended-stays-section-header p {
+  max-width: 650px;
+  margin: 9px 0 0;
+
+  color: #667085;
+
+  font-family: "Inter", "Manrope", sans-serif;
+  font-size: 13px;
+  font-weight: 450;
+  line-height: 1.65;
+}
+
+/* Subheadings: Dhulikhel and Nagarkot */
+.recommended-stays-section-header h4 {
+  margin: 0;
+
+  color: #18221b;
+
+  font-family: "Inter", "Manrope", sans-serif;
+  font-size: clamp(21px, 2.5vw, 27px);
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.55px;
+}
+
+/* Each group uses the existing premium three-column grid */
+.recommended-stays-section .recommended-stays-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  align-items: stretch;
+}
+
+/* Prevent long hotel names and content from breaking the grid */
+.recommended-stays-section .recommended-stay-card {
+  min-width: 0;
+  height: 100%;
+}
+
+/* Keep section spacing consistent */
+.recommended-stays-section + .recommended-stays-section {
+  margin-top: 58px;
+}
+
+/* Loading skeletons follow the same grid */
+.recommended-stays-section .recommended-loading {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 1000px) {
+  .recommended-stays-section {
+    margin-top: 44px;
+  }
+
+  .recommended-stays-section + .recommended-stays-section {
+    margin-top: 48px;
+  }
+
+  .recommended-stays-section .recommended-stays-grid,
+  .recommended-stays-section .recommended-loading {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+  }
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 640px) {
+  .recommended-stays-section {
+    margin-top: 38px;
+  }
+
+  .recommended-stays-section + .recommended-stays-section {
+    margin-top: 42px;
+  }
+
+  .recommended-stays-section-header {
+    margin-bottom: 19px;
+  }
+
+  .recommended-stays-section-header h3 {
+    font-size: 25px;
+    letter-spacing: -0.7px;
+  }
+
+  .recommended-stays-section-header h4 {
+    font-size: 22px;
+    letter-spacing: -0.4px;
+  }
+
+  .recommended-stays-section-header p {
+    margin-top: 8px;
+    font-size: 12px;
+  }
+
+  .recommended-stays-section .recommended-stays-grid,
+  .recommended-stays-section .recommended-loading {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
+}
+
+/* =========================================================
+   SMALL MOBILE — 320px
+========================================================= */
+
+@media (max-width: 380px) {
+  .recommended-stays-section {
+    margin-top: 32px;
+  }
+
+  .recommended-stays-section + .recommended-stays-section {
+    margin-top: 36px;
+  }
+
+  .recommended-stays-section-header h3 {
+    font-size: 23px;
+  }
+
+  .recommended-stays-section-header h4 {
+    font-size: 20px;
+  }
+
+  .recommended-stays-section-header {
+    margin-bottom: 16px;
+  }
+
+  .recommended-stays-section .recommended-stays-grid,
+  .recommended-stays-section .recommended-loading {
+    gap: 16px;
+  }
+}
+
+/* =========================================================
+   RECOMMENDED STAYS — HOTEL CATEGORY SECTIONS
+========================================================= */
+
+.recommended-stays-section {
+  width: 100%;
+  margin-top: 48px;
+}
+
+.recommended-stays-section + .recommended-stays-section {
+  margin-top: 54px;
+}
+
+.recommended-stays-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+.recommended-stays-section-header h3 {
+  margin: 0;
+  color: #111827;
+  font-family: "Inter", "Manrope", sans-serif;
+  font-size: clamp(25px, 3vw, 34px);
+  font-weight: 750;
+  line-height: 1.2;
+  letter-spacing: -0.8px;
+}
+
+.recommended-stays-section-header h4 {
+  margin: 0;
+  color: #18221b;
+  font-family: "Inter", "Manrope", sans-serif;
+  font-size: clamp(21px, 2.5vw, 27px);
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.5px;
+}
+
+.recommended-stays-section-header p {
+  margin: 0;
+  color: #667085;
+  font-family: "Inter", "Manrope", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Three cards per row on desktop */
+.recommended-stays-section .recommended-stays-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  align-items: stretch;
+}
+
+.recommended-stays-section .recommended-stay-card {
+  min-width: 0;
+  height: 100%;
+}
+
+/* Himalayan retreat heading */
+.recommended-retreats {
+  margin-top: 68px;
+  padding-top: 38px;
+  border-top: 1px solid #e4e7ec;
+}
+
+.recommended-retreats > .recommended-stays-section-header {
+  margin-bottom: 12px;
+}
+
+.recommended-retreats > .recommended-stays-section-header h3 {
+  font-size: clamp(27px, 3.5vw, 38px);
+}
+
+/* Loading placeholders match the desktop grid */
+.recommended-stays-section .recommended-loading {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 1000px) {
+  .recommended-stays-section,
+  .recommended-stays-section + .recommended-stays-section {
+    margin-top: 42px;
+  }
+
+  .recommended-stays-section .recommended-stays-grid,
+  .recommended-stays-section .recommended-loading {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+  }
+
+  .recommended-retreats {
+    margin-top: 52px;
+    padding-top: 30px;
+  }
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 640px) {
+  .recommended-stays-section,
+  .recommended-stays-section + .recommended-stays-section {
+    margin-top: 36px;
+  }
+
+  .recommended-stays-section-header {
+    margin-bottom: 17px;
+  }
+
+  .recommended-stays-section-header h3 {
+    font-size: 25px;
+    letter-spacing: -0.6px;
+  }
+
+  .recommended-stays-section-header h4 {
+    font-size: 22px;
+    letter-spacing: -0.35px;
+  }
+
+  .recommended-stays-section-header p {
+    font-size: 11px;
+  }
+
+  .recommended-stays-section .recommended-stays-grid,
+  .recommended-stays-section .recommended-loading {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
+
+  .recommended-retreats {
+    margin-top: 42px;
+    padding-top: 26px;
+  }
+
+  .recommended-retreats > .recommended-stays-section-header h3 {
+    font-size: 27px;
+    line-height: 1.2;
+  }
+}
+
+/* =========================================================
+   SMALL MOBILE — 320px
+========================================================= */
+
+@media (max-width: 380px) {
+  .recommended-stays-section,
+  .recommended-stays-section + .recommended-stays-section {
+    margin-top: 30px;
+  }
+
+  .recommended-stays-section-header h3 {
+    font-size: 23px;
+  }
+
+  .recommended-stays-section-header h4 {
+    font-size: 20px;
+  }
+
+  .recommended-stays-section .recommended-stays-grid,
+  .recommended-stays-section .recommended-loading {
+    gap: 16px;
+  }
+
+  .recommended-retreats > .recommended-stays-section-header h3 {
+    font-size: 24px;
+  }
+}
