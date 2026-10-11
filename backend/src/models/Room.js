@@ -1,3 +1,4 @@
+
 const mongoose = require("mongoose");
 
 const roomSchema = new mongoose.Schema(
@@ -15,7 +16,6 @@ const roomSchema = new mongoose.Schema(
 
     // ==========================================
     // DESTINATION
-    // Example: Kathmandu, Pokhara, Chitwan
     // ==========================================
     destination: {
       type: String,
@@ -27,12 +27,44 @@ const roomSchema = new mongoose.Schema(
     },
 
     // ==========================================
+    // PROPERTY TYPE & STAR CATEGORY
+    // ==========================================
+    propertyType: {
+      type: String,
+      trim: true,
+      default: "Hotel",
+    },
+
+    starCategory: {
+      type: String,
+      trim: true,
+      enum: ["", "1 Star", "2 Star", "3 Star", "4 Star", "5 Star"],
+      default: "",
+    },
+
+    // ==========================================
+    // CHECK-IN & CHECK-OUT
+    // ==========================================
+    checkIn: {
+      type: String,
+      trim: true,
+      default: "14:00",
+    },
+
+    checkOut: {
+      type: String,
+      trim: true,
+      default: "12:00",
+    },
+
+    languages: {
+      type: [String],
+      default: [],
+    },
+
+    // ==========================================
     // SEO FIELDS
     // ==========================================
-
-    // SEO URL / Slug
-    // Example:
-    // deluxe-mountain-view-room-kathmandu
     seoSlug: {
       type: String,
       trim: true,
@@ -41,16 +73,12 @@ const roomSchema = new mongoose.Schema(
       index: true,
     },
 
-    // SEO Page Title
-    // Example:
-    // Deluxe Mountain View Room in Kathmandu | Backpacker Gateways
     seoTitle: {
       type: String,
       trim: true,
       maxlength: [160, "SEO title cannot exceed 160 characters"],
     },
 
-    // SEO Meta Description
     seoDescription: {
       type: String,
       trim: true,
@@ -89,7 +117,6 @@ const roomSchema = new mongoose.Schema(
 
     // ==========================================
     // BED INFORMATION
-    // Example: 1 Double Bed
     // ==========================================
     beds: {
       type: String,
@@ -100,8 +127,6 @@ const roomSchema = new mongoose.Schema(
 
     // ==========================================
     // AMENITIES
-    // Example:
-    // ["WiFi", "Hot Shower", "TV", "Mountain View"]
     // ==========================================
     amenities: {
       type: [String],
@@ -121,10 +146,6 @@ const roomSchema = new mongoose.Schema(
 
     // ==========================================
     // ROOM IMAGES / GALLERY
-    // Example:
-    // ["https://...", "https://..."]
-    //
-    // These are all images used by the gallery.
     // ==========================================
     images: {
       type: [String],
@@ -139,16 +160,7 @@ const roomSchema = new mongoose.Schema(
     },
 
     // ==========================================
-    // YOUR ROOM IMAGE
-    //
-    // Dedicated image for the "Your Room"
-    // section on the room details page.
-    //
-    // This is intentionally separate from
-    // the active gallery image.
-    //
-    // Existing rooms can leave this empty.
-    // Frontend will fall back to images[0].
+    // DEDICATED ROOM IMAGE
     // ==========================================
     roomImage: {
       type: String,
@@ -173,7 +185,6 @@ const roomSchema = new mongoose.Schema(
 // ==========================================
 // CLEAN ROOM DATA BEFORE RETURNING
 // ==========================================
-
 roomSchema.set("toJSON", {
   transform: (doc, ret) => {
     delete ret.__v;
