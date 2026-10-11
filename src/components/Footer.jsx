@@ -40,7 +40,7 @@ const schema = {
   areaServed: ["Kathmandu", "Pokhara", "Chitwan", "Nepal"],
   address: {
     "@type": "PostalAddress",
-    streetAddress: "Third Floor, Citizen Bank Building, Sorhakhutte, Nayabazar",
+    streetAddress: "Third Floor, Sanima Bank Building, Sorhakhutte, Nayabazar",
     addressLocality: "Kathmandu",
     addressCountry: "NP",
   },
@@ -207,11 +207,11 @@ export default function Footer() {
               target="_blank"
               rel={REL}
             >
-              3rd Floor, Citizen Bank Building, Sorhakhutte, Nayabazar,
+              3rd Floor, Sanima Bank Building, Sorhakhutte, Nayabazar,
               Kathmandu, Nepal
             </a>
             <span className="hf-note">
-              Near Abhiwadan Expedition and Trip Holidays and Citizen Bank
+              Near Abhiwadan Expedition and Trip Holidays
             </span>
             {EMAIL && <a href={`mailto:${EMAIL}`}>{EMAIL}</a>}
           </address>

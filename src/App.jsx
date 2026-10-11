@@ -212,10 +212,10 @@ function App() {
           />
 
         </Routes>
-      </Suspense>
 
-      {/* GLOBAL FOOTER */}
-      <SiteFooter />
+        {/* GLOBAL FOOTER (hidden while a page is loading) */}
+        <SiteFooter />
+      </Suspense>
     </BrowserRouter>
   );
 }
