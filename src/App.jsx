@@ -1,8 +1,9 @@
 import { lazy, Suspense } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import ScrollToTop from "./components/ScrollToTop";
+import Footer from "./components/Footer";
 
 // Public pages
 const Home = lazy(() => import("./pages/Home"));
@@ -61,6 +62,13 @@ function PageLoader() {
       Loading...
     </div>
   );
+}
+
+// Footer shows on every public page, hidden on admin pages
+function SiteFooter() {
+  const { pathname } = useLocation();
+  if (pathname.startsWith("/admin")) return null;
+  return <Footer />;
 }
 
 function App() {
@@ -205,6 +213,9 @@ function App() {
 
         </Routes>
       </Suspense>
+
+      {/* GLOBAL FOOTER */}
+      <SiteFooter />
     </BrowserRouter>
   );
 }
