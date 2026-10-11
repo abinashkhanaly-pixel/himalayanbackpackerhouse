@@ -40,19 +40,6 @@ const getStars = (stay) => {
   return 0;
 };
 
-const getLocationText = (stay) =>
-  [
-    stay.destination,
-    stay.location,
-    stay.address,
-    stay.city,
-    stay.name,
-    stay.propertyName,
-  ]
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase();
-
 const sortByName = (items) =>
   [...items].sort((a, b) =>
     String(a.name || "").localeCompare(String(b.name || ""))
@@ -71,6 +58,14 @@ const getUniqueRooms = (items) => {
   });
 };
 
+// Match retreat sections using hotel destination/location.
+// Admin homepageSections checkboxes are not required.
+const getLocationText = (stay) =>
+  `${stay.destination || ""} ${stay.location || ""}`.toLowerCase();
+
+const belongsToLocation = (stay, locationName) =>
+  getLocationText(stay).includes(locationName.toLowerCase());
+
 const RecommendedStays = () => {
   const [stays, setStays] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -86,14 +81,13 @@ const RecommendedStays = () => {
         const roomList = getRoomList(result);
 
         console.log("RECOMMENDED ROOMS RESPONSE:", result);
+
         console.table(
           roomList.map((room) => ({
             name: room.name,
             starCategory: room.starCategory,
             destination: room.destination,
             location: room.location,
-            address: room.address,
-            city: room.city,
           }))
         );
 
@@ -120,26 +114,45 @@ const RecommendedStays = () => {
     };
   }, []);
 
+  // 5-Star Hotels: based on star category.
   const fiveStar = sortByName(
-    getUniqueRooms(stays.filter((stay) => getStars(stay) === 5))
+    getUniqueRooms(
+      stays.filter((stay) => getStars(stay) === 5)
+    )
   ).slice(0, 15);
 
+  // 4-Star Hotels: based on star category.
   const fourStar = sortByName(
-    getUniqueRooms(stays.filter((stay) => getStars(stay) === 4))
+    getUniqueRooms(
+      stays.filter((stay) => getStars(stay) === 4)
+    )
   ).slice(0, 9);
 
+  // Himalayan retreats include properties from both locations.
+  const himalayanRetreats = sortByName(
+    getUniqueRooms(
+      stays.filter(
+        (stay) =>
+          belongsToLocation(stay, "dhulikhel") ||
+          belongsToLocation(stay, "nagarkot")
+      )
+    )
+  ).slice(0, 12);
+
+  // Dhulikhel: based on destination/location.
   const dhulikhel = sortByName(
     getUniqueRooms(
       stays.filter((stay) =>
-        getLocationText(stay).includes("dhulikhel")
+        belongsToLocation(stay, "dhulikhel")
       )
     )
   ).slice(0, 6);
 
+  // Nagarkot: based on destination/location.
   const nagarkot = sortByName(
     getUniqueRooms(
       stays.filter((stay) =>
-        getLocationText(stay).includes("nagarkot")
+        belongsToLocation(stay, "nagarkot")
       )
     )
   ).slice(0, 6);
@@ -203,8 +216,12 @@ const RecommendedStays = () => {
 
               {stay.description && (
                 <p className="stay-description">
-                  {String(stay.description).replace(/\n/g, " ").slice(0, 105)}
-                  {String(stay.description).length > 105 ? "..." : ""}
+                  {String(stay.description)
+                    .replace(/\n/g, " ")
+                    .slice(0, 105)}
+                  {String(stay.description).length > 105
+                    ? "..."
+                    : ""}
                 </p>
               )}
 
@@ -257,7 +274,9 @@ const RecommendedStays = () => {
           <Heading>{title}</Heading>
 
           {!loading && (
-            <p>{items.length} {items.length === 1 ? "stay" : "stays"}</p>
+            <p>
+              {items.length} {items.length === 1 ? "stay" : "stays"}
+            </p>
           )}
         </div>
 
@@ -273,6 +292,9 @@ const RecommendedStays = () => {
       </section>
     );
   };
+
+  const hasRetreats =
+    loading || himalayanRetreats.length > 0;
 
   return (
     <section id="recommended-stays" className="recommended-stays">
@@ -299,15 +321,27 @@ const RecommendedStays = () => {
 
         {renderSection("4-Star Hotels", fourStar, "four-star")}
 
-        <section className="recommended-retreats">
-          <div className="recommended-stays-section-header">
-            <h3>Himalayan Retreats Near Kathmandu</h3>
-          </div>
+        {hasRetreats && (
+          <section className="recommended-retreats">
+            <div className="recommended-stays-section-header">
+              <h3>Himalayan Retreats Near Kathmandu</h3>
+            </div>
 
-          {renderSection("Dhulikhel", dhulikhel, "dhulikhel", "h4")}
+            {renderSection(
+              "Dhulikhel",
+              dhulikhel,
+              "dhulikhel",
+              "h4"
+            )}
 
-          {renderSection("Nagarkot", nagarkot, "nagarkot", "h4")}
-        </section>
+            {renderSection(
+              "Nagarkot",
+              nagarkot,
+              "nagarkot",
+              "h4"
+            )}
+          </section>
+        )}
       </div>
     </section>
   );
