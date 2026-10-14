@@ -29,6 +29,7 @@ const DEFAULT_FORM = {
   amenities: "",
   images: [],
   roomImage: "",
+  mainImage: "",
   available: true,
 
   // Property
@@ -367,6 +368,10 @@ export default function AdminRooms() {
   form.roomImage?.trim() ||
   form.images[0]?.trim() ||
   "",
+  mainImage:
+  form.mainImage?.trim() ||
+  form.images[0]?.trim() ||
+  "",
         available: form.available,
 
         // PROPERTY
@@ -412,15 +417,22 @@ export default function AdminRooms() {
       };
 
       if (editingId) {
-        await updateRoom(editingId, roomData);
+  const result = await updateRoom(editingId, roomData);
 
-        alert("Room updated successfully.");
-      } else {
-        await createRoom(roomData);
+  console.log("MAIN IMAGE SENT:", roomData.mainImage);
+  console.log("MAIN IMAGE SAVED:", result?.data?.mainImage);
+  console.log("UPDATE RESPONSE:", result);
 
-        alert("Room added successfully.");
-      }
+  alert(
+    result?.data?.mainImage === roomData.mainImage
+      ? "Room updated. Main Image saved successfully."
+      : "Room updated, but Main Image does not match. Check Console."
+  );
+} else {
+  await createRoom(roomData);
 
+  alert("Room added successfully.");
+}
       resetForm();
 
       await loadRooms();
@@ -469,6 +481,7 @@ export default function AdminRooms() {
         ? room.images
         : [],
       roomImage: room.roomImage || "",
+      mainImage: room.mainImage || room.images?.[0] || "",
 
       available: room.available ?? true,
 
@@ -1253,6 +1266,24 @@ onClick={() =>
     ? "✓ YOUR ROOM"
     : "Use for Your Room"}
 </button>
+<button
+  type="button"
+  className={
+    form.mainImage === image
+      ? "room-image-select selected"
+      : "room-image-select"
+  }
+  onClick={() =>
+    setForm((previous) => ({
+      ...previous,
+      mainImage: image,
+    }))
+  }
+>
+  {form.mainImage === image
+    ? "✓ MAIN IMAGE"
+    : "Use as Main Image"}
+</button>
           <button
             type="button"
             className="image-delete"
@@ -1939,11 +1970,12 @@ onClick={() =>
           ) : (
             <div className="modern-room-grid">
               {rooms.map((room) => {
-                const roomImage =
-                  room.images?.[0] ||
-                  "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=1200&q=80";
-
-                const slug =
+               
+const roomImage =
+  room.mainImage ||
+  room.images?.[0] ||
+  "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=1200&q=80";
+               const slug =
                   room.seoSlug || room._id;
 
                 return (

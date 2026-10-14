@@ -43,6 +43,19 @@ const roomSchema = new mongoose.Schema(
     },
 
     // ==========================================
+    // HOMEPAGE DISPLAY SECTIONS (NEW)
+    // ==========================================
+    homepageSections: {
+      type: [String],
+      enum: [
+        "Himalayan Retreats Near Kathmandu",
+        "Dhulikhel",
+        "Nagarkot",
+      ],
+      default: [],
+    },
+
+    // ==========================================
     // CHECK-IN & CHECK-OUT
     // ==========================================
     checkIn: {
@@ -167,6 +180,11 @@ const roomSchema = new mongoose.Schema(
       trim: true,
       default: "",
     },
+   mainImage: {
+  type: String,
+  trim: true,
+  default: "",
+},
 
     // ==========================================
     // ROOM AVAILABILITY

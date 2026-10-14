@@ -170,10 +170,10 @@ const RecommendedStays = () => {
     <div className="recommended-stays-grid">
       {items.map((stay, index) => {
         const image =
-          Array.isArray(stay.images) && stay.images.length > 0
-            ? stay.images[0]
-            : FALLBACK_IMAGE;
-
+  stay.mainImage ||
+  (Array.isArray(stay.images) && stay.images.length > 0
+    ? stay.images[0]
+    : FALLBACK_IMAGE);
         const amenities = Array.isArray(stay.amenities)
           ? stay.amenities.slice(0, 3)
           : [];
