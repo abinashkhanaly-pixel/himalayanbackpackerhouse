@@ -2383,3 +2383,258 @@
     animation: none !important;
   }
 }
+
+/* =========================================================
+   YOUR ROOM — INDEPENDENT IMAGE SELECTOR
+========================================================= */
+
+.room-image-selector {
+  width: 100%;
+  margin-top: 12px;
+}
+
+.room-image-selector-title {
+  margin: 0 0 10px;
+  color: #243247;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.room-image-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.room-image-option {
+  width: 76px;
+  height: 64px;
+  flex: 0 0 auto;
+  padding: 3px;
+  overflow: hidden;
+  border: 2px solid #e0e5eb;
+  border-radius: 9px;
+  background: #fff;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.room-image-option img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 5px;
+}
+
+.room-image-option:hover {
+  border-color: #1668e3;
+  transform: translateY(-2px);
+}
+
+.room-image-option.is-selected {
+  border-color: #1668e3;
+  box-shadow: 0 0 0 2px rgba(22, 104, 227, 0.15);
+}
+
+.room-image-option:focus-visible {
+  outline: 2px solid #1668e3;
+  outline-offset: 3px;
+}
+
+@media (max-width: 480px) {
+  .room-image-options {
+    gap: 7px;
+  }
+
+  .room-image-option {
+    width: 65px;
+    height: 56px;
+  }
+}
+
+/* =========================================================
+   YOUR ROOM — INDEPENDENT IMAGE SELECTOR
+========================================================= */
+
+.room-image-selector {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  margin-top: 12px;
+  gap: 12px;
+}
+
+.room-image-selector-title {
+  margin: 0;
+  color: #243247;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+/* Image thumbnails */
+.room-image-options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+/* Individual thumbnail */
+.room-image-option {
+  position: relative;
+  display: block;
+  flex: 0 0 86px;
+  width: 86px;
+  height: 66px;
+  padding: 3px;
+  overflow: hidden;
+  border: 2px solid #e0e5eb;
+  border-radius: 9px;
+  background: #fff;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.room-image-option img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 5px;
+}
+
+.room-image-option:hover {
+  border-color: #1668e3;
+  transform: translateY(-2px);
+}
+
+.room-image-option.is-selected {
+  border-color: #1668e3;
+  box-shadow: 0 0 0 2px rgba(22, 104, 227, 0.15);
+}
+
+.room-image-option:focus-visible {
+  outline: 2px solid #1668e3;
+  outline-offset: 3px;
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .room-image-selector {
+    gap: 10px;
+  }
+
+  .room-image-options {
+    gap: 7px;
+  }
+
+  .room-image-option {
+    flex-basis: 68px;
+    width: 68px;
+    height: 54px;
+  }
+}
+
+/* =========================================================
+   YOUR ROOM — WIDE PREVIEW + CLICKABLE THUMBNAILS
+========================================================= */
+
+.room-summary-image {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  gap: 12px;
+}
+
+/* Main Your Room photo */
+.room-summary-image > img.your-room-preview {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  max-height: 400px;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 12px;
+}
+
+/* Thumbnail selector below the main photo */
+.room-summary-image .room-image-selector {
+  width: 100%;
+  min-width: 0;
+  margin-top: 0;
+}
+
+.room-summary-image .room-image-options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+}
+
+.room-summary-image .room-image-option {
+  flex: 0 0 82px;
+  width: 82px;
+  height: 62px;
+  padding: 3px;
+  overflow: hidden;
+  border: 2px solid #e0e5eb;
+  border-radius: 9px;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.room-summary-image .room-image-option img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 5px;
+}
+
+.room-summary-image .room-image-option:hover,
+.room-summary-image .room-image-option.is-selected {
+  border-color: #1668e3;
+}
+
+.room-summary-image .room-image-option.is-selected {
+  box-shadow: 0 0 0 2px rgba(22, 104, 227, 0.15);
+}
+
+.room-summary-image .room-image-option:focus-visible {
+  outline: 2px solid #1668e3;
+  outline-offset: 3px;
+}
+
+@media (max-width: 480px) {
+  .room-summary-image > img.your-room-preview {
+    aspect-ratio: 4 / 3;
+    max-height: 320px;
+  }
+
+  .room-summary-image .room-image-options {
+    gap: 7px;
+  }
+
+  .room-summary-image .room-image-option {
+    flex-basis: 68px;
+    width: 68px;
+    height: 52px;
+  }
+}
+
+

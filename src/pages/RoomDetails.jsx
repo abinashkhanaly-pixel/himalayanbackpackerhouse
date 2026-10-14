@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { getRoomBySlug } from "../services/roomApi";
@@ -16,9 +17,9 @@ const RoomDetails = () => {
   const [room, setRoom] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
   const [activeImage, setActiveImage] = useState(0);
   const [showGallery, setShowGallery] = useState(false);
+  const [selectedRoomImage, setSelectedRoomImage] = useState("");
 
   /* =========================================================
      LOAD ROOM
@@ -46,8 +47,13 @@ const RoomDetails = () => {
           throw new Error("Room not found");
         }
 
-        setRoom(result.data);
+        const roomData = result.data;
+
+        setRoom(roomData);
         setActiveImage(0);
+        setSelectedRoomImage(
+          roomData.roomImage || roomData.images?.[0] || ""
+        );
       } catch (err) {
         if (cancelled) return;
 
@@ -68,7 +74,7 @@ const RoomDetails = () => {
   }, [slug]);
 
   /* =========================================================
-     SEO
+     SEO AND STRUCTURED DATA
   ========================================================= */
 
   useEffect(() => {
@@ -84,10 +90,8 @@ const RoomDetails = () => {
       `Book the ${roomName} in ${destination}, Nepal with Backpacker Gateways. Enjoy comfortable accommodation, Himalayan hospitality and convenient access to local attractions and trekking routes.`;
 
     const title = room.seoTitle?.trim() || fallbackTitle;
-
     const description =
       room.seoDescription?.trim() || fallbackDescription;
-
     const cleanSlug = room.seoSlug?.trim() || slug;
 
     const canonicalUrl =
@@ -95,37 +99,58 @@ const RoomDetails = () => {
 
     document.title = title;
 
-    let metaDescription =
-      document.querySelector('meta[name="description"]');
+    const setMeta = (selector, attribute, key, content, tagName, attrName) => {
+      let tag = document.querySelector(selector);
 
-    if (!metaDescription) {
-      metaDescription = document.createElement("meta");
-      metaDescription.setAttribute("name", "description");
-      document.head.appendChild(metaDescription);
-    }
+      if (!tag) {
+        tag = document.createElement(tagName);
+        tag.setAttribute(attrName, key);
+        document.head.appendChild(tag);
+      }
 
-    metaDescription.setAttribute("content", description);
+      tag.setAttribute(attribute, content);
+    };
 
-    let canonical =
-      document.querySelector('link[rel="canonical"]');
+    setMeta(
+      'meta[name="description"]',
+      "content",
+      "description",
+      description,
+      "meta",
+      "name"
+    );
 
-    if (!canonical) {
-      canonical = document.createElement("link");
-      canonical.setAttribute("rel", "canonical");
-      document.head.appendChild(canonical);
-    }
-
-    canonical.setAttribute("href", canonicalUrl);
+    setMeta(
+      'link[rel="canonical"]',
+      "href",
+      "canonical",
+      canonicalUrl,
+      "link",
+      "rel"
+    );
 
     const setMetaProperty = (property, content) => {
-      let tag =
-        document.querySelector(
-          `meta[property="${property}"]`
-        );
+      let tag = document.querySelector(
+        `meta[property="${property}"]`
+      );
 
       if (!tag) {
         tag = document.createElement("meta");
         tag.setAttribute("property", property);
+        document.head.appendChild(tag);
+      }
+
+      tag.setAttribute("content", content);
+    };
+
+    const setMetaName = (name, content) => {
+      let tag = document.querySelector(
+        `meta[name="${name}"]`
+      );
+
+      if (!tag) {
+        tag = document.createElement("meta");
+        tag.setAttribute("name", name);
         document.head.appendChild(tag);
       }
 
@@ -137,39 +162,21 @@ const RoomDetails = () => {
     setMetaProperty("og:url", canonicalUrl);
     setMetaProperty("og:type", "website");
 
-    if (room.images?.length > 0) {
-      setMetaProperty("og:image", room.images[0]);
+    const socialImage = room.roomImage || room.images?.[0];
+
+    if (socialImage) {
+      setMetaProperty("og:image", socialImage);
+      setMetaName("twitter:image", socialImage);
     }
-
-    const setMetaName = (name, content) => {
-      let tag =
-        document.querySelector(
-          `meta[name="${name}"]`
-        );
-
-      if (!tag) {
-        tag = document.createElement("meta");
-        tag.setAttribute("name", name);
-        document.head.appendChild(tag);
-      }
-
-      tag.setAttribute("content", content);
-    };
 
     setMetaName("twitter:card", "summary_large_image");
     setMetaName("twitter:title", title);
     setMetaName("twitter:description", description);
 
-    if (room.images?.length > 0) {
-      setMetaName("twitter:image", room.images[0]);
-    }
-
     const existingSchema =
       document.getElementById("room-jsonld");
 
-    if (existingSchema) {
-      existingSchema.remove();
-    }
+    if (existingSchema) existingSchema.remove();
 
     const schema = {
       "@context": "https://schema.org",
@@ -177,108 +184,82 @@ const RoomDetails = () => {
       name: roomName,
       description: room.description || description,
       url: canonicalUrl,
-
-      image:
-        Array.isArray(room.images)
-          ? room.images
-          : [],
-
+      image: [
+        ...new Set(
+          [
+            ...(Array.isArray(room.images) ? room.images : []),
+            room.roomImage,
+          ].filter(Boolean)
+        ),
+      ],
       occupancy: {
         "@type": "QuantitativeValue",
         maxValue: Number(room.capacity || 1),
       },
-
       bed: room.beds
         ? {
             "@type": "BedDetails",
             typeOfBed: room.beds,
           }
         : undefined,
-
-      amenityFeature:
-        Array.isArray(room.amenities)
-          ? room.amenities.map((amenity) => ({
-              "@type":
-                "LocationFeatureSpecification",
-              name: amenity,
-              value: true,
-            }))
-          : [],
-
+      amenityFeature: Array.isArray(room.amenities)
+        ? room.amenities.map((amenity) => ({
+            "@type": "LocationFeatureSpecification",
+            name: amenity,
+            value: true,
+          }))
+        : [],
       address: {
         "@type": "PostalAddress",
         addressLocality: destination,
         addressCountry: "NP",
       },
-
       offers: {
         "@type": "Offer",
         price: Number(room.price || 0),
         priceCurrency: "NPR",
-
-        availability:
-          room.available
-            ? "https://schema.org/InStock"
-            : "https://schema.org/OutOfStock",
-
+        availability: room.available
+          ? "https://schema.org/InStock"
+          : "https://schema.org/OutOfStock",
         url: canonicalUrl,
       },
     };
 
-    const cleanSchema =
-      JSON.parse(
-        JSON.stringify(schema)
-      );
-
-    const script =
-      document.createElement("script");
-
+    const script = document.createElement("script");
     script.id = "room-jsonld";
     script.type = "application/ld+json";
-    script.textContent =
-      JSON.stringify(cleanSchema);
+    script.textContent = JSON.stringify(
+      JSON.parse(JSON.stringify(schema))
+    );
 
     document.head.appendChild(script);
 
     return () => {
-      const schemaElement =
-        document.getElementById(
-          "room-jsonld"
-        );
-
-      if (schemaElement) {
-        schemaElement.remove();
-      }
+      document.getElementById("room-jsonld")?.remove();
     };
   }, [room, slug]);
 
   /* =========================================================
-     GALLERY DATA
+     GALLERY DATA AND CONTROLS
   ========================================================= */
 
-  const images =
-    Array.isArray(room?.images)
-      ? room.images.filter(Boolean)
-      : [];
+  const images = Array.isArray(room?.images)
+    ? room.images.filter(Boolean)
+    : [];
 
   const totalImages = images.length;
 
   const nextImage = () => {
     if (totalImages <= 1) return;
 
-    setActiveImage(
-      (current) =>
-        (current + 1) % totalImages
-    );
+    setActiveImage((current) => (current + 1) % totalImages);
   };
 
   const previousImage = () => {
     if (totalImages <= 1) return;
 
     setActiveImage(
-      (current) =>
-        (current - 1 + totalImages) %
-        totalImages
+      (current) => (current - 1 + totalImages) % totalImages
     );
   };
 
@@ -289,47 +270,22 @@ const RoomDetails = () => {
     setShowGallery(true);
   };
 
-  const closeGallery = () => {
-    setShowGallery(false);
-  };
-
-  /* =========================================================
-     KEYBOARD GALLERY CONTROLS
-  ========================================================= */
+  const closeGallery = () => setShowGallery(false);
 
   useEffect(() => {
     if (!showGallery) return;
 
     const handleKeyDown = (event) => {
-      if (!totalImages) return;
-
-      if (event.key === "Escape") {
-        closeGallery();
-        return;
-      }
-
-      if (event.key === "ArrowRight") {
-        nextImage();
-      }
-
-      if (event.key === "ArrowLeft") {
-        previousImage();
-      }
+      if (event.key === "Escape") closeGallery();
+      if (event.key === "ArrowRight") nextImage();
+      if (event.key === "ArrowLeft") previousImage();
     };
 
-    document.addEventListener(
-      "keydown",
-      handleKeyDown
-    );
-
+    document.addEventListener("keydown", handleKeyDown);
     document.body.style.overflow = "hidden";
 
     return () => {
-      document.removeEventListener(
-        "keydown",
-        handleKeyDown
-      );
-
+      document.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = "";
     };
   }, [showGallery, totalImages]);
@@ -339,50 +295,31 @@ const RoomDetails = () => {
   ========================================================= */
 
   const handleBooking = () => {
-    if (!room?._id || !room?.available) {
-      return;
-    }
-
+    if (!room?._id || !room?.available) return;
     navigate(`/booking?room=${room._id}`);
   };
 
   /* =========================================================
-     LOADING
+     LOADING AND ERROR STATES
   ========================================================= */
 
   if (loading) {
     return (
       <div className="details-loading">
-        <div
-          className="spinner"
-          aria-hidden="true"
-        />
-
-        <p>
-          Preparing your Himalayan stay...
-        </p>
+        <div className="spinner" aria-hidden="true" />
+        <p>Preparing your Himalayan stay...</p>
       </div>
     );
   }
-
-  /* =========================================================
-     ERROR
-  ========================================================= */
 
   if (error || !room) {
     return (
       <div className="details-error">
         <h2>No room selected</h2>
-
         <p>
-          {error ||
-            "The requested room could not be found."}
+          {error || "The requested room could not be found."}
         </p>
-
-        <Link
-          to="/rooms"
-          className="back-button"
-        >
+        <Link to="/rooms" className="back-button">
           ← Back to Rooms
         </Link>
       </div>
@@ -393,31 +330,32 @@ const RoomDetails = () => {
      ROOM DATA
   ========================================================= */
 
-  const destination =
-    room.destination || "Kathmandu";
-
-  const roomName =
-    room.name || "Himalayan Room";
+  const destination = room.destination || "Kathmandu";
+  const roomName = room.name || "Himalayan Room";
 
   const mainImage =
-    totalImages > 0
+    images.length > 0
       ? images[activeImage] || images[0]
       : "";
-   const roomImage =
-  room.roomImage ||
-  images[0] ||
-  "";
 
-  const sideImages =
-    images.slice(1, 5);
+  const roomImageOptions = [
+    ...new Set(
+      [
+        ...(Array.isArray(room.images) ? room.images : []),
+        room.roomImage,
+      ].filter(Boolean)
+    ),
+  ];
 
-  const hiddenPhotos =
-    Math.max(totalImages - 5, 0);
+  const roomImage =
+    selectedRoomImage || room.roomImage || images[0] || "";
 
-  const amenities =
-    Array.isArray(room.amenities)
-      ? room.amenities.filter(Boolean)
-      : [];
+  const sideImages = images.slice(1, 5);
+  const hiddenPhotos = Math.max(totalImages - 5, 0);
+
+  const amenities = Array.isArray(room.amenities)
+    ? room.amenities.filter(Boolean)
+    : [];
 
   const hasRichDescription =
     typeof room.description === "string" &&
@@ -429,36 +367,24 @@ const RoomDetails = () => {
 
   return (
     <div className="details-page">
-
-      {/* =====================================================
-          PHOTO GALLERY
-      ===================================================== */}
+      {/* MAIN PHOTO GALLERY — INDEPENDENT FROM YOUR ROOM */}
 
       <div className="room-gallery-wrapper">
-
         {totalImages > 0 ? (
-
           <section className="room-gallery">
-
             <div
               className="gallery-main"
-              onClick={() =>
-                openGallery(activeImage)
-              }
+              onClick={() => openGallery(activeImage)}
               role="button"
               tabIndex={0}
               onKeyDown={(event) => {
-                if (
-                  event.key === "Enter" ||
-                  event.key === " "
-                ) {
+                if (event.key === "Enter" || event.key === " ") {
                   event.preventDefault();
                   openGallery(activeImage);
                 }
               }}
               aria-label="View room photo"
             >
-
               <img
                 src={mainImage}
                 alt={`${roomName} in ${destination}, Nepal`}
@@ -497,92 +423,62 @@ const RoomDetails = () => {
                   {activeImage + 1} / {totalImages}
                 </span>
               )}
-
             </div>
 
             <div className="gallery-side">
+              {sideImages.map((image, index) => {
+                const actualIndex = index + 1;
+                const isLastTile =
+                  actualIndex === 4 && hiddenPhotos > 0;
 
-              {sideImages.map(
-                (image, index) => {
+                return (
+                  <button
+                    type="button"
+                    key={`${image}-${actualIndex}`}
+                    className="gallery-tile"
+                    onClick={() => openGallery(actualIndex)}
+                    aria-label={
+                      isLastTile
+                        ? "View all room photos"
+                        : `View photo ${actualIndex + 1}`
+                    }
+                  >
+                    <img
+                      src={image}
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
+                    />
 
-                  const actualIndex =
-                    index + 1;
-
-                  const isLastTile =
-                    actualIndex === 4 &&
-                    hiddenPhotos > 0;
-
-                  return (
-                    <button
-                      type="button"
-                      key={`${image}-${actualIndex}`}
-                      className="gallery-tile"
-                      onClick={() =>
-                        openGallery(actualIndex)
-                      }
-                      aria-label={
-                        isLastTile
-                          ? "View all room photos"
-                          : `View photo ${
-                              actualIndex + 1
-                            }`
-                      }
-                    >
-
-                      <img
-                        src={image}
-                        alt=""
-                        loading="lazy"
-                        decoding="async"
-                      />
-
-                      {isLastTile && (
-                        <span className="gallery-overlay">
-                          +{hiddenPhotos} Photos
-                        </span>
-                      )}
-
-                    </button>
-                  );
-                }
-              )}
-
+                    {isLastTile && (
+                      <span className="gallery-overlay">
+                        +{hiddenPhotos} Photos
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
-
           </section>
-
         ) : (
-
           <div className="no-image-gallery">
             No room photos available
           </div>
-
         )}
-
       </div>
 
-      {/* =====================================================
-          HOTEL HEADER
-      ===================================================== */}
+      {/* HOTEL HEADER */}
 
       <header className="room-header">
-
-        <Link
-          to="/rooms"
-          className="details-back"
-        >
+        <Link to="/rooms" className="details-back">
           ← Back to Rooms
         </Link>
 
         <div className="room-header-row">
-
           <div className="room-header-main">
-
             <div
               className={`details-availability ${
-                !room.available
-                  ? "unavailable"
-                  : ""
+                !room.available ? "unavailable" : ""
               }`}
             >
               {room.available
@@ -592,9 +488,7 @@ const RoomDetails = () => {
 
             <div className="property-class">
               Luxury Stay
-              <span aria-hidden="true">
-                ★★★★★
-              </span>
+              <span aria-hidden="true">★★★★★</span>
             </div>
 
             <h1>
@@ -610,900 +504,459 @@ const RoomDetails = () => {
               <span>Direct booking</span>
               <span>Himalayan hospitality</span>
             </div>
-
           </div>
 
           <div className="room-header-price">
-
             <strong>
-              NPR{" "}
-              {Number(
-                room.price || 0
-              ).toLocaleString("en-NP")}
+              NPR {Number(room.price || 0).toLocaleString("en-NP")}
             </strong>
-
-            <span>
-              per night
-            </span>
-
+            <span>per night</span>
           </div>
-
         </div>
-
       </header>
 
-      {/* =====================================================
-          EXPEDIA STYLE SECTION NAVIGATION
-      ===================================================== */}
+      {/* SECTION NAVIGATION */}
 
       <nav
         className="details-section-nav"
         aria-label="Room information"
       >
-
         <div className="details-section-nav-inner">
-
-          <a href="#overview">
-            Overview
-          </a>
-
-          <a href="#about">
-            About
-          </a>
-
-          <a href="#rooms">
-            Rooms
-          </a>
-
-          <a href="#accessibility">
-            Accessibility
-          </a>
-
-          <a href="#policies">
-            Policies
-          </a>
-
+          <a href="#overview">Overview</a>
+          <a href="#about">About</a>
+          <a href="#rooms">Rooms</a>
+          <a href="#accessibility">Accessibility</a>
+          <a href="#policies">Policies</a>
         </div>
-
       </nav>
 
-      {/* =====================================================
-          MAIN CONTENT
-      ===================================================== */}
+      {/* MAIN CONTENT */}
 
       <main className="details-container">
-
         <div className="details-grid">
-
           <div className="content-section">
-
-            {/* =================================================
-                OVERVIEW
-            ================================================= */}
+            {/* OVERVIEW */}
 
             <section
               id="overview"
               className="details-section overview-section"
             >
-
               <div className="section-heading-row">
-
                 <div>
-
-                  <span className="section-label">
-                    Overview
-                  </span>
-
-                  <h2>
-                    Everything you need for your stay
-                  </h2>
-
+                  <span className="section-label">Overview</span>
+                  <h2>Everything you need for your stay</h2>
                 </div>
-
               </div>
 
               <div className="property-highlights">
-
-                {/* GREAT LOCATION */}
-
                 <div className="property-highlight-card">
-
                   <span className="highlight-small-icon">
                     <MapPin />
                   </span>
-
                   <div>
-
-                    <strong>
-                      Great Location
-                    </strong>
-
+                    <strong>Great Location</strong>
                     <span>
-                      Convenient access to
-                      attractions and local
-                      travel connections in{" "}
-                      {destination}.
+                      Convenient access to attractions and local
+                      travel connections in {destination}.
                     </span>
-
                   </div>
-
                 </div>
 
-                {/* COMFORTABLE ROOMS */}
-
                 <div className="property-highlight-card">
-
                   <span className="highlight-small-icon">
                     <BedDouble />
                   </span>
-
                   <div>
-
-                    <strong>
-                      Comfortable Rooms
-                    </strong>
-
+                    <strong>Comfortable Rooms</strong>
                     <span>
-                      Designed for a relaxing
-                      stay after sightseeing,
+                      Designed for a relaxing stay after sightseeing,
                       trekking or travelling.
                     </span>
-
                   </div>
-
                 </div>
 
-                {/* GUEST FRIENDLY */}
-
                 <div className="property-highlight-card">
-
                   <span className="highlight-small-icon">
                     <UsersRound />
                   </span>
-
                   <div>
-
-                    <strong>
-                      Guest Friendly
-                    </strong>
-
+                    <strong>Guest Friendly</strong>
                     <span>
-                      Suitable for couples,
-                      families, solo travellers
+                      Suitable for couples, families, solo travellers
                       and business guests.
                     </span>
-
                   </div>
-
                 </div>
 
-                {/* HIMALAYAN EXPERIENCE */}
-
                 <div className="property-highlight-card">
-
                   <span className="highlight-small-icon">
                     <Mountain />
                   </span>
-
                   <div>
-
-                    <strong>
-                      Himalayan Experience
-                    </strong>
-
+                    <strong>Himalayan Experience</strong>
                     <span>
-                      A convenient base for
-                      discovering Nepal and
+                      A convenient base for discovering Nepal and
                       planning your next adventure.
                     </span>
-
                   </div>
-
                 </div>
-
               </div>
 
               <div className="overview-facts">
-
                 <div>
                   <span>Guests</span>
-
-                  <strong>
-                    {room.capacity || 1}
-                  </strong>
+                  <strong>{room.capacity || 1}</strong>
                 </div>
-
                 <div>
                   <span>Beds</span>
-
-                  <strong>
-                    {room.beds || "Comfortable bedding"}
-                  </strong>
+                  <strong>{room.beds || "Comfortable bedding"}</strong>
                 </div>
-
                 <div>
                   <span>Location</span>
-
-                  <strong>
-                    {destination}, Nepal
-                  </strong>
+                  <strong>{destination}, Nepal</strong>
                 </div>
-
                 <div>
                   <span>Availability</span>
-
                   <strong>
-                    {room.available
-                      ? "Available"
-                      : "Unavailable"}
+                    {room.available ? "Available" : "Unavailable"}
                   </strong>
                 </div>
-
               </div>
-
             </section>
 
-            {/* =================================================
-                ABOUT
-            ================================================= */}
+            {/* ABOUT */}
 
-            <section
-              id="about"
-              className="details-section"
-            >
-
-              <span className="section-label">
-                About this property
-              </span>
-
-              <h2>
-                Comfortable accommodation in{" "}
-                {destination}.
-              </h2>
+            <section id="about" className="details-section">
+              <span className="section-label">About this property</span>
+              <h2>Comfortable accommodation in {destination}.</h2>
 
               {hasRichDescription ? (
-
                 <div
                   className="property-description"
                   dangerouslySetInnerHTML={{
                     __html: room.description,
                   }}
                 />
-
               ) : (
-
                 <div className="property-description">
-
                   <p>
-                    <strong>
-                      Comfortable Accommodation:
-                    </strong>{" "}
-                    {roomName} in {destination}
-                    offers a comfortable stay
-                    for travellers looking for
-                    convenience, friendly
-                    hospitality and easy access
-                    to local attractions.
+                    <strong>Comfortable Accommodation:</strong>{" "}
+                    {roomName} in {destination} offers a comfortable
+                    stay for travellers looking for convenience,
+                    friendly hospitality and easy access to local
+                    attractions.
                   </p>
-
                   <p>
-                    <strong>
-                      Exceptional Facilities:
-                    </strong>{" "}
-                    Guests can enjoy comfortable
-                    accommodation, essential room
-                    facilities, WiFi and convenient
-                    services designed for a relaxing
-                    stay.
+                    <strong>Exceptional Facilities:</strong>{" "}
+                    Guests can enjoy the facilities listed for this
+                    property, with services varying by accommodation.
                   </p>
-
                   <p>
-                    <strong>
-                      Dining Experience:
-                    </strong>{" "}
-                    Guests can enjoy convenient
-                    dining options and local
-                    Nepalese flavours, with
-                    breakfast and meals available
-                    according to the property's
-                    services.
+                    <strong>Dining Experience:</strong>{" "}
+                    Dining options, breakfast and meals depend on
+                    the property's available services and booking plan.
                   </p>
-
                   <p>
-                    <strong>
-                      Convenient Location:
-                    </strong>{" "}
-                    Located in {destination}, Nepal,
-                    the property provides convenient
-                    access to local attractions,
-                    restaurants, shopping areas
-                    and travel connections.
+                    <strong>Convenient Location:</strong>{" "}
+                    Located in {destination}, Nepal, the property can
+                    provide a base for exploring local attractions,
+                    restaurants, shopping areas and travel connections.
                   </p>
-
                   <p>
-                    <strong>
-                      Stay Experience:
-                    </strong>{" "}
-                    Whether you are travelling as
-                    a couple, family, solo traveller
-                    or business guest, this
-                    accommodation provides a
-                    convenient base for exploring
-                    Nepal.
+                    <strong>Stay Experience:</strong>{" "}
+                    Whether travelling as a couple, family, solo
+                    traveller or business guest, check the property
+                    details to find the facilities that suit your stay.
                   </p>
-
                 </div>
-
               )}
 
               {/* FACILITIES */}
 
               <div className="property-info-section">
-
                 <span className="section-label">
                   Most Popular Facilities
                 </span>
-
-                <h3>
-                  Facilities guests can enjoy.
-                </h3>
+                <h3>Facilities guests can enjoy.</h3>
 
                 <div className="facilities-list">
-
                   {amenities.length > 0 ? (
-
-                    amenities.map(
-                      (amenity, index) => (
-
-                        <div
-                          className="facility-item"
-                          key={`${room._id}-facility-${index}`}
-                        >
-
-                          <span className="facility-check">
-                            ✓
-                          </span>
-
-                          <strong>
-                            {amenity}
-                          </strong>
-
-                        </div>
-
-                      )
-                    )
-
+                    amenities.map((amenity, index) => (
+                      <div
+                        className="facility-item"
+                        key={`${room._id}-facility-${index}`}
+                      >
+                        <span className="facility-check">✓</span>
+                        <strong>{amenity}</strong>
+                      </div>
+                    ))
                   ) : (
-
-                    <>
-
-                      <div className="facility-item">
-
-                        <span className="facility-check">
-                          ✓
-                        </span>
-
-                        <strong>
-                          Comfortable Rooms
-                        </strong>
-
-                      </div>
-
-                      <div className="facility-item">
-
-                        <span className="facility-check">
-                          ✓
-                        </span>
-
-                        <strong>
-                          Free WiFi
-                        </strong>
-
-                      </div>
-
-                      <div className="facility-item">
-
-                        <span className="facility-check">
-                          ✓
-                        </span>
-
-                        <strong>
-                          Room Service
-                        </strong>
-
-                      </div>
-
-                      <div className="facility-item">
-
-                        <span className="facility-check">
-                          ✓
-                        </span>
-
-                        <strong>
-                          Restaurant
-                        </strong>
-
-                      </div>
-
-                    </>
-
+                    <p>
+                      Please check with the property for available
+                      facilities.
+                    </p>
                   )}
-
                 </div>
-
               </div>
 
               {/* DINING */}
 
               <div className="property-info-section">
-
-                <span className="section-label">
-                  Dining Experience
-                </span>
-
-                <h3>
-                  Food and breakfast.
-                </h3>
-
+                <span className="section-label">Dining Experience</span>
+                <h3>Food and breakfast.</h3>
                 <div className="property-text-box">
-
                   <p>
-                    <strong>
-                      Dining Experience:
-                    </strong>{" "}
-                    Guests can enjoy convenient
-                    dining options during their
-                    stay, with opportunities to
-                    experience Nepalese cuisine
-                    and local and international
-                    flavours depending on the
-                    property's available services.
+                    <strong>Dining Experience:</strong>{" "}
+                    Dining options and cuisine depend on the property's
+                    available services.
                   </p>
-
                   <p>
-                    <strong>
-                      Breakfast:
-                    </strong>{" "}
-                    Breakfast availability and
-                    options may vary by property
-                    and booking plan. Please check
-                    the selected room and booking
-                    details for the latest information.
+                    <strong>Breakfast:</strong>{" "}
+                    Check the selected room and booking details for
+                    breakfast availability and inclusions.
                   </p>
-
                 </div>
-
               </div>
 
               {/* BREAKFAST */}
 
               <div className="property-info-section">
-
                 <span className="section-label">
                   Breakfast Information
                 </span>
-
                 <div className="breakfast-box">
-
-                  <strong>
-                    Breakfast options
-                  </strong>
-
+                  <strong>Breakfast options</strong>
                   <p>
-                    Breakfast options may include
-                    continental, Nepalese, Asian,
-                    vegetarian and other selections
-                    depending on the property.
+                    Breakfast selections and availability vary by
+                    property and booking plan.
                   </p>
-
                 </div>
-
               </div>
 
               {/* LOCATION */}
 
               <div className="property-info-section">
-
-                <span className="section-label">
-                  Convenient Location
-                </span>
-
-                <h3>
-                  Explore {destination}.
-                </h3>
-
+                <span className="section-label">Convenient Location</span>
+                <h3>Explore {destination}.</h3>
                 <div className="property-text-box">
-
                   <p>
-                    <strong>
-                      Convenient Location:
-                    </strong>{" "}
-                    Located in {destination}, Nepal,
-                    this property provides a
-                    convenient starting point for
-                    exploring nearby attractions,
-                    restaurants, shopping areas
-                    and local experiences.
+                    <strong>Convenient Location:</strong>{" "}
+                    Located in {destination}, Nepal, this property can
+                    provide access to local attractions and experiences.
+                    Check the property's exact location before booking.
                   </p>
-
                   <p>
-                    <strong>
-                      Travel Access:
-                    </strong>{" "}
-                    Guests can easily plan
-                    sightseeing, trekking, tours
-                    and onward travel from the
-                    property.
+                    <strong>Travel Access:</strong>{" "}
+                    Plan sightseeing, trekking, tours and onward travel
+                    according to your itinerary.
                   </p>
-
                 </div>
-
               </div>
-
             </section>
 
-            {/* =================================================
-                ROOMS
-            ================================================= */}
+            {/* ROOMS */}
 
-            <section
-              id="rooms"
-              className="details-section"
-            >
-
-              <span className="section-label">
-                Rooms
-              </span>
-
-              <h2>
-                Your room
-              </h2>
+            <section id="rooms" className="details-section">
+              <span className="section-label">Rooms</span>
+              <h2>Your room</h2>
 
               <div className="room-summary-card">
-
                 {roomImage && (
-
                   <div className="room-summary-image">
-
                     <img
+                      className="your-room-preview"
                       src={roomImage}
-                      alt={roomName}
+                      alt={`${roomName} in ${destination}, Nepal`}
                       loading="lazy"
+                      decoding="async"
                     />
 
-                  </div>
+                    {/* THUMBNAILS — INDEPENDENT FROM MAIN GALLERY */}
 
+                    {roomImageOptions.length > 0 && (
+                      <div
+                        className="room-image-selector"
+                        aria-label="Choose Your Room image"
+                      >
+                        <p className="room-image-selector-title">
+                          Choose a room image
+                        </p>
+
+                        <div className="room-image-options">
+                          {roomImageOptions.map((image, index) => (
+                            <button
+                              type="button"
+                              key={`${image}-${index}`}
+                              className={`room-image-option ${
+                                roomImage === image ? "is-selected" : ""
+                              }`}
+                              onClick={() =>
+                                setSelectedRoomImage(image)
+                              }
+                              aria-label={`Select room image ${index + 1}`}
+                              aria-pressed={roomImage === image}
+                            >
+                              <img
+                                src={image}
+                                alt=""
+                                loading="lazy"
+                                decoding="async"
+                              />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 )}
 
                 <div className="room-summary-content">
-
-                  <h3>
-                    {roomName}
-                  </h3>
-
+                  <h3>{roomName}</h3>
                   <p>
-                    A comfortable Himalayan stay
-                    in {destination}, Nepal.
+                    A comfortable stay in {destination}, Nepal.
                   </p>
 
                   <div className="room-summary-features">
-
-                    <span>
-                      👥Sleeps{" "}
-                      {room.capacity || 1}
-                    </span>
-
-                    <span>
-                      🛏️{" "}
-                      {room.beds ||
-                        "Comfortable bedding"}
-                    </span>
-
-                    <span>
-                      📍 {destination}
-                    </span>
-
+                    <span>👥 Sleeps {room.capacity || 1}</span>
+                    <span>🛏️ {room.beds || "Comfortable bedding"}</span>
+                    <span>📍 {destination}</span>
                   </div>
 
                   <div className="room-price-inline">
-
                     <strong>
-                      NPR{" "}
-                      {Number(
-                        room.price || 0
-                      ).toLocaleString("en-NP")}
+                      NPR {Number(room.price || 0).toLocaleString("en-NP")}
                     </strong>
-
-                    <span>
-                      / night
-                    </span>
-
+                    <span>/ night</span>
                   </div>
-
                 </div>
-
               </div>
 
               {/* ROOM HIGHLIGHTS */}
 
               <div className="property-info-section">
-
-                <span className="section-label">
-                  Room Highlights
-                </span>
-
+                <span className="section-label">Room Highlights</span>
                 <div className="room-highlights">
-
                   <div className="highlight">
-
-                    <div className="highlight-icon">
-                      👥
-                    </div>
-
-                    <strong>
-                      Guests
-                    </strong>
-
-                    <span>
-                      Up to{" "}
-                      {room.capacity || 1} guests
-                    </span>
-
+                    <div className="highlight-icon">👥</div>
+                    <strong>Guests</strong>
+                    <span>Up to {room.capacity || 1} guests</span>
                   </div>
-
                   <div className="highlight">
-
-                    <div className="highlight-icon">
-                      🛏️
-                    </div>
-
-                    <strong>
-                      Sleeping
-                    </strong>
-
-                    <span>
-                      {room.beds ||
-                        "Comfortable bedding"}
-                    </span>
-
+                    <div className="highlight-icon">🛏️</div>
+                    <strong>Sleeping</strong>
+                    <span>{room.beds || "Comfortable bedding"}</span>
                   </div>
-
                   <div className="highlight">
-
-                    <div className="highlight-icon">
-                      🏔️
-                    </div>
-
-                    <strong>
-                      Experience
-                    </strong>
-
-                    <span>
-                      Himalayan stay in{" "}
-                      {destination}
-                    </span>
-
+                    <div className="highlight-icon">🏔️</div>
+                    <strong>Experience</strong>
+                    <span>Stay in {destination}</span>
                   </div>
-
                 </div>
-
               </div>
 
               {/* AMENITIES */}
 
               <div className="property-info-section">
-
-                <span className="section-label">
-                  Room Amenities
-                </span>
-
-                <h3>
-                  Everything you need.
-                </h3>
-
+                <span className="section-label">Room Amenities</span>
+                <h3>Everything you need.</h3>
                 <div className="amenities-grid">
-
                   {amenities.length > 0 ? (
-
-                    amenities.map(
-                      (amenity, index) => (
-
-                        <div
-                          className="amenity-card"
-                          key={`${room._id}-${index}`}
-                        >
-
-                          <span className="amenity-icon">
-                            ✓
-                          </span>
-
-                          <span>
-                            {amenity}
-                          </span>
-
-                        </div>
-
-                      )
-                    )
-
+                    amenities.map((amenity, index) => (
+                      <div
+                        className="amenity-card"
+                        key={`${room._id}-${index}`}
+                      >
+                        <span className="amenity-icon">✓</span>
+                        <span>{amenity}</span>
+                      </div>
+                    ))
                   ) : (
-
-                    <p>
-                      Standard room amenities
-                      are available.
-                    </p>
-
+                    <p>Room amenities have not been specified.</p>
                   )}
-
                 </div>
-
               </div>
-
             </section>
 
-            {/* =================================================
-                ACCESSIBILITY
-            ================================================= */}
+            {/* ACCESSIBILITY */}
 
-            <section
-              id="accessibility"
-              className="details-section"
-            >
-
-              <span className="section-label">
-                Accessibility
-              </span>
-
-              <h2>
-                Accessibility information
-              </h2>
-
+            <section id="accessibility" className="details-section">
+              <span className="section-label">Accessibility</span>
+              <h2>Accessibility information</h2>
               <div className="simple-info-box">
-
                 <p>
-                  Accessibility features and
-                  services may vary by property.
-                  Please contact the property
-                  directly before booking if you
-                  require specific accessibility
-                  arrangements.
+                  Accessibility features and services vary by property.
+                  Contact the property before booking if you require
+                  specific accessibility arrangements.
                 </p>
-
               </div>
-
             </section>
 
-            {/* =================================================
-                POLICIES
-            ================================================= */}
+            {/* POLICIES */}
 
-            <section
-              id="policies"
-              className="details-section"
-            >
-
-              <span className="section-label">
-                Policies
-              </span>
-
-              <h2>
-                Property policies
-              </h2>
+            <section id="policies" className="details-section">
+              <span className="section-label">Policies</span>
+              <h2>Property policies</h2>
 
               <div className="policies-grid">
-
                 <div className="policy-card">
-
-                  <strong>
-                    Check-in
-                  </strong>
-
+                  <strong>Check-in</strong>
                   <span>
-                    Please confirm check-in
-                    timing with the property.
+                    Confirm check-in timing with the property.
                   </span>
-
                 </div>
-
                 <div className="policy-card">
-
-                  <strong>
-                    Check-out
-                  </strong>
-
+                  <strong>Check-out</strong>
                   <span>
-                    Check-out timing may vary
-                    by property.
+                    Check-out timing may vary by property.
                   </span>
-
                 </div>
-
                 <div className="policy-card">
-
-                  <strong>
-                    Cancellation
-                  </strong>
-
+                  <strong>Cancellation</strong>
                   <span>
-                    Cancellation terms depend
-                    on the selected booking plan.
+                    Cancellation terms depend on the selected booking
+                    plan.
                   </span>
-
                 </div>
-
                 <div className="policy-card">
-
-                  <strong>
-                    Availability
-                  </strong>
-
+                  <strong>Availability</strong>
                   <span>
-                    Room availability is subject
-                    to the selected booking.
+                    Room availability is subject to the selected
+                    booking.
                   </span>
-
                 </div>
-
               </div>
-
             </section>
-
           </div>
 
-          {/* =================================================
-              STICKY BOOKING CARD
-          ================================================= */}
+          {/* STICKY BOOKING CARD */}
 
           <aside className="booking-card">
-
             <div className="booking-card-top">
-
-              <span className="booking-eyebrow">
-                Your stay
-              </span>
-
-              <h3>
-                Reserve this room
-              </h3>
-
+              <span className="booking-eyebrow">Your stay</span>
+              <h3>Reserve this room</h3>
               <p className="booking-subtitle">
-                Plan your Himalayan escape
-                with Backpacker Gateways.
+                Plan your stay with Backpacker Gateways.
               </p>
-
             </div>
 
             <div className="price-box">
-
               <span className="price">
-                NPR{" "}
-                {Number(
-                  room.price || 0
-                ).toLocaleString("en-NP")}
+                NPR {Number(room.price || 0).toLocaleString("en-NP")}
               </span>
-
-              <span className="per-night">
-                / night
-              </span>
-
+              <span className="per-night">/ night</span>
             </div>
 
             <div className="booking-divider" />
 
             <div className="availability-status">
-
               <span
                 className={`available-dot ${
-                  !room.available
-                    ? "unavailable-dot"
-                    : ""
+                  !room.available ? "unavailable-dot" : ""
                 }`}
               />
-
               {room.available
                 ? "Room available for booking"
                 : "Currently unavailable"}
-
             </div>
 
             <button
@@ -1512,126 +965,90 @@ const RoomDetails = () => {
               disabled={!room.available}
               onClick={handleBooking}
             >
-              {room.available
-                ? "Reserve Room →"
-                : "Currently Unavailable"}
+              {room.available ? "Reserve Room →" : "Currently Unavailable"}
             </button>
 
             <p className="booking-note">
-              You will not be charged yet.
-              Review your booking details
+              You will not be charged yet. Review your booking details
               before confirmation.
             </p>
 
             <div className="booking-benefits">
-
-              <span>
-                Secure booking
-              </span>
-
-              <span>
-                Direct with Backpacker Gateways
-              </span>
-
-              <span>
-                Himalayan travel support
-              </span>
-
+              <span>Secure booking</span>
+              <span>Direct with Backpacker Gateways</span>
+              <span>Himalayan travel support</span>
             </div>
 
-            <Link
-              to="/rooms"
-              className="back-rooms"
-            >
+            <Link to="/rooms" className="back-rooms">
               ← Browse All Rooms
             </Link>
-
           </aside>
-
         </div>
-
       </main>
 
-      {/* =====================================================
-          FULL SCREEN PHOTO CAROUSEL
-      ===================================================== */}
+      {/* FULL SCREEN MAIN GALLERY */}
 
-      {showGallery &&
-        totalImages > 0 && (
-
-          <div
-            className="gallery-modal"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Room photo gallery"
-            onClick={closeGallery}
+      {showGallery && totalImages > 0 && (
+        <div
+          className="gallery-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Room photo gallery"
+          onClick={closeGallery}
+        >
+          <button
+            type="button"
+            className="gallery-close"
+            onClick={(event) => {
+              event.stopPropagation();
+              closeGallery();
+            }}
+            aria-label="Close gallery"
           >
+            ×
+          </button>
 
+          {totalImages > 1 && (
             <button
               type="button"
-              className="gallery-close"
+              className="gallery-arrow gallery-arrow-left"
               onClick={(event) => {
                 event.stopPropagation();
-                closeGallery();
+                previousImage();
               }}
-              aria-label="Close gallery"
+              aria-label="Previous photo"
             >
-              ×
+              ‹
             </button>
+          )}
 
-            {totalImages > 1 && (
+          <img
+            className="gallery-modal-image"
+            src={images[activeImage]}
+            alt={`${roomName} photo ${activeImage + 1}`}
+            onClick={(event) => event.stopPropagation()}
+            decoding="async"
+          />
 
-              <button
-                type="button"
-                className="gallery-arrow gallery-arrow-left"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  previousImage();
-                }}
-                aria-label="Previous photo"
-              >
-                ‹
-              </button>
+          {totalImages > 1 && (
+            <button
+              type="button"
+              className="gallery-arrow gallery-arrow-right"
+              onClick={(event) => {
+                event.stopPropagation();
+                nextImage();
+              }}
+              aria-label="Next photo"
+            >
+              ›
+            </button>
+          )}
 
-            )}
-
-            <img
-              className="gallery-modal-image"
-              src={images[activeImage]}
-              alt={`${roomName} photo ${
-                activeImage + 1
-              }`}
-              onClick={(event) =>
-                event.stopPropagation()
-              }
-              decoding="async"
-            />
-
-            {totalImages > 1 && (
-
-              <button
-                type="button"
-                className="gallery-arrow gallery-arrow-right"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  nextImage();
-                }}
-                aria-label="Next photo"
-              >
-                ›
-              </button>
-
-            )}
-
-            <div className="gallery-modal-counter">
-              {activeImage + 1} /{" "}
-              {totalImages}
-            </div>
-
+          <div className="gallery-modal-counter">
+            {activeImage + 1} / {totalImages}
           </div>
-
-        )}
-
+        </div>
+      )}
     </div>
   );
 };
