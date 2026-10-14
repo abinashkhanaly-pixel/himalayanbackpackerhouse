@@ -34,6 +34,7 @@ const DEFAULT_FORM = {
   // Property
   propertyType: "Hotel",
   starCategory: "",
+  homepageSections: [],
   checkIn: "14:00",
   checkOut: "12:00",
   languages: "",
@@ -362,16 +363,16 @@ export default function AdminRooms() {
           .map((image) => image.trim())
           .filter(Boolean),
 
-         roomImage: form.images.includes(form.roomImage)
-         ? form.roomImage
-         : form.images[0] || "",
-
-
+         roomImage:
+  form.roomImage?.trim() ||
+  form.images[0]?.trim() ||
+  "",
         available: form.available,
 
         // PROPERTY
         propertyType: form.propertyType,
         starCategory: form.starCategory,
+        homepageSections: form.homepageSections,
         checkIn: form.checkIn,
         checkOut: form.checkOut,
 
@@ -474,6 +475,9 @@ export default function AdminRooms() {
       propertyType: room.propertyType || "Hotel",
 
       starCategory: room.starCategory || "",
+      homepageSections: Array.isArray(room.homepageSections)
+      ? room.homepageSections
+      : [],
 
       checkIn: room.checkIn || "14:00",
 
@@ -1231,27 +1235,22 @@ export default function AdminRooms() {
           )}
 
           <button
-  type="button"
-  className={
-    form.roomImage === image
-      ? "room-image-select selected"
-      : "room-image-select"
-  }
-  onClick={() =>
-    setForm((previous) => ({
-      ...previous,
-      roomImage: image,
-      images: [
-        image,
-        ...previous.images.filter(
-          (item) => item !== image
-        ),
-      ],
-    }))
-  }
+  
+type="button"
+className={
+  form.roomImage === image
+    ? "room-image-select selected"
+    : "room-image-select"
+}
+onClick={() =>
+  setForm((previous) => ({
+    ...previous,
+    roomImage: image,
+  }))
+}
 >
   {form.roomImage === image
-    ? "✓ YOUR ROOM • MAIN"
+    ? "✓ YOUR ROOM"
     : "Use for Your Room"}
 </button>
           <button
@@ -1378,24 +1377,70 @@ export default function AdminRooms() {
                         Star / Category
                       </label>
 
-                      <select
-                        name="starCategory"
-                        value={form.starCategory}
-                        onChange={handleChange}
-                      >
-                        <option value="">
-                          Select category
-                        </option>
-                        <option>1 Star</option>
-                        <option>2 Star</option>
-                        <option>3 Star</option>
-                        <option>4 Star</option>
-                        <option>5 Star</option>
-                        <option>Budget</option>
-                        <option>Premium</option>
-                        <option>Luxury</option>
-                      </select>
-                    </div>
+                   
+                                     <select
+                                     name="starCategory"
+                                         value={form.starCategory}
+                                           onChange={handleChange}
+                                                    >
+                                           <option value="">
+                                                   Select category
+                                            </option>
+
+                                             <option value="1 Star">1 Star</option>
+                                                 <option value="2 Star">2 Star</option>
+                                                     <option value="3 Star">3 Star</option>
+                                                  <option value="4 Star">4 Star</option>
+                                                     <option value="5 Star">5 Star</option>
+                                                        <option value="Budget">Budget</option>
+                                                         <option value="Premium">Premium</option>
+                                                            <option value="Luxury">Luxury</option>
+
+                                                                   
+                                                                           </select>
+                              </div>
+
+<div className="field full">
+  <label>Homepage Display Sections</label>
+
+  {[
+    "Himalayan Retreats Near Kathmandu",
+    "Dhulikhel",
+    "Nagarkot",
+  ].map((section) => (
+    <label
+      key={section}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "10px",
+        marginTop: "8px",
+        cursor: "pointer",
+      }}
+    >
+      <input
+        type="checkbox"
+        checked={(form.homepageSections || []).includes(section)}
+        onChange={(e) => {
+          setForm((previous) => {
+            const selected = previous.homepageSections || [];
+
+            return {
+              ...previous,
+              homepageSections: e.target.checked
+                ? [...new Set([...selected, section])]
+                : selected.filter((item) => item !== section),
+            };
+          });
+        }}
+      />
+
+      <span>{section}</span>
+    </label>
+  ))}
+</div>
+
+
 
                     <div className="field">
                       <label>
