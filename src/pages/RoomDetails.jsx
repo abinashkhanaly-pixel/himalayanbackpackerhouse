@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { getRoomBySlug } from "../services/roomApi";
@@ -337,15 +336,6 @@ const RoomDetails = () => {
     images.length > 0
       ? images[activeImage] || images[0]
       : "";
-
-  const roomImageOptions = [
-    ...new Set(
-      [
-        ...(Array.isArray(room.images) ? room.images : []),
-        room.roomImage,
-      ].filter(Boolean)
-    ),
-  ];
 
   const roomImage =
     selectedRoomImage || room.roomImage || images[0] || "";
@@ -770,43 +760,6 @@ const RoomDetails = () => {
                       loading="lazy"
                       decoding="async"
                     />
-
-                    {/* THUMBNAILS — INDEPENDENT FROM MAIN GALLERY */}
-
-                    {roomImageOptions.length > 0 && (
-                      <div
-                        className="room-image-selector"
-                        aria-label="Choose Your Room image"
-                      >
-                        <p className="room-image-selector-title">
-                          Choose a room image
-                        </p>
-
-                        <div className="room-image-options">
-                          {roomImageOptions.map((image, index) => (
-                            <button
-                              type="button"
-                              key={`${image}-${index}`}
-                              className={`room-image-option ${
-                                roomImage === image ? "is-selected" : ""
-                              }`}
-                              onClick={() =>
-                                setSelectedRoomImage(image)
-                              }
-                              aria-label={`Select room image ${index + 1}`}
-                              aria-pressed={roomImage === image}
-                            >
-                              <img
-                                src={image}
-                                alt=""
-                                loading="lazy"
-                                decoding="async"
-                              />
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
                   </div>
                 )}
 
