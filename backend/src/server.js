@@ -221,6 +221,117 @@ ${roomXml}
 // API ROUTES
 // =====================================================
 
+// USD/NPR EXCHANGE RATE
+// GET /api/exchange-rate
+// Source: ExchangeRate-API
+// Admin and booking prices remain in NPR.
+// =====================================================
+
+let exchangeRateCache = null;
+const EXCHANGE_RATE_CACHE_MS = 12 * 60 * 60 * 1000;
+
+app.get("/api/exchange-rate", async (req, res) => {
+  const now = Date.now();
+
+  // Return the cached rate while it is fresh.
+  if (
+    exchangeRateCache &&
+    now - exchangeRateCache.fetchedAt < EXCHANGE_RATE_CACHE_MS
+  ) {
+    return res.json({
+      success: true,
+      base: "NPR",
+      target: "USD",
+      nprPerUsd: exchangeRateCache.nprPerUsd,
+      rateDate: exchangeRateCache.rateDate,
+      nextUpdate: exchangeRateCache.nextUpdate,
+      source: exchangeRateCache.source,
+      cached: true,
+    });
+  }
+
+  try {
+    const response = await fetch(
+      "https://open.er-api.com/v6/latest/USD",
+      {
+        signal: AbortSignal.timeout(10000),
+        headers: {
+          Accept: "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        `Exchange API HTTP ${response.status}`
+      );
+    }
+
+    const data = await response.json();
+    const rate = Number(data?.rates?.NPR);
+
+    if (
+      data?.result !== "success" ||
+      data?.base_code !== "USD" ||
+      !Number.isFinite(rate) ||
+      rate <= 0
+    ) {
+      throw new Error(
+        "Invalid exchange-rate response"
+      );
+    }
+
+    exchangeRateCache = {
+      nprPerUsd: rate,
+      rateDate:
+        data.time_last_update_utc || null,
+      nextUpdate:
+        data.time_next_update_utc || null,
+      source: "ExchangeRate-API",
+      fetchedAt: Date.now(),
+    };
+
+    return res.json({
+      success: true,
+      base: "NPR",
+      target: "USD",
+      nprPerUsd: exchangeRateCache.nprPerUsd,
+      rateDate: exchangeRateCache.rateDate,
+      nextUpdate: exchangeRateCache.nextUpdate,
+      source: exchangeRateCache.source,
+      cached: false,
+    });
+  } catch (error) {
+    console.error(
+      "[EXCHANGE RATE ERROR]:",
+      error.message
+    );
+
+    // Return the last successful rate if the API fails.
+    if (exchangeRateCache) {
+      return res.json({
+        success: true,
+        base: "NPR",
+        target: "USD",
+        nprPerUsd: exchangeRateCache.nprPerUsd,
+        rateDate: exchangeRateCache.rateDate,
+        nextUpdate: exchangeRateCache.nextUpdate,
+        source: exchangeRateCache.source,
+        cached: true,
+        stale: true,
+      });
+    }
+
+    return res.status(503).json({
+      success: false,
+      message: "Exchange rate temporarily unavailable",
+    });
+  }
+});
+
+
+// =====================================================
+
 app.use("/api/rooms", roomRoutes);
 
 app.use("/api/bookings", bookingRoutes);
@@ -291,4 +402,5 @@ connectDB()
       error.message
     );
   });
+
 
