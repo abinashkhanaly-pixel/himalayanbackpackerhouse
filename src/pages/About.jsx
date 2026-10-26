@@ -47,7 +47,8 @@ const schema = {
     areaServed: ["Kathmandu", "Pokhara", "Chitwan", "Nepal"],
     address: {
       "@type": "PostalAddress",
-      streetAddress: "Third Floor, Sanima Bank Building, Sorhakhutte, Nayabazar",
+      streetAddress:
+        "Third Floor, Sanima Bank Building, Sorhakhutte, Nayabazar",
       addressLocality: "Kathmandu",
       addressCountry: "NP",
     },
@@ -56,10 +57,12 @@ const schema = {
 
 function upsert(selector, tag, attrs) {
   let el = document.head.querySelector(selector);
+
   if (!el) {
     el = document.createElement(tag);
     document.head.appendChild(el);
   }
+
   Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
 }
 
@@ -85,22 +88,27 @@ function Photo({ src, name, initials }) {
 export default function About() {
   useEffect(() => {
     document.title = TITLE;
+
     upsert('meta[name="description"]', "meta", {
       name: "description",
       content: DESC,
     });
+
     upsert('link[rel="canonical"]', "link", {
       rel: "canonical",
       href: URL,
     });
+
     upsert('meta[property="og:title"]', "meta", {
       property: "og:title",
       content: TITLE,
     });
+
     upsert('meta[property="og:description"]', "meta", {
       property: "og:description",
       content: DESC,
     });
+
     upsert('meta[property="og:url"]', "meta", {
       property: "og:url",
       content: URL,
@@ -118,19 +126,27 @@ export default function About() {
       <section className="ab-hero">
         <div className="ab-wrap">
           <span className="ab-kicker">ABOUT BACKPACKER GATEWAYS</span>
+
           <h1>
-            Luxury hotels across Nepal,
-            <em> booked with confidence.</em>
+            <span className="ab-hero-highlight">
+              Luxury hotels across Nepal,
+            </span>{" "}
+            <span className="ab-hero-subhighlight">
+              <em>booked with confidence.</em>
+            </span>
           </h1>
+
           <p className="ab-lead">
             Backpacker Gateways is Nepal's luxury hotel brand. We help you
             book the best 5-star and 4-star hotels in Kathmandu, Pokhara,
             Chitwan and all over Nepal.
           </p>
+
           <div className="ab-actions">
             <Link to="/booking" className="ab-btn ab-btn-gold">
               Book a luxury hotel
             </Link>
+
             <a
               href={WA}
               target="_blank"
@@ -153,11 +169,17 @@ export default function About() {
               <em> with luxury comfort.</em>
             </h2>
           </div>
+
           <p className="ab-text">
-            Our mission is simple: to bring luxury brand hotels to every
-            corner of Nepal. We make sure your holiday is grand, your stay
-            is comfortable and every detail is taken care of, from the first
-            message to the last day of your trip.
+            Our mission is to make booking Nepal’s finest 4-star and 5-star
+            hotels easy and accessible to travellers around the world.
+            Discover premium hotels in Kathmandu and across Nepal, or find a
+            peaceful Himalayan retreat in Dhulikhel and Nagarkot near
+            Kathmandu. We make the booking process simple, help you choose
+            the right stay, and assist you with your reservation. With
+            convenient booking assistance and the option to pay directly at
+            the property, subject to hotel terms, you can plan your Nepal
+            stay with greater confidence.
           </p>
         </div>
       </section>
@@ -166,10 +188,12 @@ export default function About() {
       <section className="ab-sec ab-soft">
         <div className="ab-wrap">
           <span className="ab-label">WHAT WE OFFER</span>
+
           <h2>
             Stay the way
             <em> you deserve.</em>
           </h2>
+
           <div className="ab-grid">
             {OFFERS.map((o) => (
               <article key={o.t} className="ab-card">
@@ -185,6 +209,7 @@ export default function About() {
       <section className="ab-sec">
         <div className="ab-wrap">
           <span className="ab-label">THE PEOPLE BEHIND US</span>
+
           <h2>
             Built by
             <em> people who know Nepal.</em>
@@ -197,6 +222,7 @@ export default function About() {
                 name="Umesh Gupta"
                 initials="UG"
               />
+
               <div>
                 <h3>Umesh Gupta</h3>
                 <strong>Founder</strong>
@@ -215,6 +241,7 @@ export default function About() {
                 name="Bikash Khanal"
                 initials="BK"
               />
+
               <div>
                 <h3>Bikash Khanal</h3>
                 <strong>Senior MERN Stack Developer</strong>
@@ -242,15 +269,18 @@ export default function About() {
             Plan your luxury stay
             <em> in Nepal.</em>
           </h2>
+
           <p>
             Visit us at 3rd Floor, Sanima Bank Building, Sorhakhutte,
             Nayabazar, Kathmandu. With Abhiwadan Expedition and Trip
             Holidays.
           </p>
+
           <div className="ab-actions">
             <Link to="/booking" className="ab-btn ab-btn-gold">
               Book now
             </Link>
+
             <Link to="/contact" className="ab-btn ab-btn-line">
               Contact us
             </Link>
