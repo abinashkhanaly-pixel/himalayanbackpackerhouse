@@ -1,7 +1,8 @@
-
+﻿
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getRooms } from "../services/roomApi";
+import { getExchangeRate, formatUSD } from "../utils/currency";
 import "./RecommendedStays.css";
 
 const FALLBACK_IMAGE =
@@ -73,7 +74,23 @@ const isKathmanduAreaRetreat = (stay) =>
 const RecommendedStays = () => {
   const [stays, setStays] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [nprPerUsd, setNprPerUsd] = useState(null);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    getExchangeRate()
+      .then((data) => {
+        if (!cancelled) setNprPerUsd(data.nprPerUsd);
+      })
+      .catch((error) => {
+        console.error("RECOMMENDED STAYS EXCHANGE RATE ERROR:", error);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   useEffect(() => {
     let cancelled = false;
 
@@ -211,7 +228,7 @@ const RecommendedStays = () => {
 
             <div className="stay-card-content">
               <div className="stay-location">
-                <span>⌖</span>
+                <span>📍</span>
                 {stay.destination || stay.location || "Nepal"}
               </div>
 
@@ -239,13 +256,25 @@ const RecommendedStays = () => {
               )}
 
               <div className="stay-card-footer">
-                <div className="stay-price">
-                  <small>From</small>
-                  <strong>
-                    NPR {Number(stay.price || 0).toLocaleString()}
-                  </strong>
-                  <span>/ night</span>
-                </div>
+               
+<div className="stay-price">
+  <small>From</small>
+
+  <strong>
+    NPR {Number(stay.price || 0).toLocaleString("en-NP", {
+      maximumFractionDigits: 0,
+    })}
+  </strong>
+
+  {nprPerUsd && Number(stay.price) > 0 && (
+    <span className="stay-price-usd">
+      {formatUSD(stay.price, nprPerUsd)} USD
+    </span>
+  )}
+
+  <span>/ night</span>
+</div>
+
 
                 <Link to={detailsUrl} className="stay-view-button">
                   View Stay <span>→</span>
@@ -353,3 +382,5 @@ const RecommendedStays = () => {
 };
 
 export default RecommendedStays;
+
+

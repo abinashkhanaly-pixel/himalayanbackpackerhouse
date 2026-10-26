@@ -1069,3 +1069,15 @@
     font-size: 24px;
   }
 }
+
+/* Clear, customer-friendly USD price */
+.recommended-stays .stay-price-usd {
+  display: block;
+  margin-top: 5px;
+  color: #1769d2;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: 0.1px;
+}
+
