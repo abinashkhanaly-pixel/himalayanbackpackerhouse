@@ -96,32 +96,32 @@ function LuxuryHero() {
 
   const [activeTab, setActiveTab] = useState("hotel");
 
-const handleTabClick = (tabId) => {
-  setActiveTab(tabId);
-  setTravelerOpen(false);
-  setLocationOpen(false);
+  const handleTabClick = (tabId) => {
+    setActiveTab(tabId);
+    setTravelerOpen(false);
+    setLocationOpen(false);
 
-  if (tabId === "hotel") {
-    navigate("/rooms");
-    return;
-  }
+    if (tabId === "hotel") {
+      navigate("/rooms");
+      return;
+    }
 
-  if (tabId === "trek") {
-    navigate("/trekking");
-    return;
-  }
+    if (tabId === "trek") {
+      navigate("/trekking");
+      return;
+    }
 
-  if (tabId === "vehicle") {
-    navigate("/vehicles");
-    return;
-  }
+    if (tabId === "vehicle") {
+      navigate("/vehicles");
+      return;
+    }
 
-  if (tabId === "packages") {
-    navigate("/packages");
-    return;
-  }
-};  
-    
+    if (tabId === "packages") {
+      navigate("/packages");
+      return;
+    }
+  };
+
   const [destination, setDestination] = useState("");
 
   /* =========================================================
@@ -333,6 +333,7 @@ const handleTabClick = (tabId) => {
 
       {/* =====================================================
           HOTEL INFORMATION OVER IMAGE
+          PRESERVED WITHOUT CHANGES
       ===================================================== */}
 
       <div
@@ -403,8 +404,9 @@ const handleTabClick = (tabId) => {
             <span className="eyebrow-line" />
           </div>
 
+          {/* UPDATED H1: SEO */}
           <h1>
-            Stay Luxury in Nepal
+            Discover Luxury Hotels in Nepal
           </h1>
 
           {/* =================================================
@@ -420,7 +422,8 @@ const handleTabClick = (tabId) => {
                 className={`luxury-tab ${
                   activeTab === tab.id ? "active" : ""
                 }`}
-               onClick={() => handleTabClick(tab.id)}              >
+                onClick={() => handleTabClick(tab.id)}
+              >
                 <span className="luxury-tab-icon">
                   {tab.icon}
                 </span>
@@ -929,4 +932,3 @@ const handleTabClick = (tabId) => {
 }
 
 export default LuxuryHero;
-
