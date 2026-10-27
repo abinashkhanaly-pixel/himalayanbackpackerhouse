@@ -377,7 +377,7 @@ const RoomDetails = () => {
             >
               <img
                 src={mainImage}
-                alt={`${roomName} in ${destination}, Nepal`}
+                alt={`${roomName} in ${destination}Nepal`}
                 width="1600"
                 height="1000"
                 fetchPriority="high"
@@ -486,7 +486,7 @@ const RoomDetails = () => {
             </h1>
 
             <p className="room-location">
-              {destination}, Nepal
+              {destination}
             </p>
 
             <div className="room-trust-row">
@@ -603,7 +603,7 @@ const RoomDetails = () => {
                 </div>
                 <div>
                   <span>Location</span>
-                  <strong>{destination}, Nepal</strong>
+                  <strong>{destination}</strong>
                 </div>
                 <div>
                   <span>Availability</span>
@@ -648,7 +648,7 @@ const RoomDetails = () => {
                   </p>
                   <p>
                     <strong>Convenient Location:</strong>{" "}
-                    Located in {destination}, Nepal, the property can
+                    Located in {destination},the property can
                     provide a base for exploring local attractions,
                     restaurants, shopping areas and travel connections.
                   </p>
@@ -731,7 +731,7 @@ const RoomDetails = () => {
                 <div className="property-text-box">
                   <p>
                     <strong>Convenient Location:</strong>{" "}
-                    Located in {destination}, Nepal, this property can
+                    Located in {destination},this property can
                     provide access to local attractions and experiences.
                     Check the property's exact location before booking.
                   </p>
@@ -756,7 +756,7 @@ const RoomDetails = () => {
                     <img
                       className="your-room-preview"
                       src={roomImage}
-                      alt={`${roomName} in ${destination}, Nepal`}
+                      alt={`${roomName} in ${destination}`}
                       loading="lazy"
                       decoding="async"
                     />
@@ -766,7 +766,7 @@ const RoomDetails = () => {
                 <div className="room-summary-content">
                   <h3>{roomName}</h3>
                   <p>
-                    A comfortable stay in {destination}, Nepal.
+                    A comfortable stay in {destination}
                   </p>
 
                   <div className="room-summary-features">
