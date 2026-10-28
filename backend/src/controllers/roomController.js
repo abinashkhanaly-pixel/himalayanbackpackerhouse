@@ -1,3 +1,4 @@
+
 const Room = require("../models/Room");
 const { uploadRoomImage } = require("../utils/imageUpload");
 
@@ -421,9 +422,26 @@ const updateRoom = async (req, res) => {
       });
     }
 
-    const roomData = {
-      ...req.body,
-    };
+    const roomData = { ...req.body };
+
+    // DEBUG: CHECK HOTEL INSIGHTS FROM REQUEST
+    console.log(
+      "HOTEL INSIGHTS RECEIVED:",
+      JSON.stringify(req.body.hotelInsights, null, 2)
+    );
+
+    // ---------------------------------------------
+    // MERGE HOTEL INSIGHTS
+    // ---------------------------------------------
+
+    if (req.body.hotelInsights) {
+      roomData.hotelInsights = {
+        ...(existingRoom.hotelInsights?.toObject?.() ||
+          existingRoom.hotelInsights ||
+          {}),
+        ...req.body.hotelInsights,
+      };
+    }
 
     // ---------------------------------------------
     // SEO SLUG
