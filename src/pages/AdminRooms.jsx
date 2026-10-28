@@ -20,6 +20,21 @@ const DEFAULT_FORM = {
   seoSlug: "",
   seoTitle: "",
   seoDescription: "",
+  seoKeywords: "",
+
+    // Hotel Insights
+  hotelInsights: {
+    whyChoose: "",
+    locationIntelligence: "",
+    bestFor: "",
+    roomSelection: "",
+    experiences: "",
+    bookingConfidence: "",
+    neighbourhoodGuide: "",
+    prosAndConsiderations: "",
+    smartComparison: "",
+    hotelFAQs: "",
+  },
 
   // Room
   description: "",
@@ -345,6 +360,23 @@ export default function AdminRooms() {
         seoSlug: cleanSlug,
         seoTitle: form.seoTitle.trim(),
         seoDescription: form.seoDescription.trim(),
+                seoKeywords: form.seoKeywords
+          .split(",")
+          .map((keyword) => keyword.trim())
+          .filter(Boolean),
+
+        hotelInsights: {
+          whyChoose: form.hotelInsights.whyChoose,
+          locationIntelligence: form.hotelInsights.locationIntelligence,
+          bestFor: form.hotelInsights.bestFor,
+          roomSelection: form.hotelInsights.roomSelection,
+          experiences: form.hotelInsights.experiences,
+          bookingConfidence: form.hotelInsights.bookingConfidence,
+          neighbourhoodGuide: form.hotelInsights.neighbourhoodGuide,
+          prosAndConsiderations: form.hotelInsights.prosAndConsiderations,
+          smartComparison: form.hotelInsights.smartComparison,
+          hotelFAQs: form.hotelInsights.hotelFAQs,
+        },
 
         // ROOM
         description: form.description,
@@ -422,6 +454,8 @@ export default function AdminRooms() {
   console.log("MAIN IMAGE SENT:", roomData.mainImage);
   console.log("MAIN IMAGE SAVED:", result?.data?.mainImage);
   console.log("UPDATE RESPONSE:", result);
+  console.log("HOTEL INSIGHTS SENT:", roomData.hotelInsights);
+console.log("HOTEL INSIGHTS SAVED:", result?.data?.hotelInsights);
 
   alert(
     result?.data?.mainImage === roomData.mainImage
@@ -464,6 +498,22 @@ export default function AdminRooms() {
       seoTitle: room.seoTitle || "",
 
       seoDescription: room.seoDescription || "",
+            seoKeywords: Array.isArray(room.seoKeywords)
+        ? room.seoKeywords.join(", ")
+        : room.seoKeywords || "",
+
+      hotelInsights: {
+        whyChoose: room.hotelInsights?.whyChoose || "",
+        locationIntelligence: room.hotelInsights?.locationIntelligence || "",
+        bestFor: room.hotelInsights?.bestFor || "",
+        roomSelection: room.hotelInsights?.roomSelection || "",
+        experiences: room.hotelInsights?.experiences || "",
+        bookingConfidence: room.hotelInsights?.bookingConfidence || "",
+        neighbourhoodGuide: room.hotelInsights?.neighbourhoodGuide || "",
+        prosAndConsiderations: room.hotelInsights?.prosAndConsiderations || "",
+        smartComparison: room.hotelInsights?.smartComparison || "",
+        hotelFAQs: room.hotelInsights?.hotelFAQs || "",
+      },
 
       description: room.description || "",
 
@@ -840,7 +890,7 @@ export default function AdminRooms() {
               loadPosts();
             }}
           >
-            ↻ Refresh Dashboard
+            â†» Refresh Dashboard
           </button>
         </header>
 
@@ -1056,14 +1106,24 @@ export default function AdminRooms() {
 
                           <small>
                             Preferably around
-                            50–60 characters.
+                            50â€“60 characters.
                           </small>
                         </div>
 
                         <div className="field full">
+                        <label>SEO Keywords</label>
+<input
+  type="text"
+  name="seoKeywords"
+  value={form.seoKeywords}
+  onChange={handleChange}
+  placeholder="luxury hotel Nepal, 5 star hotel Kathmandu, luxury hotel Thamel"
+/>
+<small>Separate keywords with commas.</small>
                           <label>
                             SEO Description
                           </label>
+
 
                           <textarea
                             name="seoDescription"
@@ -1075,7 +1135,7 @@ export default function AdminRooms() {
                           />
 
                           <small>
-                            Around 150–160
+                            Around 150â€“160
                             characters is a good target.
                           </small>
                         </div>
@@ -1100,6 +1160,187 @@ export default function AdminRooms() {
                         required
                       />
                     </div>
+{/* HOTEL INSIGHTS */}
+
+<div className="field full">
+  <label>Why Choose This Hotel?</label>
+  <textarea
+    value={form.hotelInsights.whyChoose}
+    onChange={(e) =>
+      setForm((prev) => ({
+        ...prev,
+        hotelInsights: {
+          ...prev.hotelInsights,
+          whyChoose: e.target.value,
+        },
+      }))
+    }
+    rows={4}
+    placeholder="Explain what makes this hotel distinctive."
+  />
+</div>
+
+<div className="field full">
+  <label>Real Location Intelligence</label>
+  <textarea
+    value={form.hotelInsights.locationIntelligence}
+    onChange={(e) =>
+      setForm((prev) => ({
+        ...prev,
+        hotelInsights: {
+          ...prev.hotelInsights,
+          locationIntelligence: e.target.value,
+        },
+      }))
+    }
+    rows={4}
+    placeholder="Describe the hotel's location and nearby places."
+  />
+</div>
+
+<div className="field full">
+  <label>Who Is This Hotel Best For?</label>
+  <textarea
+    value={form.hotelInsights.bestFor}
+    onChange={(e) =>
+      setForm((prev) => ({
+        ...prev,
+        hotelInsights: {
+          ...prev.hotelInsights,
+          bestFor: e.target.value,
+        },
+      }))
+    }
+    rows={4}
+    placeholder="Describe which types of guests this hotel suits."
+  />
+</div>
+
+<div className="field full">
+  <label>Room Selection Intelligence</label>
+  <textarea
+    value={form.hotelInsights.roomSelection}
+    onChange={(e) =>
+      setForm((prev) => ({
+        ...prev,
+        hotelInsights: {
+          ...prev.hotelInsights,
+          roomSelection: e.target.value,
+        },
+      }))
+    }
+    rows={4}
+    placeholder="Explain the available room types and differences."
+  />
+</div>
+
+<div className="field full">
+  <label>Experience Beyond the Room</label>
+  <textarea
+    value={form.hotelInsights.experiences}
+    onChange={(e) =>
+      setForm((prev) => ({
+        ...prev,
+        hotelInsights: {
+          ...prev.hotelInsights,
+          experiences: e.target.value,
+        },
+      }))
+    }
+    rows={4}
+    placeholder="Describe verified hotel facilities and experiences."
+  />
+</div>
+
+<div className="field full">
+  <label>Booking Confidence Centre</label>
+  <textarea
+    value={form.hotelInsights.bookingConfidence}
+    onChange={(e) =>
+      setForm((prev) => ({
+        ...prev,
+        hotelInsights: {
+          ...prev.hotelInsights,
+          bookingConfidence: e.target.value,
+        },
+      }))
+    }
+    rows={4}
+    placeholder="Explain booking terms, cancellation and payment policies."
+  />
+</div>
+
+<div className="field full">
+  <label>The Neighbourhood Guide</label>
+  <textarea
+    value={form.hotelInsights.neighbourhoodGuide}
+    onChange={(e) =>
+      setForm((prev) => ({
+        ...prev,
+        hotelInsights: {
+          ...prev.hotelInsights,
+          neighbourhoodGuide: e.target.value,
+        },
+      }))
+    }
+    rows={4}
+    placeholder="Describe the surrounding neighbourhood and nearby attractions."
+  />
+</div>
+
+<div className="field full">
+  <label>Honest Pros and Things to Consider</label>
+  <textarea
+    value={form.hotelInsights.prosAndConsiderations}
+    onChange={(e) =>
+      setForm((prev) => ({
+        ...prev,
+        hotelInsights: {
+          ...prev.hotelInsights,
+          prosAndConsiderations: e.target.value,
+        },
+      }))
+    }
+    rows={4}
+    placeholder="Explain factual advantages and things guests should consider."
+  />
+</div>
+
+<div className="field full">
+  <label>Smart Hotel Comparison</label>
+  <textarea
+    value={form.hotelInsights.smartComparison}
+    onChange={(e) =>
+      setForm((prev) => ({
+        ...prev,
+        hotelInsights: {
+          ...prev.hotelInsights,
+          smartComparison: e.target.value,
+        },
+      }))
+    }
+    rows={4}
+    placeholder="Compare relevant room options, facilities or alternatives."
+  />
+</div>
+
+<div className="field full">
+  <label>Ask About This Hotel â€” FAQs</label>
+  <textarea
+    value={form.hotelInsights.hotelFAQs}
+    onChange={(e) =>
+      setForm((prev) => ({
+        ...prev,
+        hotelInsights: {
+          ...prev.hotelInsights,
+          hotelFAQs: e.target.value,
+        },
+      }))
+    }
+    rows={5}
+    placeholder={"Q: What is the check-in time?\nA: Enter the hotel's verified check-in time and other frequently asked questions."}
+  />
+</div>
 
                     <div className="field">
                       <label>
@@ -1163,7 +1404,7 @@ export default function AdminRooms() {
 
                     {/* IMAGES */}
 
-                    
+
 
 <div className="field full">
   <label>
@@ -1172,7 +1413,7 @@ export default function AdminRooms() {
 
   <div className="image-upload-modern">
     <div className="upload-icon">
-      ↑
+      â†‘
     </div>
 
     <h4>
@@ -1248,7 +1489,7 @@ export default function AdminRooms() {
           )}
 
           <button
-  
+
 type="button"
 className={
   form.roomImage === image
@@ -1263,7 +1504,7 @@ onClick={() =>
 }
 >
   {form.roomImage === image
-    ? "✓ YOUR ROOM"
+    ? "âœ“ YOUR ROOM"
     : "Use for Your Room"}
 </button>
 <button
@@ -1281,7 +1522,7 @@ onClick={() =>
   }
 >
   {form.mainImage === image
-    ? "✓ MAIN IMAGE"
+    ? "âœ“ MAIN IMAGE"
     : "Use as Main Image"}
 </button>
           <button
@@ -1291,7 +1532,7 @@ onClick={() =>
               removeImage(index)
             }
           >
-            ×
+            Ã—
           </button>
 
           <div className="image-index">
@@ -1302,7 +1543,7 @@ onClick={() =>
     </div>
   )}
 </div>
-                               
+
 
                     {/* DESCRIPTION */}
 
@@ -1351,7 +1592,7 @@ onClick={() =>
                         setActiveRoomTab("property")
                       }
                     >
-                      Continue to Property Details →
+                      Continue to Property Details â†’
                     </button>
                   </div>
                 </div>
@@ -1408,7 +1649,7 @@ onClick={() =>
                         Star / Category
                       </label>
 
-                   
+
                                      <select
                                      name="starCategory"
                                          value={form.starCategory}
@@ -1427,7 +1668,7 @@ onClick={() =>
                                                          <option value="Premium">Premium</option>
                                                             <option value="Luxury">Luxury</option>
 
-                                                                   
+
                                                                            </select>
                               </div>
 
@@ -1591,7 +1832,7 @@ onClick={() =>
                         setActiveRoomTab("basic")
                       }
                     >
-                      ← Back
+                      â† Back
                     </button>
 
                     <button
@@ -1600,7 +1841,7 @@ onClick={() =>
                         setActiveRoomTab("rules")
                       }
                     >
-                      House Rules →
+                      House Rules â†’
                     </button>
                   </div>
                 </div>
@@ -1744,7 +1985,7 @@ onClick={() =>
                         setActiveRoomTab("property")
                       }
                     >
-                      ← Back
+                      â† Back
                     </button>
 
                     <button
@@ -1755,7 +1996,7 @@ onClick={() =>
                         )
                       }
                     >
-                      Cancellation Policy →
+                      Cancellation Policy â†’
                     </button>
                   </div>
                 </div>
@@ -1905,7 +2146,7 @@ onClick={() =>
                           setActiveRoomTab("rules")
                         }
                       >
-                        ← Back
+                        â† Back
                       </button>
 
                       <button
@@ -1970,7 +2211,7 @@ onClick={() =>
           ) : (
             <div className="modern-room-grid">
               {rooms.map((room) => {
-               
+
 const roomImage =
   room.mainImage ||
   room.images?.[0] ||
@@ -2035,13 +2276,13 @@ const roomImage =
 
                       <div className="room-card-meta">
                         <span>
-                          👤{" "}
+                          ðŸ‘¤{" "}
                           {room.capacity || 1}{" "}
                           Guests
                         </span>
 
                         <span>
-                          🛏️{" "}
+                          ðŸ›ï¸{" "}
                           {room.beds || "Bed"}
                         </span>
                       </div>
@@ -2110,7 +2351,7 @@ const roomImage =
               className="outline-btn"
               onClick={loadPosts}
             >
-              ↻ Refresh Posts
+              â†» Refresh Posts
             </button>
           </div>
 
