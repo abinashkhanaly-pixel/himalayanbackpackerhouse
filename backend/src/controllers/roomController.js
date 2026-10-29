@@ -28,9 +28,7 @@ const getUniqueSlug = async (baseSlug, excludeId = null) => {
   let counter = 2;
 
   while (true) {
-    const query = {
-      seoSlug: slug,
-    };
+    const query = { seoSlug: slug };
 
     if (excludeId) {
       query._id = { $ne: excludeId };
@@ -78,11 +76,8 @@ const generateSeoDescription = (roomData) => {
     return roomData.seoDescription.trim();
   }
 
-  const name =
-    roomData.name?.trim() || "comfortable room";
-
-  const destination =
-    roomData.destination?.trim();
+  const name = roomData.name?.trim() || "comfortable room";
+  const destination = roomData.destination?.trim();
 
   if (destination) {
     return `Book ${name} in ${destination}. Check room details, amenities, availability and pricing with Backpacker Gateways.`;
@@ -108,15 +103,9 @@ const getRooms = async (req, res) => {
 
     const roomFilter = {};
 
-    // ---------------------------------------------
-    // DESTINATION / KEYWORD SEARCH
-    // ---------------------------------------------
-
+    // Destination / keyword search
     if (destination.trim()) {
-      const searchRegex = new RegExp(
-        destination.trim(),
-        "i"
-      );
+      const searchRegex = new RegExp(destination.trim(), "i");
 
       roomFilter.$or = [
         { name: searchRegex },
@@ -130,38 +119,23 @@ const getRooms = async (req, res) => {
       ];
     }
 
-    // ---------------------------------------------
-    // GUEST CAPACITY
-    // ---------------------------------------------
-
+    // Guest capacity
     if (guests) {
       const guestNumber = Number(guests);
 
-      if (
-        !Number.isNaN(guestNumber) &&
-        guestNumber > 0
-      ) {
-        roomFilter.capacity = {
-          $gte: guestNumber,
-        };
+      if (!Number.isNaN(guestNumber) && guestNumber > 0) {
+        roomFilter.capacity = { $gte: guestNumber };
       }
     }
 
     // Only available rooms
     roomFilter.available = true;
 
-    // ---------------------------------------------
-    // GET ROOMS
-    // ---------------------------------------------
-
     let rooms = await Room.find(roomFilter).sort({
       createdAt: -1,
     });
 
-    // ---------------------------------------------
-    // DATE AVAILABILITY
-    // ---------------------------------------------
-
+    // Date availability
     if (checkIn && checkOut) {
       try {
         const Booking = require("../models/Booking");
@@ -175,32 +149,19 @@ const getRooms = async (req, res) => {
           endDate > startDate
         ) {
           const bookings = await Booking.find({
-            status: {
-              $in: ["pending", "confirmed"],
-            },
-
-            checkIn: {
-              $lt: endDate,
-            },
-
-            checkOut: {
-              $gt: startDate,
-            },
+            status: { $in: ["pending", "confirmed"] },
+            checkIn: { $lt: endDate },
+            checkOut: { $gt: startDate },
           }).select("room");
 
           const bookedRoomIds = new Set(
             bookings
               .filter((booking) => booking.room)
-              .map((booking) =>
-                booking.room.toString()
-              )
+              .map((booking) => booking.room.toString())
           );
 
           rooms = rooms.filter(
-            (room) =>
-              !bookedRoomIds.has(
-                room._id.toString()
-              )
+            (room) => !bookedRoomIds.has(room._id.toString())
           );
         }
       } catch (bookingError) {
@@ -211,27 +172,21 @@ const getRooms = async (req, res) => {
       }
     }
 
-    // ---------------------------------------------
-    // RESPONSE
-    // ---------------------------------------------
-
-    res.json({
+    return res.json({
       success: true,
       count: rooms.length,
-
       filters: {
         destination,
         guests,
         checkIn,
         checkOut,
       },
-
       data: rooms,
     });
   } catch (error) {
     console.error("Get Rooms Error:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: error.message,
     });
@@ -262,14 +217,14 @@ const getRoom = async (req, res) => {
       });
     }
 
-    res.json({
+    return res.json({
       success: true,
       data: room,
     });
   } catch (error) {
     console.error("Get Room Error:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: error.message,
     });
@@ -294,9 +249,7 @@ const getRoomBySlug = async (req, res) => {
       });
     }
 
-    const room = await Room.findOne({
-      seoSlug: slug,
-    });
+    const room = await Room.findOne({ seoSlug: slug });
 
     if (!room) {
       return res.status(404).json({
@@ -305,17 +258,14 @@ const getRoomBySlug = async (req, res) => {
       });
     }
 
-    res.json({
+    return res.json({
       success: true,
       data: room,
     });
   } catch (error) {
-    console.error(
-      "Get Room By Slug Error:",
-      error
-    );
+    console.error("Get Room By Slug Error:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: error.message,
     });
@@ -329,28 +279,16 @@ const getRoomBySlug = async (req, res) => {
 
 const createRoom = async (req, res) => {
   try {
-    const roomData = {
-      ...req.body,
-    };
-
-    // ---------------------------------------------
-    // SEO SLUG
-    // ---------------------------------------------
+    const roomData = { ...req.body };
 
     let baseSlug = roomData.seoSlug
       ? makeSlug(roomData.seoSlug)
       : "";
 
     if (!baseSlug) {
-      const nameSlug = makeSlug(roomData.name);
-
-      const destinationSlug = makeSlug(
-        roomData.destination
-      );
-
       baseSlug = [
-        nameSlug,
-        destinationSlug,
+        makeSlug(roomData.name),
+        makeSlug(roomData.destination),
       ]
         .filter(Boolean)
         .join("-");
@@ -360,41 +298,22 @@ const createRoom = async (req, res) => {
       baseSlug = "room";
     }
 
-    roomData.seoSlug =
-      await getUniqueSlug(baseSlug);
+    roomData.seoSlug = await getUniqueSlug(baseSlug);
 
-    // ---------------------------------------------
-    // SEO TITLE
-    // ---------------------------------------------
-
-    roomData.seoTitle =
-      generateSeoTitle(roomData);
-
-    // ---------------------------------------------
-    // SEO DESCRIPTION
-    // ---------------------------------------------
-
-    roomData.seoDescription =
-      generateSeoDescription(roomData);
-
-    // ---------------------------------------------
-    // CREATE
-    // ---------------------------------------------
+    roomData.seoTitle = generateSeoTitle(roomData);
+    roomData.seoDescription = generateSeoDescription(roomData);
 
     const room = await Room.create(roomData);
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       message: "Room created successfully",
       data: room,
     });
   } catch (error) {
-    console.error(
-      "Create Room Error:",
-      error
-    );
+    console.error("Create Room Error:", error);
 
-    res.status(400).json({
+    return res.status(400).json({
       success: false,
       message: error.message,
     });
@@ -408,14 +327,10 @@ const createRoom = async (req, res) => {
 
 const updateRoom = async (req, res) => {
   try {
-    // ---------------------------------------------
-    // GET EXISTING ROOM
-    // ---------------------------------------------
+    // Find the existing room
+    const room = await Room.findById(req.params.id);
 
-    const existingRoom =
-      await Room.findById(req.params.id);
-
-    if (!existingRoom) {
+    if (!room) {
       return res.status(404).json({
         success: false,
         message: "Room not found",
@@ -424,115 +339,105 @@ const updateRoom = async (req, res) => {
 
     const roomData = { ...req.body };
 
-    // DEBUG: CHECK HOTEL INSIGHTS FROM REQUEST
     console.log(
       "HOTEL INSIGHTS RECEIVED:",
       JSON.stringify(req.body.hotelInsights, null, 2)
     );
 
-    // ---------------------------------------------
-    // MERGE HOTEL INSIGHTS
-    // ---------------------------------------------
+    // Do not allow clients to overwrite MongoDB-managed fields
+    delete roomData._id;
+    delete roomData.__v;
+    delete roomData.hotelInsights;
 
-    if (req.body.hotelInsights) {
-      roomData.hotelInsights = {
-        ...(existingRoom.hotelInsights?.toObject?.() ||
-          existingRoom.hotelInsights ||
-          {}),
-        ...req.body.hotelInsights,
-      };
+    // Update supplied top-level fields without removing
+    // fields that were not included in the request.
+    Object.assign(room, roomData);
+
+    // Explicitly set each nested hotelInsights field
+    if (
+      req.body.hotelInsights &&
+      typeof req.body.hotelInsights === "object" &&
+      !Array.isArray(req.body.hotelInsights)
+    ) {
+      const insightFields = [
+        "whyChoose",
+        "locationIntelligence",
+        "bestFor",
+        "roomSelection",
+        "experiences",
+        "bookingConfidence",
+        "neighbourhoodGuide",
+        "prosAndConsiderations",
+        "smartComparison",
+        "hotelFAQs",
+      ];
+
+      for (const field of insightFields) {
+        if (
+          Object.prototype.hasOwnProperty.call(
+            req.body.hotelInsights,
+            field
+          )
+        ) {
+          room.set(
+            `hotelInsights.${field}`,
+            req.body.hotelInsights[field] ?? ""
+          );
+        }
+      }
     }
 
-    // ---------------------------------------------
-    // SEO SLUG
-    // ---------------------------------------------
-
-    let baseSlug = roomData.seoSlug
-      ? makeSlug(roomData.seoSlug)
-      : makeSlug(existingRoom.seoSlug);
+    // Generate a unique SEO slug
+    let baseSlug = room.seoSlug
+      ? makeSlug(room.seoSlug)
+      : "";
 
     if (!baseSlug) {
-      const nameSlug = makeSlug(
-        roomData.name ||
-          existingRoom.name
-      );
-
-      const destinationSlug = makeSlug(
-        roomData.destination ||
-          existingRoom.destination
-      );
-
       baseSlug = [
-        nameSlug,
-        destinationSlug,
+        makeSlug(room.name),
+        makeSlug(room.destination),
       ]
         .filter(Boolean)
         .join("-");
     }
 
     if (!baseSlug) {
-      baseSlug = `room-${existingRoom._id}`;
+      baseSlug = `room-${room._id}`;
     }
 
-    roomData.seoSlug =
-      await getUniqueSlug(
-        baseSlug,
-        existingRoom._id
-      );
+    room.seoSlug = await getUniqueSlug(baseSlug, room._id);
 
-    // ---------------------------------------------
-    // MERGED ROOM DATA
-    // ---------------------------------------------
+    // Generate SEO fields using the updated room data
+    const mergedRoomData = room.toObject();
 
-    const mergedRoomData = {
-      ...existingRoom.toObject(),
-      ...roomData,
-    };
+    room.seoTitle = generateSeoTitle(mergedRoomData);
+    room.seoDescription = generateSeoDescription(mergedRoomData);
 
-    // ---------------------------------------------
-    // SEO TITLE
-    // ---------------------------------------------
+    // Save the document
+    await room.save();
 
-    roomData.seoTitle =
-      generateSeoTitle(
-        mergedRoomData
-      );
-
-    // ---------------------------------------------
-    // SEO DESCRIPTION
-    // ---------------------------------------------
-
-    roomData.seoDescription =
-      generateSeoDescription(
-        mergedRoomData
-      );
-
-    // ---------------------------------------------
-    // UPDATE
-    // ---------------------------------------------
-
-    const room =
-      await Room.findByIdAndUpdate(
-        req.params.id,
-        roomData,
-        {
-          new: true,
-          runValidators: true,
-        }
-      );
-
-    res.json({
-      success: true,
-      message: "Room updated successfully",
-      data: room,
-    });
-  } catch (error) {
-    console.error(
-      "Update Room Error:",
-      error
+    console.log(
+      "HOTEL INSIGHTS AFTER SAVE:",
+      JSON.stringify(room.hotelInsights, null, 2)
     );
 
-    res.status(400).json({
+    // Read the saved document again from MongoDB
+    const verifyRoom = await Room.findById(room._id).lean();
+
+    console.log(
+      "HOTEL INSIGHTS AFTER DB READ:",
+      JSON.stringify(verifyRoom?.hotelInsights, null, 2)
+    );
+
+    return res.json({
+      success: true,
+      message: "Room updated successfully",
+      data: verifyRoom,
+    });
+  } catch (error) {
+    console.error("Update Room Error:", error);
+
+    return res.status(400).json({
       success: false,
       message: error.message,
     });
@@ -546,10 +451,7 @@ const updateRoom = async (req, res) => {
 
 const deleteRoom = async (req, res) => {
   try {
-    const room =
-      await Room.findByIdAndDelete(
-        req.params.id
-      );
+    const room = await Room.findByIdAndDelete(req.params.id);
 
     if (!room) {
       return res.status(404).json({
@@ -558,17 +460,14 @@ const deleteRoom = async (req, res) => {
       });
     }
 
-    res.json({
+    return res.json({
       success: true,
       message: "Room deleted successfully",
     });
   } catch (error) {
-    console.error(
-      "Delete Room Error:",
-      error
-    );
+    console.error("Delete Room Error:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: error.message,
     });
@@ -589,26 +488,19 @@ const uploadImage = async (req, res) => {
       });
     }
 
-    const result =
-      await uploadRoomImage(req.file);
+    const result = await uploadRoomImage(req.file);
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
-      message:
-        "Image uploaded and optimized successfully.",
+      message: "Image uploaded and optimized successfully.",
       data: result,
     });
   } catch (error) {
-    console.error(
-      "Upload Room Image Error:",
-      error
-    );
+    console.error("Upload Room Image Error:", error);
 
-    res.status(400).json({
+    return res.status(400).json({
       success: false,
-      message:
-        error.message ||
-        "Image upload failed.",
+      message: error.message || "Image upload failed.",
     });
   }
 };

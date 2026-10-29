@@ -43,7 +43,7 @@ const roomSchema = new mongoose.Schema(
     },
 
     // ==========================================
-    // HOMEPAGE DISPLAY SECTIONS (NEW)
+    // HOMEPAGE DISPLAY SECTIONS (EXISTING)
     // ==========================================
     homepageSections: {
       type: [String],
@@ -76,7 +76,7 @@ const roomSchema = new mongoose.Schema(
     },
 
     // ==========================================
-    // SEO FIELDS
+    // SEO FIELDS (EXISTING)
     // ==========================================
     seoSlug: {
       type: String,
@@ -99,7 +99,32 @@ const roomSchema = new mongoose.Schema(
     },
 
     // ==========================================
-    // ROOM DESCRIPTION
+    // SEO KEYWORDS (NEW)
+    // ==========================================
+    seoKeywords: {
+      type: [String],
+      default: [],
+      set: (items) => {
+        if (!Array.isArray(items)) {
+          if (typeof items === "string") {
+            items = items.split(",");
+          } else {
+            return [];
+          }
+        }
+
+        return [
+          ...new Set(
+            items
+              .map((item) => String(item).trim())
+              .filter((item) => item.length > 0)
+          ),
+        ];
+      },
+    },
+
+    // ==========================================
+    // ROOM DESCRIPTION (EXISTING)
     // ==========================================
     description: {
       type: String,
@@ -110,7 +135,84 @@ const roomSchema = new mongoose.Schema(
     },
 
     // ==========================================
-    // PRICE PER NIGHT
+    // HOTEL INSIGHTS (NEW)
+    // Admin-managed hotel-specific content
+    // No content maxlength restriction
+    // ==========================================
+    hotelInsights: {
+      // 1. Why Choose This Hotel?
+      whyChoose: {
+        type: String,
+        trim: true,
+        default: "",
+      },
+
+      // 2. Real Location Intelligence
+      locationIntelligence: {
+        type: String,
+        trim: true,
+        default: "",
+      },
+
+      // 3. Who Is This Hotel Best For?
+      bestFor: {
+        type: String,
+        trim: true,
+        default: "",
+      },
+
+      // 4. Room Selection Intelligence
+      roomSelection: {
+        type: String,
+        trim: true,
+        default: "",
+      },
+
+      // 5. Experience Beyond the Room
+      experiences: {
+        type: String,
+        trim: true,
+        default: "",
+      },
+
+      // 6. Booking Confidence Centre
+      bookingConfidence: {
+        type: String,
+        trim: true,
+        default: "",
+      },
+
+      // 7. The Neighbourhood Guide
+      neighbourhoodGuide: {
+        type: String,
+        trim: true,
+        default: "",
+      },
+
+      // 8. Honest Pros and Things to Consider
+      prosAndConsiderations: {
+        type: String,
+        trim: true,
+        default: "",
+      },
+
+      // 9. Smart Hotel Comparison
+      smartComparison: {
+        type: String,
+        trim: true,
+        default: "",
+      },
+
+      // 10. Ask About This Hotel
+      hotelFAQs: {
+        type: String,
+        trim: true,
+        default: "",
+      },
+    },
+
+    // ==========================================
+    // PRICE PER NIGHT (EXISTING)
     // ==========================================
     price: {
       type: Number,
@@ -119,7 +221,7 @@ const roomSchema = new mongoose.Schema(
     },
 
     // ==========================================
-    // GUEST CAPACITY
+    // GUEST CAPACITY (EXISTING)
     // ==========================================
     capacity: {
       type: Number,
@@ -129,7 +231,7 @@ const roomSchema = new mongoose.Schema(
     },
 
     // ==========================================
-    // BED INFORMATION
+    // BED INFORMATION (EXISTING)
     // ==========================================
     beds: {
       type: String,
@@ -139,7 +241,7 @@ const roomSchema = new mongoose.Schema(
     },
 
     // ==========================================
-    // AMENITIES
+    // AMENITIES (EXISTING)
     // ==========================================
     amenities: {
       type: [String],
@@ -158,7 +260,7 @@ const roomSchema = new mongoose.Schema(
     },
 
     // ==========================================
-    // ROOM IMAGES / GALLERY
+    // ROOM IMAGES / GALLERY (EXISTING)
     // ==========================================
     images: {
       type: [String],
@@ -173,21 +275,22 @@ const roomSchema = new mongoose.Schema(
     },
 
     // ==========================================
-    // DEDICATED ROOM IMAGE
+    // DEDICATED ROOM IMAGE (EXISTING)
     // ==========================================
     roomImage: {
       type: String,
       trim: true,
       default: "",
     },
-   mainImage: {
-  type: String,
-  trim: true,
-  default: "",
-},
+
+    mainImage: {
+      type: String,
+      trim: true,
+      default: "",
+    },
 
     // ==========================================
-    // ROOM AVAILABILITY
+    // ROOM AVAILABILITY (EXISTING)
     // ==========================================
     available: {
       type: Boolean,
@@ -201,7 +304,7 @@ const roomSchema = new mongoose.Schema(
 );
 
 // ==========================================
-// CLEAN ROOM DATA BEFORE RETURNING
+// CLEAN ROOM DATA BEFORE RETURNING (EXISTING)
 // ==========================================
 roomSchema.set("toJSON", {
   transform: (doc, ret) => {
