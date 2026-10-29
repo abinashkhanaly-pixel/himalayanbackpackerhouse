@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { getRoomBySlug } from "../services/roomApi";
@@ -9,6 +8,7 @@ import {
   Mountain,
 } from "lucide-react";
 import "./RoomDetails.css";
+
 
 const HOTEL_INSIGHT_SECTIONS = [
   {
@@ -63,6 +63,11 @@ const HOTEL_INSIGHT_SECTIONS = [
   },
 ];
 
+/* =========================================================
+   HOTEL INSIGHTS
+   Content remains dynamically controlled by the Admin Dashboard.
+========================================================= */
+
 const HotelInsights = ({ insights }) => {
   if (!insights || typeof insights !== "object") {
     return null;
@@ -73,7 +78,7 @@ const HotelInsights = ({ insights }) => {
       {HOTEL_INSIGHT_SECTIONS.map(({ key, title, label }) => {
         const value = insights[key];
 
-        // Only render content supplied through the Admin Dashboard.
+        // Render only content supplied through the Admin Dashboard.
         if (typeof value !== "string" || !value.trim()) {
           return null;
         }
@@ -90,13 +95,43 @@ const HotelInsights = ({ insights }) => {
             id={`hotel-insight-${key}`}
             className="details-section hotel-insight-section"
           >
-            <span className="section-label">{label}</span>
-            <h2>{title}</h2>
+            <span className="section-label hotel-insight-label">
+              {label}
+            </span>
+
+            <h2 className="hotel-insight-title">{title}</h2>
 
             <div className="hotel-insight-content">
-              {paragraphs.map((paragraph, index) => (
-                <p key={`${key}-${index}`}>{paragraph}</p>
-              ))}
+              {paragraphs.map((paragraph, index) => {
+                const normalized = paragraph.trim();
+
+                const isFaqQuestion =
+                  key === "hotelFAQs" &&
+                  /[?？]\s*$/.test(normalized);
+
+                const isSubheading =
+                  key !== "hotelFAQs" &&
+                  normalized.length <= 100 &&
+                  /[A-Z]/.test(normalized) &&
+                  normalized === normalized.toLocaleUpperCase();
+
+                const className = isFaqQuestion
+                  ? "hotel-faq-question"
+                  : key === "hotelFAQs"
+                    ? "hotel-faq-answer"
+                    : isSubheading
+                      ? "hotel-insight-subheading"
+                      : "hotel-insight-paragraph";
+
+                return (
+                  <p
+                    key={`${key}-${index}`}
+                    className={className}
+                  >
+                    {normalized}
+                  </p>
+                );
+              })}
             </div>
           </section>
         );
@@ -898,7 +933,6 @@ const RoomDetails = () => {
             </section>
 
             {/* ADMIN-MANAGED HOTEL INSIGHTS */}
-            {/* Moved below the complete Your room section */}
 
             <HotelInsights insights={room.hotelInsights} />
 
