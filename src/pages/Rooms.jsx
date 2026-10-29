@@ -1,12 +1,18 @@
+
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { getRooms } from "../services/roomApi";
+import { getExchangeRate, formatUSD } from "../utils/currency";
 import heroImages from "../data/heroImages";
 
-const PAGE_TITLE = "Luxury Hotels in Nepal | Backpacker Gateways";
+const PAGE_TITLE =
+  "Best Luxury Hotels in Nepal | Backpacker Gateways";
+
 const PAGE_DESCRIPTION =
-  "Discover hotels, hostels, luxury stays and trekking lodges across Nepal with Backpacker Gateways.";
-const CANONICAL_URL = "https://www.backpackergateways.com/rooms";
+  "Discover the best luxury hotels in Nepal with Backpacker Gateways.";
+
+const CANONICAL_URL =
+  "https://www.backpackergateways.com/rooms";
 
 const FALLBACK_ROOM_IMAGE =
   "https://images.unsplash.com/photo-1566665797739-1674de7a421a?auto=format&fit=crop&w=900&q=80";
@@ -17,11 +23,8 @@ const Rooms = () => {
   const destinationQuery =
     searchParams.get("destination")?.trim() || "";
 
-  const checkInQuery =
-    searchParams.get("checkIn") || "";
-
-  const checkOutQuery =
-    searchParams.get("checkOut") || "";
+  const checkInQuery = searchParams.get("checkIn") || "";
+  const checkOutQuery = searchParams.get("checkOut") || "";
 
   const adultsQuery = Math.max(
     Number(searchParams.get("adults") || 1),
@@ -33,11 +36,11 @@ const Rooms = () => {
     0
   );
 
-  const totalGuestsQuery =
-    adultsQuery + childrenQuery;
+  const totalGuestsQuery = adultsQuery + childrenQuery;
 
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [nprPerUsd, setNprPerUsd] = useState(null);
 
   /* =========================================================
      HERO SLIDER
@@ -46,6 +49,8 @@ const Rooms = () => {
   const [activeImage, setActiveImage] = useState(0);
 
   useEffect(() => {
+    if (!heroImages.length) return undefined;
+
     const timer = setInterval(() => {
       setActiveImage(
         (current) => (current + 1) % heroImages.length
@@ -53,6 +58,29 @@ const Rooms = () => {
     }, 6000);
 
     return () => clearInterval(timer);
+  }, []);
+
+  /* =========================================================
+     EXCHANGE RATE
+     NPR remains the original hotel and booking currency.
+  ========================================================= */
+
+  useEffect(() => {
+    let cancelled = false;
+
+    getExchangeRate()
+      .then((data) => {
+        if (!cancelled) {
+          setNprPerUsd(data.nprPerUsd);
+        }
+      })
+      .catch((error) => {
+        console.error("EXCHANGE RATE ERROR:", error);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   /* =========================================================
@@ -69,16 +97,16 @@ const Rooms = () => {
     const previousDescription =
       existingDescription?.getAttribute("content") || "";
 
-    document.title = destinationQuery
-      ? `${destinationQuery} Hotels | Backpacker Gateways`
+    const pageTitle = destinationQuery
+      ? `Best Luxury Hotels in ${destinationQuery} | Backpacker Gateways`
       : PAGE_TITLE;
+
+    document.title = pageTitle;
 
     if (existingDescription) {
       existingDescription.setAttribute(
         "content",
-        destinationQuery
-          ? `Find hotels and rooms in ${destinationQuery} with Backpacker Gateways. Compare stays, prices, amenities and book your Nepal accommodation.`
-          : PAGE_DESCRIPTION
+        PAGE_DESCRIPTION
       );
     }
 
@@ -171,15 +199,11 @@ const Rooms = () => {
 
   return (
     <div className="rooms-page">
-
       {/* =====================================================
           HERO
       ====================================================== */}
 
       <section className="rooms-hero">
-
-        {/* SAME HERO IMAGES AS LUXURY HERO */}
-
         <div className="rooms-hero-bg">
           {heroImages.map((image, index) => (
             <img
@@ -187,40 +211,31 @@ const Rooms = () => {
               src={image.src}
               alt={image.alt}
               className={
-                index === activeImage
-                  ? "active"
-                  : ""
+                index === activeImage ? "active" : ""
               }
             />
           ))}
         </div>
 
-        {/* PREMIUM DARK OVERLAY */}
-
         <div className="rooms-hero-overlay" />
 
-        {/* ROOMS PAGE TEXT */}
-
         <div className="rooms-hero-content">
-
           <span className="rooms-eyebrow">
-             LUXURY HOTELS • NEPAL
+            LUXURY HOTELS • NEPAL
           </span>
 
           <h1>
-    {destinationQuery
-      ? `Best Luxury Hotels in ${destinationQuery}`
-      : "Best Luxury Hotels in Nepal"}
-       </h1>
+            {destinationQuery
+              ? `Best Luxury Hotels in ${destinationQuery}`
+              : "Best Luxury Hotels in Nepal"}
+          </h1>
 
           <p>
-            Discover luxury hotels and 5-star stays across Nepal, from
-    Kathmandu to Pokhara. Explore premium rooms, exceptional
-    amenities and unforgettable stays with Backpacker Gateways.
+            Discover the best luxury hotels in Nepal with
+            Backpacker Gateways. Explore premium stays and
+            find your next hotel in Nepal.
           </p>
-
         </div>
-
       </section>
 
       {/* =====================================================
@@ -229,24 +244,19 @@ const Rooms = () => {
 
       {hasSearch && (
         <section className="rooms-search-summary">
-
           <div className="search-summary-inner">
-
             <div>
               <span className="summary-label">
                 YOUR SEARCH
               </span>
 
               <div className="summary-main">
-                {destinationQuery
-                  ? destinationQuery
-                  : "All Nepal"}
+                {destinationQuery || "All Nepal"}
               </div>
             </div>
 
             <div className="summary-item">
               <span>CHECK-IN</span>
-
               <strong>
                 {checkInQuery
                   ? formatDate(checkInQuery)
@@ -256,7 +266,6 @@ const Rooms = () => {
 
             <div className="summary-item">
               <span>CHECK-OUT</span>
-
               <strong>
                 {checkOutQuery
                   ? formatDate(checkOutQuery)
@@ -266,17 +275,12 @@ const Rooms = () => {
 
             <div className="summary-item">
               <span>GUESTS</span>
-
               <strong>
                 {totalGuestsQuery}{" "}
-                {totalGuestsQuery === 1
-                  ? "Guest"
-                  : "Guests"}
+                {totalGuestsQuery === 1 ? "Guest" : "Guests"}
               </strong>
             </div>
-
           </div>
-
         </section>
       )}
 
@@ -285,11 +289,8 @@ const Rooms = () => {
       ====================================================== */}
 
       <section className="rooms-section">
-
         <div className="section-heading">
-
           <div>
-
             <span className="section-eyebrow">
               {destinationQuery
                 ? "SEARCH RESULTS"
@@ -303,30 +304,23 @@ const Rooms = () => {
             </h2>
 
             <p>
-              Comfortable rooms, trusted properties
-              and memorable stays across Nepal.
+              Comfortable rooms, trusted properties and
+              memorable stays across Nepal.
             </p>
-
           </div>
 
           {!loading && rooms.length > 0 && (
             <div className="rooms-count">
               {rooms.length}{" "}
-              {rooms.length === 1
-                ? "Room"
-                : "Rooms"}
+              {rooms.length === 1 ? "Room" : "Rooms"}
             </div>
           )}
-
         </div>
 
-        {/* =====================================================
-            LOADING
-        ====================================================== */}
+        {/* LOADING */}
 
         {loading && (
           <div className="rooms-loading">
-
             <div className="loading-spinner"></div>
 
             <p>
@@ -334,31 +328,23 @@ const Rooms = () => {
                 ? `Finding stays in ${destinationQuery}...`
                 : "Finding available rooms..."}
             </p>
-
           </div>
         )}
 
-        {/* =====================================================
-            ROOM GRID
-        ====================================================== */}
+        {/* ROOM GRID */}
 
         {!loading && rooms.length > 0 && (
           <div className="rooms-grid">
-
             {rooms.map((room) => {
-
               const roomImage =
-                room.images?.[0] ||
-                FALLBACK_ROOM_IMAGE;
+                room.images?.[0] || FALLBACK_ROOM_IMAGE;
 
               return (
                 <article
                   className="room-card"
                   key={room._id}
                 >
-
                   <div className="room-image-wrap">
-
                     <img
                       src={roomImage}
                       alt={`${room.name || "Hotel room"} in ${
@@ -373,19 +359,15 @@ const Rooms = () => {
                         Available
                       </span>
                     )}
-
                   </div>
 
                   <div className="room-card-content">
-
                     <div className="room-location">
-                      {room.destination ||
-                        "Nepal"}
+                      {room.destination || "Nepal"}
                     </div>
 
                     <h3>
-                      {room.name ||
-                        "Comfortable Room"}
+                      {room.name || "Comfortable Room"}
                     </h3>
 
                     {room.description && (
@@ -395,7 +377,6 @@ const Rooms = () => {
                     )}
 
                     <div className="room-meta">
-
                       {room.capacity && (
                         <span>
                           👤 {room.capacity} Guests
@@ -403,16 +384,12 @@ const Rooms = () => {
                       )}
 
                       {room.beds && (
-                        <span>
-                          🛏 {room.beds}
-                        </span>
+                        <span>🛏 {room.beds}</span>
                       )}
-
                     </div>
 
                     {room.amenities?.length > 0 && (
                       <div className="room-amenities">
-
                         {room.amenities
                           .slice(0, 4)
                           .map((amenity, index) => (
@@ -422,41 +399,42 @@ const Rooms = () => {
                               {amenity}
                             </span>
                           ))}
-
                       </div>
                     )}
 
                     <div className="room-card-bottom">
-
                       <div className="room-price">
-
-                        <small>
-                          From
-                        </small>
+                        <small>From</small>
 
                         <strong>
                           NPR{" "}
                           {Number(
                             room.price || 0
-                          ).toLocaleString()}
+                          ).toLocaleString("en-NP", {
+                            maximumFractionDigits: 0,
+                          })}
                         </strong>
 
-                        <span>
-                          / night
-                        </span>
+                        {nprPerUsd && (
+                          <span className="room-price-usd">
+                            {formatUSD(
+                              room.price,
+                              nprPerUsd
+                            )}
+                          </span>
+                        )}
 
+                        <span>/ night</span>
                       </div>
 
                       <Link
                         to={`/rooms/${
-                          room.seoSlug ||
-                          room._id
+                          room.seoSlug || room._id
                         }`}
                         className="view-details-btn"
                       >
                         View Details
                       </Link>
-
                     </div>
 
                     <Link
@@ -465,30 +443,20 @@ const Rooms = () => {
                     >
                       Book Now
                     </Link>
-
                   </div>
-
                 </article>
               );
             })}
-
           </div>
         )}
 
-        {/* =====================================================
-            NO RESULTS
-        ====================================================== */}
+        {/* NO RESULTS */}
 
         {!loading && rooms.length === 0 && (
           <div className="no-rooms">
+            <div className="no-rooms-icon">🏨</div>
 
-            <div className="no-rooms-icon">
-              🏨
-            </div>
-
-            <h3>
-              No rooms found
-            </h3>
+            <h3>No rooms found</h3>
 
             <p>
               {destinationQuery
@@ -502,52 +470,33 @@ const Rooms = () => {
             >
               View All Rooms
             </Link>
-
           </div>
         )}
-
       </section>
 
-      {/* =====================================================
-          SEO CONTENT
-      ====================================================== */}
+      {/* SEO CONTENT */}
 
       <section className="rooms-seo">
-
         <div className="rooms-seo-inner">
-
-          <h2>
-            Hotels & Accommodation in Nepal
-          </h2>
+          <h2>Best Luxury Hotels in Nepal</h2>
 
           <p>
-            Backpacker Gateways helps travellers
-            discover hotels, hostels, luxury stays
-            and comfortable accommodation across
-            Nepal. Explore stays in Kathmandu,
-            Pokhara, Chitwan, Everest and other
-            popular destinations.
+            Discover the best luxury hotels in Nepal with
+            Backpacker Gateways. Explore hotel options across
+            Nepal and compare accommodation prices to find a
+            stay that suits your travel plans.
           </p>
-
         </div>
-
       </section>
 
-      {/* =====================================================
-          STYLES
-      ====================================================== */}
+      {/* STYLES */}
 
       <style>{`
-
         .rooms-page {
           background: #fff;
           color: #172033;
           min-height: 100vh;
         }
-
-        /* =====================================================
-           HERO SLIDER
-        ====================================================== */
 
         .rooms-hero {
           position: relative;
@@ -577,9 +526,7 @@ const Rooms = () => {
           object-position: center 55%;
           opacity: 0;
           transform: scale(1.04);
-          transition:
-            opacity 1.2s ease,
-            transform 7s ease;
+          transition: opacity 1.2s ease, transform 7s ease;
         }
 
         .rooms-hero-bg img.active {
@@ -591,13 +538,12 @@ const Rooms = () => {
           position: absolute;
           inset: 0;
           z-index: -2;
-          background:
-            linear-gradient(
-              180deg,
-              rgba(8, 16, 28, 0.30) 0%,
-              rgba(8, 16, 28, 0.48) 48%,
-              rgba(8, 16, 28, 0.72) 100%
-            );
+          background: linear-gradient(
+            180deg,
+            rgba(8, 16, 28, 0.30) 0%,
+            rgba(8, 16, 28, 0.48) 48%,
+            rgba(8, 16, 28, 0.72) 100%
+          );
         }
 
         .rooms-hero-content {
@@ -627,8 +573,7 @@ const Rooms = () => {
           font-weight: 800;
           line-height: 1.05;
           letter-spacing: -1.5px;
-          text-shadow:
-            0 4px 22px rgba(0, 0, 0, 0.28);
+          text-shadow: 0 4px 22px rgba(0, 0, 0, 0.28);
         }
 
         .rooms-hero p {
@@ -638,13 +583,8 @@ const Rooms = () => {
           font-size: 17px;
           font-weight: 400;
           line-height: 1.75;
-          text-shadow:
-            0 2px 12px rgba(0, 0, 0, 0.35);
+          text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
         }
-
-        /* =====================================================
-           SEARCH SUMMARY
-        ====================================================== */
 
         .rooms-search-summary {
           background: #f7f8fa;
@@ -692,10 +632,6 @@ const Rooms = () => {
           font-size: 14px;
         }
 
-        /* =====================================================
-           ROOMS SECTION
-        ====================================================== */
-
         .rooms-section {
           max-width: 1250px;
           margin: 0 auto;
@@ -735,14 +671,9 @@ const Rooms = () => {
           font-size: 15px;
         }
 
-        /* =====================================================
-           ROOM GRID
-        ====================================================== */
-
         .rooms-grid {
           display: grid;
-          grid-template-columns:
-            repeat(3, minmax(0, 1fr));
+          grid-template-columns: repeat(3, minmax(0, 1fr));
           gap: 28px;
         }
 
@@ -751,17 +682,13 @@ const Rooms = () => {
           border: 1px solid #e8eaf0;
           border-radius: 18px;
           overflow: hidden;
-          box-shadow:
-            0 10px 35px rgba(20, 30, 50, 0.07);
-          transition:
-            transform 0.25s ease,
-            box-shadow 0.25s ease;
+          box-shadow: 0 10px 35px rgba(20, 30, 50, 0.07);
+          transition: transform 0.25s ease, box-shadow 0.25s ease;
         }
 
         .room-card:hover {
           transform: translateY(-5px);
-          box-shadow:
-            0 18px 45px rgba(20, 30, 50, 0.12);
+          box-shadow: 0 18px 45px rgba(20, 30, 50, 0.12);
         }
 
         .room-image-wrap {
@@ -871,6 +798,14 @@ const Rooms = () => {
           color: #858b98;
         }
 
+        .room-price .room-price-usd {
+          display: block;
+          color: #667a63;
+          font-size: 13px;
+          font-weight: 600;
+          margin-top: 3px;
+        }
+
         .view-details-btn,
         .book-now-btn,
         .clear-search-btn {
@@ -898,10 +833,6 @@ const Rooms = () => {
           opacity: 0.9;
         }
 
-        /* =====================================================
-           LOADING
-        ====================================================== */
-
         .rooms-loading {
           min-height: 300px;
           display: flex;
@@ -926,10 +857,6 @@ const Rooms = () => {
             transform: rotate(360deg);
           }
         }
-
-        /* =====================================================
-           NO ROOMS
-        ====================================================== */
 
         .no-rooms {
           text-align: center;
@@ -960,10 +887,6 @@ const Rooms = () => {
           padding: 13px 22px;
         }
 
-        /* =====================================================
-           SEO
-        ====================================================== */
-
         .rooms-seo {
           background: #f7f8fa;
           padding: 65px 24px;
@@ -984,26 +907,18 @@ const Rooms = () => {
           line-height: 1.8;
         }
 
-        /* =====================================================
-           RESPONSIVE
-        ====================================================== */
-
         @media (max-width: 900px) {
-
           .rooms-grid {
-            grid-template-columns:
-              repeat(2, minmax(0, 1fr));
+            grid-template-columns: repeat(2, minmax(0, 1fr));
           }
 
           .section-heading {
             align-items: start;
             flex-direction: column;
           }
-
         }
 
         @media (max-width: 620px) {
-
           .rooms-hero {
             min-height: 360px;
             padding: 65px 20px;
@@ -1042,11 +957,9 @@ const Rooms = () => {
           .rooms-section {
             padding: 55px 18px;
           }
-
         }
 
         @media (max-width: 360px) {
-
           .rooms-hero {
             min-height: 340px;
             padding: 55px 16px;
@@ -1064,11 +977,8 @@ const Rooms = () => {
           .rooms-hero p {
             font-size: 13px;
           }
-
         }
-
       `}</style>
-
     </div>
   );
 };

@@ -2637,4 +2637,63 @@
   }
 }
 
+/* =========================================
+   ADMIN-MANAGED HOTEL INSIGHTS
+========================================= */
+
+.hotel-insight-section {
+  padding: 28px 0;
+  border-bottom: 1px solid #e8ebef;
+  scroll-margin-top: 100px;
+}
+
+.hotel-insight-section .section-label {
+  display: inline-block;
+  margin-bottom: 8px;
+  color: #8b6f47;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+.hotel-insight-section h2 {
+  margin: 0 0 16px;
+  color: #172b4d;
+  font-size: 25px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.hotel-insight-content {
+  color: #4b5563;
+  font-size: 16px;
+  line-height: 1.85;
+  overflow-wrap: anywhere;
+}
+
+.hotel-insight-content p {
+  margin: 0 0 14px;
+  white-space: pre-line;
+}
+
+.hotel-insight-content p:last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+  .hotel-insight-section {
+    padding: 22px 0;
+  }
+
+  .hotel-insight-section h2 {
+    font-size: 21px;
+  }
+
+  .hotel-insight-content {
+    font-size: 15px;
+    line-height: 1.8;
+  }
+}
+
 

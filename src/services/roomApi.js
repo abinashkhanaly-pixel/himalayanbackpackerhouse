@@ -1,5 +1,5 @@
 const API_URL =
-  "https://backpacker-gateways-2.onrender.com/api/rooms";
+  `${import.meta.env.VITE_API_URL || "https://backpacker-gateways-2.onrender.com/api"}/rooms`;
 
 // ==========================================
 // FETCH HELPER

@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { getRoomBySlug } from "../services/roomApi";
@@ -8,6 +9,101 @@ import {
   Mountain,
 } from "lucide-react";
 import "./RoomDetails.css";
+
+const HOTEL_INSIGHT_SECTIONS = [
+  {
+    key: "whyChoose",
+    title: "Why Choose This Hotel?",
+    label: "ABOUT THIS STAY",
+  },
+  {
+    key: "locationIntelligence",
+    title: "Location Guide",
+    label: "LOCATION",
+  },
+  {
+    key: "bestFor",
+    title: "Who Is This Hotel Best For?",
+    label: "WHO IT SUITS",
+  },
+  {
+    key: "roomSelection",
+    title: "Room Selection Guide",
+    label: "ROOM GUIDE",
+  },
+  {
+    key: "experiences",
+    title: "Experiences Beyond the Room",
+    label: "EXPERIENCES",
+  },
+  {
+    key: "bookingConfidence",
+    title: "Before You Book",
+    label: "BOOKING INFORMATION",
+  },
+  {
+    key: "neighbourhoodGuide",
+    title: "Neighbourhood Guide",
+    label: "EXPLORE THE AREA",
+  },
+  {
+    key: "prosAndConsiderations",
+    title: "Pros and Things to Consider",
+    label: "THINGS TO CONSIDER",
+  },
+  {
+    key: "smartComparison",
+    title: "Hotel Comparison Guide",
+    label: "COMPARE HOTELS",
+  },
+  {
+    key: "hotelFAQs",
+    title: "Frequently Asked Questions",
+    label: "HOTEL FAQs",
+  },
+];
+
+const HotelInsights = ({ insights }) => {
+  if (!insights || typeof insights !== "object") {
+    return null;
+  }
+
+  return (
+    <>
+      {HOTEL_INSIGHT_SECTIONS.map(({ key, title, label }) => {
+        const value = insights[key];
+
+        // Only render content supplied through the Admin Dashboard.
+        if (typeof value !== "string" || !value.trim()) {
+          return null;
+        }
+
+        const paragraphs = value
+          .trim()
+          .split(/\n\s*\n/)
+          .map((paragraph) => paragraph.trim())
+          .filter(Boolean);
+
+        return (
+          <section
+            key={key}
+            id={`hotel-insight-${key}`}
+            className="details-section hotel-insight-section"
+          >
+            <span className="section-label">{label}</span>
+            <h2>{title}</h2>
+
+            <div className="hotel-insight-content">
+              {paragraphs.map((paragraph, index) => (
+                <p key={`${key}-${index}`}>{paragraph}</p>
+              ))}
+            </div>
+          </section>
+        );
+      })}
+    </>
+  );
+};
 
 const RoomDetails = () => {
   const { slug } = useParams();
@@ -86,7 +182,7 @@ const RoomDetails = () => {
       `${roomName} in ${destination} | Backpacker Gateways`;
 
     const fallbackDescription =
-      `Book the ${roomName} in ${destination}, Nepal with Backpacker Gateways. Enjoy comfortable accommodation, Himalayan hospitality and convenient access to local attractions and trekking routes.`;
+      `Book the ${roomName} in ${destination}, Nepal with Backpacker Gateways. Check the available accommodation details and booking information before planning your stay.`;
 
     const title = room.seoTitle?.trim() || fallbackTitle;
     const description =
@@ -98,7 +194,14 @@ const RoomDetails = () => {
 
     document.title = title;
 
-    const setMeta = (selector, attribute, key, content, tagName, attrName) => {
+    const setMeta = (
+      selector,
+      attribute,
+      key,
+      content,
+      tagName,
+      attrName
+    ) => {
       let tag = document.querySelector(selector);
 
       if (!tag) {
@@ -357,7 +460,7 @@ const RoomDetails = () => {
 
   return (
     <div className="details-page">
-      {/* MAIN PHOTO GALLERY — INDEPENDENT FROM YOUR ROOM */}
+      {/* MAIN PHOTO GALLERY */}
 
       <div className="room-gallery-wrapper">
         {totalImages > 0 ? (
@@ -377,7 +480,7 @@ const RoomDetails = () => {
             >
               <img
                 src={mainImage}
-                alt={`${roomName} in ${destination}Nepal`}
+                alt={`${roomName} in ${destination}, Nepal`}
                 width="1600"
                 height="1000"
                 fetchPriority="high"
@@ -485,14 +588,12 @@ const RoomDetails = () => {
               {roomName} in {destination}
             </h1>
 
-            <p className="room-location">
-              {destination}
-            </p>
+            <p className="room-location">{destination}</p>
 
             <div className="room-trust-row">
-              <span>Verified accommodation</span>
+              <span>Accommodation details</span>
               <span>Direct booking</span>
-              <span>Himalayan hospitality</span>
+              <span>Booking information available</span>
             </div>
           </div>
 
@@ -544,10 +645,10 @@ const RoomDetails = () => {
                     <MapPin />
                   </span>
                   <div>
-                    <strong>Great Location</strong>
+                    <strong>Location</strong>
                     <span>
-                      Convenient access to attractions and local
-                      travel connections in {destination}.
+                      Explore accommodation details for {destination}.
+                      Check the exact property address before booking.
                     </span>
                   </div>
                 </div>
@@ -557,10 +658,10 @@ const RoomDetails = () => {
                     <BedDouble />
                   </span>
                   <div>
-                    <strong>Comfortable Rooms</strong>
+                    <strong>Room Information</strong>
                     <span>
-                      Designed for a relaxing stay after sightseeing,
-                      trekking or travelling.
+                      Review the room type, bed details and facilities
+                      listed for this property.
                     </span>
                   </div>
                 </div>
@@ -570,10 +671,10 @@ const RoomDetails = () => {
                     <UsersRound />
                   </span>
                   <div>
-                    <strong>Guest Friendly</strong>
+                    <strong>Guest Capacity</strong>
                     <span>
-                      Suitable for couples, families, solo travellers
-                      and business guests.
+                      Check the maximum guest capacity before selecting
+                      this accommodation.
                     </span>
                   </div>
                 </div>
@@ -583,10 +684,10 @@ const RoomDetails = () => {
                     <Mountain />
                   </span>
                   <div>
-                    <strong>Himalayan Experience</strong>
+                    <strong>Explore Nepal</strong>
                     <span>
-                      A convenient base for discovering Nepal and
-                      planning your next adventure.
+                      Use the property's location to plan your
+                      sightseeing and onward travel.
                     </span>
                   </div>
                 </div>
@@ -599,7 +700,7 @@ const RoomDetails = () => {
                 </div>
                 <div>
                   <span>Beds</span>
-                  <strong>{room.beds || "Comfortable bedding"}</strong>
+                  <strong>{room.beds || "Not specified"}</strong>
                 </div>
                 <div>
                   <span>Location</span>
@@ -618,7 +719,7 @@ const RoomDetails = () => {
 
             <section id="about" className="details-section">
               <span className="section-label">About this property</span>
-              <h2>Comfortable accommodation in {destination}.</h2>
+              <h2>{roomName} in {destination}</h2>
 
               {hasRichDescription ? (
                 <div
@@ -630,33 +731,14 @@ const RoomDetails = () => {
               ) : (
                 <div className="property-description">
                   <p>
-                    <strong>Comfortable Accommodation:</strong>{" "}
-                    {roomName} in {destination} offers a comfortable
-                    stay for travellers looking for convenience,
-                    friendly hospitality and easy access to local
-                    attractions.
+                    Review the property information and listed
+                    facilities to decide whether this accommodation
+                    suits your trip.
                   </p>
                   <p>
-                    <strong>Exceptional Facilities:</strong>{" "}
-                    Guests can enjoy the facilities listed for this
-                    property, with services varying by accommodation.
-                  </p>
-                  <p>
-                    <strong>Dining Experience:</strong>{" "}
-                    Dining options, breakfast and meals depend on
-                    the property's available services and booking plan.
-                  </p>
-                  <p>
-                    <strong>Convenient Location:</strong>{" "}
-                    Located in {destination},the property can
-                    provide a base for exploring local attractions,
-                    restaurants, shopping areas and travel connections.
-                  </p>
-                  <p>
-                    <strong>Stay Experience:</strong>{" "}
-                    Whether travelling as a couple, family, solo
-                    traveller or business guest, check the property
-                    details to find the facilities that suit your stay.
+                    Services, dining options and booking conditions
+                    may vary by property and selected booking plan.
+                    Check the details before making a reservation.
                   </p>
                 </div>
               )}
@@ -665,9 +747,9 @@ const RoomDetails = () => {
 
               <div className="property-info-section">
                 <span className="section-label">
-                  Most Popular Facilities
+                  Listed Facilities
                 </span>
-                <h3>Facilities guests can enjoy.</h3>
+                <h3>Property facilities</h3>
 
                 <div className="facilities-list">
                   {amenities.length > 0 ? (
@@ -682,8 +764,7 @@ const RoomDetails = () => {
                     ))
                   ) : (
                     <p>
-                      Please check with the property for available
-                      facilities.
+                      No facilities have been specified for this listing.
                     </p>
                   )}
                 </div>
@@ -692,18 +773,12 @@ const RoomDetails = () => {
               {/* DINING */}
 
               <div className="property-info-section">
-                <span className="section-label">Dining Experience</span>
-                <h3>Food and breakfast.</h3>
+                <span className="section-label">Dining Information</span>
+                <h3>Food and breakfast</h3>
                 <div className="property-text-box">
                   <p>
-                    <strong>Dining Experience:</strong>{" "}
-                    Dining options and cuisine depend on the property's
-                    available services.
-                  </p>
-                  <p>
-                    <strong>Breakfast:</strong>{" "}
-                    Check the selected room and booking details for
-                    breakfast availability and inclusions.
+                    Check with the property to confirm dining options,
+                    breakfast availability and any additional charges.
                   </p>
                 </div>
               </div>
@@ -717,8 +792,8 @@ const RoomDetails = () => {
                 <div className="breakfast-box">
                   <strong>Breakfast options</strong>
                   <p>
-                    Breakfast selections and availability vary by
-                    property and booking plan.
+                    Breakfast availability and inclusions should be
+                    confirmed for the selected room and booking plan.
                   </p>
                 </div>
               </div>
@@ -726,19 +801,13 @@ const RoomDetails = () => {
               {/* LOCATION */}
 
               <div className="property-info-section">
-                <span className="section-label">Convenient Location</span>
-                <h3>Explore {destination}.</h3>
+                <span className="section-label">Location</span>
+                <h3>Explore {destination}</h3>
                 <div className="property-text-box">
                   <p>
-                    <strong>Convenient Location:</strong>{" "}
-                    Located in {destination},this property can
-                    provide access to local attractions and experiences.
-                    Check the property's exact location before booking.
-                  </p>
-                  <p>
-                    <strong>Travel Access:</strong>{" "}
-                    Plan sightseeing, trekking, tours and onward travel
-                    according to your itinerary.
+                    This listing is associated with {destination}.
+                    Confirm the exact property address and travel
+                    arrangements before booking.
                   </p>
                 </div>
               </div>
@@ -765,13 +834,11 @@ const RoomDetails = () => {
 
                 <div className="room-summary-content">
                   <h3>{roomName}</h3>
-                  <p>
-                    A comfortable stay in {destination}
-                  </p>
+                  <p>A stay in {destination}</p>
 
                   <div className="room-summary-features">
                     <span>👥 Sleeps {room.capacity || 1}</span>
-                    <span>🛏️ {room.beds || "Comfortable bedding"}</span>
+                    <span>🛏️ {room.beds || "Not specified"}</span>
                     <span>📍 {destination}</span>
                   </div>
 
@@ -797,12 +864,12 @@ const RoomDetails = () => {
                   <div className="highlight">
                     <div className="highlight-icon">🛏️</div>
                     <strong>Sleeping</strong>
-                    <span>{room.beds || "Comfortable bedding"}</span>
+                    <span>{room.beds || "Not specified"}</span>
                   </div>
                   <div className="highlight">
                     <div className="highlight-icon">🏔️</div>
-                    <strong>Experience</strong>
-                    <span>Stay in {destination}</span>
+                    <strong>Location</strong>
+                    <span>{destination}</span>
                   </div>
                 </div>
               </div>
@@ -811,7 +878,7 @@ const RoomDetails = () => {
 
               <div className="property-info-section">
                 <span className="section-label">Room Amenities</span>
-                <h3>Everything you need.</h3>
+                <h3>Available amenities</h3>
                 <div className="amenities-grid">
                   {amenities.length > 0 ? (
                     amenities.map((amenity, index) => (
@@ -824,11 +891,16 @@ const RoomDetails = () => {
                       </div>
                     ))
                   ) : (
-                    <p>Room amenities have not been specified.</p>
+                    <p>No room amenities have been specified.</p>
                   )}
                 </div>
               </div>
             </section>
+
+            {/* ADMIN-MANAGED HOTEL INSIGHTS */}
+            {/* Moved below the complete Your room section */}
+
+            <HotelInsights insights={room.hotelInsights} />
 
             {/* ACCESSIBILITY */}
 
@@ -837,9 +909,9 @@ const RoomDetails = () => {
               <h2>Accessibility information</h2>
               <div className="simple-info-box">
                 <p>
-                  Accessibility features and services vary by property.
-                  Contact the property before booking if you require
-                  specific accessibility arrangements.
+                  Contact the property before booking to confirm
+                  accessibility features and any specific arrangements
+                  you may require.
                 </p>
               </div>
             </section>
@@ -860,21 +932,21 @@ const RoomDetails = () => {
                 <div className="policy-card">
                   <strong>Check-out</strong>
                   <span>
-                    Check-out timing may vary by property.
+                    Confirm check-out timing with the property.
                   </span>
                 </div>
                 <div className="policy-card">
                   <strong>Cancellation</strong>
                   <span>
-                    Cancellation terms depend on the selected booking
-                    plan.
+                    Review the cancellation terms for your selected
+                    booking plan.
                   </span>
                 </div>
                 <div className="policy-card">
                   <strong>Availability</strong>
                   <span>
-                    Room availability is subject to the selected
-                    booking.
+                    Availability is subject to confirmation for
+                    your requested stay.
                   </span>
                 </div>
               </div>
@@ -888,7 +960,7 @@ const RoomDetails = () => {
               <span className="booking-eyebrow">Your stay</span>
               <h3>Reserve this room</h3>
               <p className="booking-subtitle">
-                Plan your stay with Backpacker Gateways.
+                Review the details before proceeding with your booking.
               </p>
             </div>
 
@@ -922,14 +994,13 @@ const RoomDetails = () => {
             </button>
 
             <p className="booking-note">
-              You will not be charged yet. Review your booking details
-              before confirmation.
+              Review your booking details before confirmation.
             </p>
 
             <div className="booking-benefits">
-              <span>Secure booking</span>
-              <span>Direct with Backpacker Gateways</span>
-              <span>Himalayan travel support</span>
+              <span>Booking details before confirmation</span>
+              <span>Backpacker Gateways</span>
+              <span>Accommodation information</span>
             </div>
 
             <Link to="/rooms" className="back-rooms">

@@ -1,3 +1,4 @@
+
 const Room = require("../models/Room");
 
 // =====================================================
@@ -38,6 +39,17 @@ const getRooms = async (req, res) => {
         { seoTitle: searchRegex },
         { seoDescription: searchRegex },
         { seoSlug: searchRegex },
+        { seoKeywords: searchRegex },
+        { "hotelInsights.whyChoose": searchRegex },
+        { "hotelInsights.locationIntelligence": searchRegex },
+        { "hotelInsights.bestFor": searchRegex },
+        { "hotelInsights.roomSelection": searchRegex },
+        { "hotelInsights.experiences": searchRegex },
+        { "hotelInsights.bookingConfidence": searchRegex },
+        { "hotelInsights.neighbourhoodGuide": searchRegex },
+        { "hotelInsights.prosAndConsiderations": searchRegex },
+        { "hotelInsights.smartComparison": searchRegex },
+        { "hotelInsights.hotelFAQs": searchRegex },
       ];
     }
 
@@ -183,9 +195,6 @@ const getRoom = async (req, res) => {
 // =====================================================
 // GET SINGLE ROOM BY SEO SLUG
 // GET /api/rooms/slug/:slug
-//
-// Example:
-// /api/rooms/slug/deluxe-mountain-view-room-kathmandu
 // =====================================================
 
 const getRoomBySlug = async (req, res) => {
@@ -227,38 +236,114 @@ const getRoomBySlug = async (req, res) => {
 };
 
 // =====================================================
+// HELPER: CLEAN SEO KEYWORDS
+// =====================================================
+
+const cleanSeoKeywords = (items) => {
+  if (typeof items === "string") {
+    items = items.split(",");
+  }
+
+  if (!Array.isArray(items)) {
+    return [];
+  }
+
+  return [
+    ...new Set(
+      items
+        .map((item) => String(item).trim())
+        .filter((item) => item.length > 0)
+    ),
+  ];
+};
+
+// =====================================================
+// HELPER: CLEAN HOTEL INSIGHTS
+// =====================================================
+
+const hotelInsightFields = [
+  "whyChoose",
+  "locationIntelligence",
+  "bestFor",
+  "roomSelection",
+  "experiences",
+  "bookingConfidence",
+  "neighbourhoodGuide",
+  "prosAndConsiderations",
+  "smartComparison",
+  "hotelFAQs",
+];
+
+const cleanHotelInsights = (value) => {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return {};
+  }
+
+  const cleaned = {};
+
+  hotelInsightFields.forEach((field) => {
+    if (Object.prototype.hasOwnProperty.call(value, field)) {
+      const fieldValue = value[field];
+
+      cleaned[field] =
+        fieldValue === null || fieldValue === undefined
+          ? ""
+          : String(fieldValue).trim();
+    }
+  });
+
+  return cleaned;
+};
+
+// =====================================================
+// HELPER: PREPARE CREATE/UPDATE DATA
+// =====================================================
+
+const prepareRoomData = (body, isUpdate = false) => {
+  const roomData = { ...body };
+
+  if (body.seoSlug !== undefined) {
+    roomData.seoSlug = body.seoSlug
+      ? String(body.seoSlug)
+          .trim()
+          .toLowerCase()
+          .replace(/\s+/g, "-")
+      : "";
+  } else if (!isUpdate) {
+    roomData.seoSlug = "";
+  }
+
+  if (body.seoTitle !== undefined) {
+    roomData.seoTitle = body.seoTitle
+      ? String(body.seoTitle).trim()
+      : "";
+  }
+
+  if (body.seoDescription !== undefined) {
+    roomData.seoDescription = body.seoDescription
+      ? String(body.seoDescription).trim()
+      : "";
+  }
+
+  if (body.seoKeywords !== undefined) {
+    roomData.seoKeywords = cleanSeoKeywords(body.seoKeywords);
+  }
+
+  if (body.hotelInsights !== undefined) {
+    roomData.hotelInsights = cleanHotelInsights(body.hotelInsights);
+  }
+
+  return roomData;
+};
+
+// =====================================================
 // CREATE ROOM
 // POST /api/rooms
 // =====================================================
 
 const createRoom = async (req, res) => {
   try {
-    // ---------------------------------------------
-    // CLEAN SEO DATA
-    // ---------------------------------------------
-
-    const roomData = {
-      ...req.body,
-
-      seoSlug: req.body.seoSlug
-        ? req.body.seoSlug
-            .trim()
-            .toLowerCase()
-            .replace(/\s+/g, "-")
-        : "",
-
-      seoTitle: req.body.seoTitle
-        ? req.body.seoTitle.trim()
-        : "",
-
-      seoDescription: req.body.seoDescription
-        ? req.body.seoDescription.trim()
-        : "",
-    };
-
-    // ---------------------------------------------
-    // CREATE ROOM
-    // ---------------------------------------------
+    const roomData = prepareRoomData(req.body);
 
     const room = await Room.create(roomData);
 
@@ -284,38 +369,30 @@ const createRoom = async (req, res) => {
 
 const updateRoom = async (req, res) => {
   try {
-    // ---------------------------------------------
-    // CLEAN SEO DATA
-    // ---------------------------------------------
+    const roomData = prepareRoomData(req.body, true);
 
-    const roomData = {
-      ...req.body,
+    // If only some Hotel Insights fields are sent,
+    // update those fields without replacing the others.
+    if (roomData.hotelInsights) {
+      const existingRoom = await Room.findById(req.params.id);
 
-      ...(req.body.seoSlug !== undefined && {
-        seoSlug: req.body.seoSlug
-          ? req.body.seoSlug
-              .trim()
-              .toLowerCase()
-              .replace(/\s+/g, "-")
-          : "",
-      }),
+      if (!existingRoom) {
+        return res.status(404).json({
+          success: false,
+          message: "Room not found",
+        });
+      }
 
-      ...(req.body.seoTitle !== undefined && {
-        seoTitle: req.body.seoTitle
-          ? req.body.seoTitle.trim()
-          : "",
-      }),
+      const existingInsights =
+        existingRoom.hotelInsights?.toObject?.() ||
+        existingRoom.hotelInsights ||
+        {};
 
-      ...(req.body.seoDescription !== undefined && {
-        seoDescription: req.body.seoDescription
-          ? req.body.seoDescription.trim()
-          : "",
-      }),
-    };
-
-    // ---------------------------------------------
-    // UPDATE ROOM
-    // ---------------------------------------------
+      roomData.hotelInsights = {
+        ...existingInsights,
+        ...roomData.hotelInsights,
+      };
+    }
 
     const room = await Room.findByIdAndUpdate(
       req.params.id,
@@ -391,4 +468,3 @@ module.exports = {
   updateRoom,
   deleteRoom,
 };
-
