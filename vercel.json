@@ -5,6 +5,10 @@
       "destination": "https://backpacker-gateways-2.onrender.com/sitemap.xml"
     },
     {
+      "source": "/rooms/:slug",
+      "destination": "/rooms/:slug/index.html"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
