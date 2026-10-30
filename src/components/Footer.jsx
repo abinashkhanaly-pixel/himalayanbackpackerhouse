@@ -1,8 +1,9 @@
+
 import { Link } from "react-router-dom";
 import "./Footer.css";
 
 const BRAND = "Backpacker Gateways";
-const EMAIL = ""; // TODO: put your email here later, e.g. "info@yourdomain.com"
+const EMAIL = ""; // Add your official business email when available
 const REL = "noopener noreferrer";
 
 const PHONES = [
@@ -13,6 +14,7 @@ const PHONES = [
 const WA_TEXT = encodeURIComponent(
   "Hello Backpacker Gateways, I want to book a luxury hotel in Nepal."
 );
+
 const waLink = (n) => `https://wa.me/${n}?text=${WA_TEXT}`;
 
 const MAPS =
@@ -27,30 +29,9 @@ const CITIES = [
 ];
 
 const DESCRIPTION =
-  "Nepal's luxury hotel brand. " +
-  "Book 5-star hotels in Kathmandu, Pokhara, Chitwan and all over Nepal.";
-
-const schema = {
-  "@context": "https://schema.org",
-  "@type": "TravelAgency",
-  name: BRAND,
-  description: DESCRIPTION,
-  ...(EMAIL ? { email: EMAIL } : {}),
-  telephone: "+9779851181005",
-  areaServed: ["Kathmandu", "Pokhara", "Chitwan", "Nepal"],
-  address: {
-    "@type": "PostalAddress",
-    streetAddress: "Third Floor, Sanima Bank Building, Sorhakhutte, Nayabazar",
-    addressLocality: "Kathmandu",
-    addressCountry: "NP",
-  },
-  contactPoint: PHONES.map((p) => ({
-    "@type": "ContactPoint",
-    telephone: `+${p.wa}`,
-    contactType: "customer service",
-    availableLanguage: ["English", "Nepali"],
-  })),
-};
+  "Backpacker Gateways is a luxury hotel booking platform in Nepal. " +
+  "Discover and request bookings at premium 4-star and 5-star hotels " +
+  "in Kathmandu, Pokhara, Chitwan and destinations across Nepal.";
 
 const WA_PATH = [
   "M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15",
@@ -127,17 +108,15 @@ function Peaks() {
 export default function Footer() {
   return (
     <footer className="hf">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-      />
-
       <Peaks />
 
       <div className="hf-body">
         <div className="hf-wrap hf-top">
           <div className="hf-top-text">
-            <h2>Luxury stays across Nepal, booked in minutes.</h2>
+            <h2>
+              Luxury hotel stays across Nepal, booked with confidence.
+            </h2>
+
             <div className="hf-chips">
               {CITIES.map((c) => (
                 <Link key={c.name} to={c.to} className="hf-chip">
@@ -151,6 +130,7 @@ export default function Footer() {
             <Link to="/booking" className="hf-btn">
               Book a luxury hotel
             </Link>
+
             {PHONES.map((p) => (
               <a
                 key={p.wa}
@@ -171,28 +151,39 @@ export default function Footer() {
           <div className="hf-brand">
             <Link to="/" className="hf-logo" aria-label={`${BRAND} home`}>
               <span className="hf-mark">B</span>
+
               <span className="hf-name">
                 <strong>Backpacker</strong>
                 <small>Gateways</small>
               </span>
             </Link>
-            <p>
-              Nepal's luxury hotel brand. Hand-picked 5-star hotels in
-              Kathmandu, Pokhara, Chitwan and all over Nepal, at the best
-              direct rates.
-            </p>
+
+            <p>{DESCRIPTION}</p>
           </div>
 
           <nav className="hf-col" aria-label="Luxury hotels">
             <h3>Luxury hotels</h3>
-            <Link to="/rooms?city=kathmandu">5-star hotels in Kathmandu</Link>
-            <Link to="/rooms?city=pokhara">5-star hotels in Pokhara</Link>
-            <Link to="/rooms?city=chitwan">5-star hotels in Chitwan</Link>
-            <Link to="/trekking">Trekking and experiences</Link>
+
+            <Link to="/rooms?city=kathmandu">
+              5-star hotels in Kathmandu
+            </Link>
+
+            <Link to="/rooms?city=pokhara">
+              5-star hotels in Pokhara
+            </Link>
+
+            <Link to="/rooms?city=chitwan">
+              5-star hotels in Chitwan
+            </Link>
+
+            <Link to="/trekking">
+              Trekking and experiences
+            </Link>
           </nav>
 
           <nav className="hf-col" aria-label="Company">
             <h3>Company</h3>
+
             <Link to="/about">About us</Link>
             <Link to="/contact">Contact</Link>
             <Link to="/booking">Booking</Link>
@@ -201,29 +192,36 @@ export default function Footer() {
 
           <address className="hf-col hf-contact">
             <h3>Corporate office</h3>
+
             <a
               className="hf-addr"
               href={MAPS}
               target="_blank"
               rel={REL}
             >
-              3rd Floor, Sanima Bank Building, Sorhakhutte, Nayabazar,
-              Kathmandu, Nepal
+              3rd Floor, Sanima Bank Building, Sorhakhutte,
+              Nayabazar, Kathmandu, Nepal
             </a>
+
             <span className="hf-note">
               Near Abhiwadan Expedition and Trip Holidays
             </span>
-            {EMAIL && <a href={`mailto:${EMAIL}`}>{EMAIL}</a>}
+
+            {EMAIL && (
+              <a href={`mailto:${EMAIL}`}>{EMAIL}</a>
+            )}
           </address>
         </div>
 
         <div className="hf-wrap hf-bottom">
           <span>
-            &copy; {new Date().getFullYear()} {BRAND}. Nepal's luxury hotel
-            brand.
+            &copy; {new Date().getFullYear()} {BRAND}.
+            Nepal's luxury hotel booking platform.
           </span>
+
           <span>
-            Kathmandu &middot; Pokhara &middot; Chitwan &middot; All over Nepal
+            Kathmandu &middot; Pokhara &middot; Chitwan
+            &middot; All over Nepal
           </span>
         </div>
       </div>

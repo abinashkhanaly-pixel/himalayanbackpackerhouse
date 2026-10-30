@@ -1,57 +1,54 @@
+
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "./About.css";
 
 const SITE = "https://www.backpackergateways.com";
 const URL = SITE + "/about";
-const TITLE = "About Backpacker Gateways | Luxury Hotels in Nepal";
+
+const TITLE =
+  "About Backpacker Gateways | Luxury Hotel Booking Nepal";
+
 const DESC =
-  "Backpacker Gateways is Nepal's luxury hotel brand. " +
-  "Book 5-star and 4-star hotels in Kathmandu, Pokhara, " +
-  "Chitwan and a Himalayan retreat near Kathmandu.";
+  "Discover Backpacker Gateways, a luxury hotel booking platform in Nepal. Explore 4-star and 5-star hotels in Kathmandu, Pokhara, Chitwan and premium Himalayan destinations. Meet our co-founders and learn about our hotel booking platform.";
 
 const WA =
   "https://wa.me/9779851181005?text=" +
-  encodeURIComponent("Hello, I want to book a luxury hotel in Nepal.");
+  encodeURIComponent(
+    "Hello, I want to book a luxury hotel in Nepal."
+  );
 
 const OFFERS = [
   {
     t: "5-star hotels",
-    p: "Grand stays with the finest rooms, service and dining.",
+    p: "Discover premium 5-star hotels offering luxury accommodation and hospitality across Nepal.",
   },
   {
     t: "4-star hotels",
-    p: "Comfort and style at a smarter price.",
+    p: "Explore quality 4-star hotels combining comfort, convenience and value.",
   },
   {
-    t: "Himalayan retreat",
-    p: "A luxury mountain retreat close to Kathmandu.",
+    t: "Himalayan retreats",
+    p: "Discover premium mountain retreats in destinations such as Dhulikhel and Nagarkot.",
   },
   {
-    t: "All over Nepal",
-    p: "Kathmandu, Pokhara, Chitwan and more.",
+    t: "Hotels across Nepal",
+    p: "Explore accommodation options in Kathmandu, Pokhara, Chitwan and other destinations.",
   },
 ];
 
 const schema = {
   "@context": "https://schema.org",
   "@type": "AboutPage",
+  "@id": `${URL}#aboutpage`,
   name: TITLE,
   url: URL,
   description: DESC,
+  isPartOf: {
+    "@id": `${SITE}/#website`,
+  },
   mainEntity: {
-    "@type": "Organization",
-    name: "Backpacker Gateways",
-    url: SITE,
-    founder: { "@type": "Person", name: "Umesh Gupta" },
-    areaServed: ["Kathmandu", "Pokhara", "Chitwan", "Nepal"],
-    address: {
-      "@type": "PostalAddress",
-      streetAddress:
-        "Third Floor, Sanima Bank Building, Sorhakhutte, Nayabazar",
-      addressLocality: "Kathmandu",
-      addressCountry: "NP",
-    },
+    "@id": `${SITE}/#organization`,
   },
 };
 
@@ -63,7 +60,9 @@ function upsert(selector, tag, attrs) {
     document.head.appendChild(el);
   }
 
-  Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
+  Object.entries(attrs).forEach(([k, v]) => {
+    el.setAttribute(k, v);
+  });
 }
 
 function Photo({ src, name, initials }) {
@@ -113,19 +112,35 @@ export default function About() {
       property: "og:url",
       content: URL,
     });
+
+    const existingSchema =
+      document.getElementById("about-jsonld");
+
+    if (existingSchema) {
+      existingSchema.remove();
+    }
+
+    const script = document.createElement("script");
+    script.id = "about-jsonld";
+    script.type = "application/ld+json";
+    script.textContent = JSON.stringify(schema);
+
+    document.head.appendChild(script);
+
+    return () => {
+      document.getElementById("about-jsonld")?.remove();
+    };
   }, []);
 
   return (
     <main className="ab">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-      />
 
       {/* HERO */}
       <section className="ab-hero">
         <div className="ab-wrap">
-          <span className="ab-kicker">ABOUT BACKPACKER GATEWAYS</span>
+          <span className="ab-kicker">
+            ABOUT BACKPACKER GATEWAYS
+          </span>
 
           <h1>
             <span className="ab-hero-highlight">
@@ -137,9 +152,11 @@ export default function About() {
           </h1>
 
           <p className="ab-lead">
-            Backpacker Gateways is Nepal's luxury hotel brand. We help you
-            book the best 5-star and 4-star hotels in Kathmandu, Pokhara,
-            Chitwan and all over Nepal.
+            Backpacker Gateways is a luxury hotel booking platform
+            in Nepal. We help travellers discover premium
+            accommodation, explore 4-star and 5-star hotels, compare
+            stays and request hotel bookings across Kathmandu,
+            Pokhara, Chitwan and other destinations in Nepal.
           </p>
 
           <div className="ab-actions">
@@ -164,6 +181,7 @@ export default function About() {
         <div className="ab-wrap ab-two">
           <div>
             <span className="ab-label">OUR MISSION</span>
+
             <h2>
               A grand vacation,
               <em> with luxury comfort.</em>
@@ -171,15 +189,17 @@ export default function About() {
           </div>
 
           <p className="ab-text">
-            Our mission is to make booking Nepal’s finest 4-star and 5-star
-            hotels easy and accessible to travellers around the world.
-            Discover premium hotels in Kathmandu and across Nepal, or find a
-            peaceful Himalayan retreat in Dhulikhel and Nagarkot near
-            Kathmandu. We make the booking process simple, help you choose
-            the right stay, and assist you with your reservation. With
-            convenient booking assistance and the option to pay directly at
-            the property, subject to hotel terms, you can plan your Nepal
-            stay with greater confidence.
+            Our mission is to make discovering and booking Nepal's
+            finest 4-star and 5-star hotels easier for travellers
+            around the world. Through Backpacker Gateways, travellers
+            can explore premium hotels in Kathmandu, Pokhara and
+            Chitwan, along with Himalayan retreats in Dhulikhel and
+            Nagarkot. We simplify the hotel discovery and booking
+            request process, help travellers choose suitable stays
+            and provide booking assistance. Guests can pay directly
+            at the property where supported by the hotel's booking
+            terms, giving travellers a convenient way to plan their
+            stay in Nepal.
           </p>
         </div>
       </section>
@@ -208,7 +228,9 @@ export default function About() {
       {/* PEOPLE */}
       <section className="ab-sec">
         <div className="ab-wrap">
-          <span className="ab-label">THE PEOPLE BEHIND US</span>
+          <span className="ab-label">
+            THE PEOPLE BEHIND US
+          </span>
 
           <h2>
             Built by
@@ -216,6 +238,7 @@ export default function About() {
           </h2>
 
           <div className="ab-people">
+
             <article className="ab-person">
               <Photo
                 src="/umesh-gupta.jpg"
@@ -225,12 +248,16 @@ export default function About() {
 
               <div>
                 <h3>Umesh Gupta</h3>
-                <strong>Founder</strong>
+                <strong>Co-Founder</strong>
+
                 <p>
-                  Umesh owns several organisations in Nepal, including
-                  Abhiwadan Expedition and Trip Holidays and Gramayana
-                  Hotels, Nayabazar. His years in travel and hospitality
-                  shape every stay we offer.
+                  Umesh Gupta is a co-founder of Backpacker Gateways
+                  and an entrepreneur with experience across
+                  organisations in Nepal, including Abhiwadan
+                  Expedition and Trip Holidays and Gramayana
+                  Hotels, Nayabazar. His experience in travel and
+                  hospitality contributes to the platform's vision
+                  and direction.
                 </p>
               </div>
             </article>
@@ -244,14 +271,20 @@ export default function About() {
 
               <div>
                 <h3>Bikash Khanal</h3>
-                <strong>Senior MERN Stack Developer</strong>
+                <strong>Co-Founder</strong>
+
                 <p>
-                  Bikash is the technology backbone of Backpacker Gateways.
-                  He is developing this web app so booking a luxury hotel is
-                  fast, simple and secure.
+                  Bikash Khanal is a co-founder of Backpacker
+                  Gateways and leads its technology development.
+                  With expertise in MERN stack development, he is
+                  building the platform's digital infrastructure,
+                  hotel discovery experience and booking technology
+                  to make luxury hotel reservations simpler and
+                  more accessible.
                 </p>
               </div>
             </article>
+
           </div>
 
           <div className="ab-orgs">
@@ -271,9 +304,9 @@ export default function About() {
           </h2>
 
           <p>
-            Visit us at 3rd Floor, Sanima Bank Building, Sorhakhutte,
-            Nayabazar, Kathmandu. With Abhiwadan Expedition and Trip
-            Holidays.
+            Visit us at 3rd Floor, Sanima Bank Building,
+            Sorhakhutte, Nayabazar, Kathmandu. With Abhiwadan
+            Expedition and Trip Holidays.
           </p>
 
           <div className="ab-actions">
@@ -287,6 +320,7 @@ export default function About() {
           </div>
         </div>
       </section>
+
     </main>
   );
 }
